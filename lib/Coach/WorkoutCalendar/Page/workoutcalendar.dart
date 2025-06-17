@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:legacyendurancesport/Coach/WorkoutCalendar/Functions/editdialog.dart';
+import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
+import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 
 class Workoutcalendar extends StatefulWidget {
   const Workoutcalendar({super.key});
@@ -24,9 +26,7 @@ class _WorkoutcalendarState extends State<Workoutcalendar> {
           underline: Container(),
           dropdownColor: Colors.blue,
           style: TextStyle(color: Colors.white, fontSize: 20),
-          items: List.generate(5, (index) => 2023 + index)
-              .map((y) => DropdownMenuItem(value: y, child: Text('$y')))
-              .toList(),
+          items: List.generate(5, (index) => 2023 + index).map((y) => DropdownMenuItem(value: y, child: Text('$y'))).toList(),
           onChanged: (newYear) {
             if (newYear != null) setState(() => selectedYear = newYear);
           },
@@ -36,7 +36,7 @@ class _WorkoutcalendarState extends State<Workoutcalendar> {
         children: [
           // Sidebar
           Container(
-            width: 100,
+            width: MediaQuery.of(context).size.width * 0.25,
             color: Colors.grey[200],
             child: ListView(
               children: draggableItems
@@ -50,10 +50,7 @@ class _WorkoutcalendarState extends State<Workoutcalendar> {
                           child: Text(item, style: TextStyle(color: Colors.white)),
                         ),
                       ),
-                      childWhenDragging: Opacity(
-                        opacity: 0.5,
-                        child: ListTile(title: Text(item)),
-                      ),
+                      childWhenDragging: Opacity(opacity: 0.5, child: ListTile(title: Text(item))),
                       child: ListTile(title: Text(item)),
                     ),
                   )
@@ -70,37 +67,28 @@ class _WorkoutcalendarState extends State<Workoutcalendar> {
                   final int daysInMonth = DateTime(selectedYear, monthIndex + 2, 0).day;
                   final int startOffset = (firstDayOfMonth.weekday - firstDayOfWeek + 7) % 7;
                   final totalSlots = ((daysInMonth + startOffset) / 7.0).ceil() * 7;
+                  final localAppTheme = ResponsiveTheme(context).theme;
 
                   return Container(
                     margin: EdgeInsets.all(8),
                     padding: EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey),
-                      color: MediaQuery.of(context).size.height / 2 < (totalSlots / 7) * 80
-                          ? Colors.yellow[100]
-                          : Colors.white,
+                      color: MediaQuery.of(context).size.height / 2 < (totalSlots / 7) * 80 ? Colors.yellow[100] : Colors.white,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          DateFormat.MMMM().format(firstDayOfMonth),
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
+                        header1(header: DateFormat.MMMM().format(firstDayOfMonth), context: context, color: localAppTheme['anchorColors']['primaryColor']),
                         SizedBox(height: 4),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: List.generate(7, (i) =>
-                              Text(DateFormat.E().format(DateTime(2024, 1, firstDayOfWeek + i > 7 ? firstDayOfWeek + i - 7 : firstDayOfWeek + i)),
-                                  style: TextStyle(fontWeight: FontWeight.bold))),
+                          children: List.generate(7, (i) => header2(header: DateFormat.E().format(DateTime(2024, 1, firstDayOfWeek + i > 7 ? firstDayOfWeek + i - 7 : firstDayOfWeek + i)), context: context, color: localAppTheme['anchorColors']['primaryColor'])),
                         ),
                         GridView.builder(
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 7,
-                            childAspectRatio: 1,
-                          ),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7, childAspectRatio: 1),
                           itemCount: totalSlots,
                           itemBuilder: (context, index) {
                             final dayNum = index - startOffset + 1;
@@ -112,43 +100,39 @@ class _WorkoutcalendarState extends State<Workoutcalendar> {
                             final items = droppedItems[dateKey] ?? [];
 
                             return DragTarget<String>(
-                              onAccept: (data) {
+                              onAcceptWithDetails: (details) {
                                 setState(() {
-                                  droppedItems.putIfAbsent(dateKey, () => []).add(data);
+                                  droppedItems.putIfAbsent(dateKey, () => []).add(details.data);
                                 });
                               },
                               builder: (context, candidateData, rejectedData) => InkWell(
-                                onTap: items.isNotEmpty
-                                    ? () => editDialog(dateKey, items.last, context)
-                                    : null,
+                                onTap: items.isNotEmpty ? () => editDialog(dateKey, items.last, context) : null,
                                 child: Container(
                                   margin: EdgeInsets.all(2),
                                   padding: EdgeInsets.all(4),
                                   decoration: BoxDecoration(
                                     border: Border.all(color: Colors.grey.shade300),
-                                    color: candidateData.isNotEmpty
-                                        ? Colors.blue[50]
-                                        : Colors.transparent,
+                                    color: candidateData.isNotEmpty ? Colors.blue[50] : Colors.transparent,
                                   ),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text('$dayNum', style: TextStyle(fontWeight: FontWeight.bold)),
-                                      ...items.map((e) => Text(e, style: TextStyle(fontSize: 10))).toList(),
+                                      header3(header: '$dayNum', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                                      ...items.map((e) => header3(header: e, context: context, color: localAppTheme['anchorColors']['primaryColor'])),
                                     ],
                                   ),
                                 ),
                               ),
                             );
                           },
-                        )
+                        ),
                       ],
                     ),
                   );
                 }),
               ),
             ),
-          )
+          ),
         ],
       ),
     );

@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/Coach/WorkoutCalendar/Page/workoutcalendar.dart';
+import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
+import 'package:legacyendurancesport/General/Widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(MyApp());
+   runApp(MultiProvider(
+      providers: [
+        Provider<AppInfo>(create: (_) => AppInfo(appInfo)),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
