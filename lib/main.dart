@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/Coach/WorkoutCalendar/Page/workoutcalendar.dart';
+import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +9,7 @@ void main() {
    runApp(MultiProvider(
       providers: [
         Provider<AppInfo>(create: (_) => AppInfo(appInfo)),
+        ChangeNotifierProvider(create: (_) => InternalStatusProvider()),
       ],
       child: MyApp(),
     ),
