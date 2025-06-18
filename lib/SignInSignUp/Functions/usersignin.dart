@@ -12,6 +12,17 @@ class UserSignIn extends StatefulWidget {
 }
 
 class _UserSignInState extends State<UserSignIn> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final localAppTheme = ResponsiveTheme(context).theme;
@@ -20,55 +31,58 @@ class _UserSignInState extends State<UserSignIn> {
     return Center(
       child: SizedBox(
         width: MediaQuery.of(context).size.width * 0.3,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            header1(header: 'SIGN-IN:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-            const SizedBox(height: 20),
-            FormInputField(label: 'Enter Email', errorMessage: 'Please enter a valid email address', isMultiline: false, isPassword: false, prefixIcon: Icons.email, suffixIcon: null, showLabel: true),
-            const SizedBox(height: 20),
-            FormInputField(label: 'Enter Password', errorMessage: 'Please enter a valid password', isMultiline: false, isPassword: true, prefixIcon: Icons.lock, suffixIcon: Icons.visibility, showLabel: true),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                body(header: 'FORGOT YOUR PASSWORD?', color: localAppTheme['anchorColors']['primaryColor'], context: context),
-                TextButton(
-                  onPressed: () {
-                    // Navigate to sign-up page
-                  },
-                  child: body(header: 'RESET PASSWORD', color: localAppTheme['utilityColorPair2']['color1'], context: context),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              height: 50,
-              child: elevatedButton(
-                label: 'SIGN-IN',
-                onPressed: () {
-                  // Handle sign-in logic here
-                },
-                backgroundColor: localAppTheme['anchorColors']['primaryColor'],
-                labelColor: localAppTheme['anchorColors']['secondaryColor'],
-                leadingIcon: Icons.login,
-                trailingIcon: null,
-                context: context,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              header1(header: 'SIGN-IN:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+              const SizedBox(height: 20),
+              FormInputField(label: 'Enter Email', errorMessage: 'Please enter a valid email address', isMultiline: false, isPassword: false, prefixIcon: Icons.email, suffixIcon: null, showLabel: true, controller: emailController),
+              const SizedBox(height: 20),
+              FormInputField(label: 'Enter Password', errorMessage: 'Please enter a valid password', isMultiline: false, isPassword: true, prefixIcon: Icons.lock, suffixIcon: Icons.visibility, showLabel: true, controller: passwordController),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  body(header: 'FORGOT YOUR PASSWORD?', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                  TextButton(
+                    onPressed: () {
+                      // Navigate to sign-up page
+                    },
+                    child: body(header: 'RESET PASSWORD', color: localAppTheme['utilityColorPair2']['color1'], context: context),
+                  ),
+                ],
               ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                body(header: 'DONT\'T HAVE AN ACCOUNT?', color: localAppTheme['anchorColors']['primaryColor'], context: context),
-                TextButton(
+              const SizedBox(height: 20),
+              SizedBox(
+                height: 50,
+                child: elevatedButton(
+                  label: 'SIGN-IN',
                   onPressed: () {
-                    internalStatusProvider.setSignInSignUpStatus('SignUp');
+                    // Handle sign-in logic here
                   },
-                  child: body(header: 'SIGN-UP', color: localAppTheme['utilityColorPair2']['color1'], context: context),
+                  backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                  labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                  leadingIcon: Icons.login,
+                  trailingIcon: null,
+                  context: context,
                 ),
-              ],
-            ),
-          ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  body(header: 'DONT\'T HAVE AN ACCOUNT?', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                  TextButton(
+                    onPressed: () {
+                      internalStatusProvider.setSignInSignUpStatus('SignUp');
+                    },
+                    child: body(header: 'SIGN-UP', color: localAppTheme['utilityColorPair2']['color1'], context: context),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
