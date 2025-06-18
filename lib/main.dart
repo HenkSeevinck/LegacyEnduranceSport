@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:legacyendurancesport/Coach/WorkoutCalendar/Page/workoutcalendar.dart';
+import 'package:legacyendurancesport/SignInSignUp/Page/signin_signup.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-   runApp(MultiProvider(
+  runApp(
+    MultiProvider(
       providers: [
         Provider<AppInfo>(create: (_) => AppInfo(appInfo)),
         ChangeNotifierProvider(create: (_) => InternalStatusProvider()),
@@ -24,7 +25,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Yearly Calendar',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: Workoutcalendar(),
+      //home: Workoutcalendar(),
+      home: SigninPage(),
     );
   }
 }

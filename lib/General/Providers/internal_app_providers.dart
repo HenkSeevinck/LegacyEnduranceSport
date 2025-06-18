@@ -10,8 +10,8 @@ extension DateTimeDayOfYear on DateTime {
 
 //Form Status Provider
 class InternalStatusProvider with ChangeNotifier {
-
   bool adminMode = false;
+  String signInsignUpStatus = 'SignIn';
   int get currentYear => DateTime.now().year;
   late int firstYear = currentYear - 3;
   late int lastYear = currentYear + 3;
@@ -19,6 +19,11 @@ class InternalStatusProvider with ChangeNotifier {
 
   void setAdminMode(bool status) {
     adminMode = status;
+    notifyListeners();
+  }
+
+  void setSignInSignUpStatus(String status) {
+    signInsignUpStatus = status;
     notifyListeners();
   }
 
