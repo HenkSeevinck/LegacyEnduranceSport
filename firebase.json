@@ -1,8 +1,1 @@
-{
-  "firestore": {
-    "database": "(default)",
-    "location": "eur3",
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
-  }
-}
+{"firestore":{"database":"(default)","location":"eur3","rules":"firestore.rules","indexes":"firestore.indexes.json"},"flutter":{"platforms":{"android":{"default":{"projectId":"legacyendurancesport","appId":"1:897385819686:android:e785bd59b655faea7340e7","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"legacyendurancesport","configurations":{"android":"1:897385819686:android:e785bd59b655faea7340e7","ios":"1:897385819686:ios:1c8e3a81160d27ee7340e7","macos":"1:897385819686:ios:1c8e3a81160d27ee7340e7","web":"1:897385819686:web:a95808a87c6664eb7340e7","windows":"1:897385819686:web:ebabda78a5325b777340e7"}}}}}}

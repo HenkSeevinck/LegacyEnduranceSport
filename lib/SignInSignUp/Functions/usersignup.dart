@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
+import 'package:legacyendurancesport/ProfileSetup/Page/profilesetup.dart';
+import 'package:legacyendurancesport/SignInSignUp/Providers/appuser_provider.dart';
+import 'package:legacyendurancesport/SignInSignUp/Providers/firebase_auth_service.dart';
 import 'package:legacyendurancesport/SignInSignUp/Functions/validators.dart';
 import 'package:provider/provider.dart';
 
@@ -17,6 +20,7 @@ class _UserSignUpState extends State<UserSignUp> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController reEnterPasswordController = TextEditingController();
+  final FirebaseAuthService _authService = FirebaseAuthService();
 
   @override
   void dispose() {
@@ -30,6 +34,7 @@ class _UserSignUpState extends State<UserSignUp> {
   Widget build(BuildContext context) {
     final localAppTheme = ResponsiveTheme(context).theme;
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
+    final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
 
     return Center(
       child: SizedBox(
@@ -52,10 +57,13 @@ class _UserSignUpState extends State<UserSignUp> {
                 height: 50,
                 child: elevatedButton(
                   label: 'SIGN-UP',
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      // Handle sign-up logic here
-                      // For example, call a sign-up function with emailController.text and passwordController.text
+                      final userCredential = await _authService.signUp(emailController.text.trim(), passwordController.text, context);
+                      if (userCredential != null) {
+                        await appUserProvider.createUserRecord(userCredential.user!);
+                        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const ProfileSetup()));
+                      }
                     }
                   },
                   backgroundColor: localAppTheme['anchorColors']['primaryColor'],

@@ -13,17 +13,35 @@ class InternalStatusProvider with ChangeNotifier {
   bool adminMode = false;
   String signInsignUpStatus = 'SignIn';
   int get currentYear => DateTime.now().year;
+  String? selectedUserRole;
   late int firstYear = currentYear - 3;
   late int lastYear = currentYear + 3;
   late int totalWeeks = getTotalWeeks(currentYear);
+  String homePageSidebar = '';
+  Widget? homeMainContent;
 
   void setAdminMode(bool status) {
     adminMode = status;
     notifyListeners();
   }
 
+  void setHomeMainContent(Widget? widget) {
+    homeMainContent = widget;
+    notifyListeners();
+  }
+
+  void setHomePageSidebar(String status) {
+    homePageSidebar = status;
+    notifyListeners();
+  }
+
   void setSignInSignUpStatus(String status) {
     signInsignUpStatus = status;
+    notifyListeners();
+  }
+
+  void setUserRole(String? status) {
+    selectedUserRole = status;
     notifyListeners();
   }
 

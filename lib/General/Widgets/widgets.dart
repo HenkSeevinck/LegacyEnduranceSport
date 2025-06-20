@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
-import 'package:provider/provider.dart';
+//import 'package:provider/provider.dart';
 
 //------------------------------------------------------------------------
 //Application Info Helper
@@ -13,32 +13,24 @@ class AppInfo {
 //Page Header
 Widget pageHeader({required BuildContext context, required String topText, required String bottomText}) {
   final localAppTheme = ResponsiveTheme(context).theme;
-  final localAppInfo = Provider.of<AppInfo>(context).appInfo;
+  //final localAppInfo = Provider.of<AppInfo>(context).appInfo;
 
   return Container(
     height: localAppTheme['pageHeaderHeight'],
     width: double.infinity,
-    color: localAppTheme['anchorColors']['primaryColor'],
+    decoration: BoxDecoration(
+      border: Border.all(color: localAppTheme['anchorColors']['primaryColor'], width: 1),
+      color: Colors.transparent,
+    ),
     child: Row(
       children: [
         const SizedBox(width: 50),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Text(
-              localAppInfo['name'],
-              style: localAppTheme['font'](
-                textStyle: TextStyle(fontSize: localAppTheme['bodySize'] * 2, fontWeight: FontWeight.bold, color: localAppTheme['anchorColors']['secondaryColor']),
-              ),
-            ),
-            header1(header: topText, context: context, color: localAppTheme['anchorColors']['secondaryColor']),
-            header1(header: bottomText, context: context, color: localAppTheme['anchorColors']['secondaryColor']),
+        Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
           ],
         ),
         const Expanded(child: SizedBox(width: 50)),
         SizedBox(
-          height: localAppTheme['pageHeaderHeight'] * 0.5,
+          height: localAppTheme['pageHeaderHeight'] * 0.9,
           width: localAppTheme['pageHeaderHeight'] * 1.75,
           child: Center(child: Image.asset(localAppTheme['logo'], fit: BoxFit.cover)),
         ),
@@ -56,14 +48,17 @@ Widget pageFooter({required BuildContext context, required String? userRole}) {
   return Container(
     height: localAppTheme['pageFooterHeight'],
     width: double.infinity,
-    color: localAppTheme['anchorColors']['primaryColor'],
+    decoration: BoxDecoration(
+      border: Border.all(color: localAppTheme['anchorColors']['primaryColor'], width: 1),
+      color: Colors.transparent,
+    ),
     child: Row(
       children: [
         const SizedBox(width: 50),
         header1(header: userRole ?? '', context: context, color: localAppTheme['anchorColors']['secondaryColor']),
         const Expanded(child: SizedBox(width: 50)),
         SizedBox(
-          height: localAppTheme['pageFooterHeight'] * 0.4,
+          height: localAppTheme['pageFooterHeight'] * 0.9,
           width: localAppTheme['pageFooterHeight'] * 1,
           child: Center(child: Image.asset(localAppTheme['logo'], fit: BoxFit.cover)),
         ),
@@ -82,6 +77,19 @@ Widget header1({required String header, required BuildContext context, required 
     header,
     style: localAppTheme['font'](
       textStyle: TextStyle(fontSize: localAppTheme['header1Size'], color: color, fontWeight: FontWeight.bold),
+    ),
+  );
+}
+
+//------------------------------------------------------------------------
+//CustomHeader 1
+Widget customHeader({required String header, required BuildContext context, required Color? color, required fontWeight, required size}) {
+  final localAppTheme = ResponsiveTheme(context).theme;
+  return Text(
+    textAlign: TextAlign.center,
+    header,
+    style: localAppTheme['font'](
+      textStyle: TextStyle(fontSize: size, color: color, fontWeight: fontWeight),
     ),
   );
 }
@@ -140,7 +148,22 @@ class FormInputField extends StatefulWidget {
   final void Function(String)? onChanged;
   final Color? backgroundColor;
 
-  const FormInputField({super.key, required this.label, required this.errorMessage, this.controller, required this.isMultiline, required this.isPassword, required this.prefixIcon, required this.suffixIcon, required this.showLabel, this.initialValue, this.enabled, this.validator, this.onChanged, this.backgroundColor});
+  const FormInputField({
+    super.key,
+    required this.label,
+    required this.errorMessage,
+    this.controller,
+    required this.isMultiline,
+    required this.isPassword,
+    required this.prefixIcon,
+    required this.suffixIcon,
+    required this.showLabel,
+    this.initialValue,
+    this.enabled,
+    this.validator,
+    this.onChanged,
+    this.backgroundColor,
+  });
 
   @override
   State<FormInputField> createState() => _FormInputFieldState();
@@ -293,5 +316,35 @@ Widget textButton({required String label, required VoidCallback? onPressed, requ
         ),
       ],
     ),
+  );
+}
+
+//------------------------------------------------------------------------
+//Snackbar Widget
+ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackbar({required BuildContext context, required String header}) {
+  final localAppTheme = Theme.of(context);
+  return ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Center(
+        child: Text(
+          header,
+          style: TextStyle(color: localAppTheme.colorScheme.onPrimary, fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+      ),
+      backgroundColor: localAppTheme.colorScheme.primary,
+    ),
+  );
+}
+
+//------------------------------------------------------------------------
+//Tick Box Widget
+
+Widget tickBox({required String label, required bool value, required ValueChanged<bool?> onChanged, required BuildContext context}) {
+  final localAppTheme = ResponsiveTheme(context).theme;
+  return Row(
+    children: [
+      Checkbox(value: value, onChanged: onChanged, activeColor: localAppTheme['anchorColors']['primaryColor']),
+      body(header: label, color: localAppTheme['anchorColors']['primaryColor'], context: context),
+    ],
   );
 }
