@@ -194,37 +194,41 @@ class _FormInputFieldState extends State<FormInputField> {
   Widget build(BuildContext context) {
     final localAppTheme = ResponsiveTheme(context).theme;
 
-    return TextFormField(
-      style: localAppTheme['font'](
-        textStyle: TextStyle(color: localAppTheme['anchorColors']['primaryColor'], fontSize: localAppTheme['bodySize']),
-      ),
-      autocorrect: true,
-      enableSuggestions: true,
-      controller: widget.controller,
-      obscureText: widget.isPassword ? _obscureText : false,
-      readOnly: widget.readOnly ?? false,
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: localAppTheme['anchorColors']['secondaryColor'],
-        suffixIcon: widget.isPassword ? IconButton(icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off), onPressed: _toggleVisibility) : (widget.suffixIcon != null ? Icon(widget.suffixIcon) : null),
-        suffixIconColor: localAppTheme['anchorColors']['primaryColor'],
-        prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
-        prefixIconColor: localAppTheme['anchorColors']['primaryColor'],
-        focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 2)),
-        border: OutlineInputBorder(borderSide: BorderSide(color: localAppTheme['anchorColors']['primaryColor'])),
-        hintText: !widget.showLabel ? widget.label : null,
-        hintStyle: localAppTheme['font'](textStyle: TextStyle(color: localAppTheme['anchorColors']['primaryColor'])),
-        labelText: widget.showLabel ? widget.label : null,
-        labelStyle: localAppTheme['font'](
-          textStyle: TextStyle(fontSize: localAppTheme['bodySize'], color: localAppTheme['anchorColors']['primaryColor']),
+    return SizedBox(
+      height: !widget.isMultiline ? MediaQuery.of(context).size.height * 0.0175 * 3 : MediaQuery.of(context).size.height * 0.0175 * 3 * 3, // Testing
+      child: TextFormField(
+        style: localAppTheme['font'](
+          textStyle: TextStyle(color: localAppTheme['anchorColors']['primaryColor'], fontSize: localAppTheme['bodySize']),
         ),
+        autocorrect: true,
+        enableSuggestions: true,
+        controller: widget.controller,
+        obscureText: widget.isPassword ? _obscureText : false,
+        readOnly: widget.readOnly ?? false,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: localAppTheme['anchorColors']['secondaryColor'],
+          suffixIcon: widget.isPassword ? IconButton(icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off), onPressed: _toggleVisibility) : (widget.suffixIcon != null ? Icon(widget.suffixIcon) : null),
+          suffixIconColor: localAppTheme['anchorColors']['primaryColor'],
+          prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
+          prefixIconColor: localAppTheme['anchorColors']['primaryColor'],
+          focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 2)),
+          border: OutlineInputBorder(borderSide: BorderSide(color: localAppTheme['anchorColors']['primaryColor'])),
+          hintText: !widget.showLabel ? widget.label : null,
+          hintStyle: localAppTheme['font'](textStyle: TextStyle(color: localAppTheme['anchorColors']['primaryColor'])),
+          labelText: widget.showLabel ? widget.label : null,
+          contentPadding: EdgeInsets.only(bottom: 10, left: 10),
+          labelStyle: localAppTheme['font'](
+            textStyle: TextStyle(fontSize: localAppTheme['bodySize'], color: localAppTheme['anchorColors']['primaryColor']),
+          ),
+        ),
+        maxLines: widget.isMultiline ? null : 1,
+        minLines: widget.isMultiline ? 3 : 1,
+        validator: widget.validator,
+        initialValue: widget.controller == null ? widget.initialValue : null,
+        enabled: widget.enabled,
+        onChanged: widget.onChanged,
       ),
-      maxLines: widget.isMultiline ? null : 1,
-      minLines: widget.isMultiline ? 3 : 1,
-      validator: widget.validator,
-      initialValue: widget.controller == null ? widget.initialValue : null,
-      enabled: widget.enabled,
-      onChanged: widget.onChanged,
     );
   }
 }
@@ -233,46 +237,49 @@ class _FormInputFieldState extends State<FormInputField> {
 //Elevated Button
 Widget elevatedButton({required String label, required VoidCallback? onPressed, required Color? backgroundColor, required Color labelColor, required IconData? leadingIcon, required IconData? trailingIcon, required BuildContext context}) {
   final localAppTheme = ResponsiveTheme(context).theme;
-  return ElevatedButton(
-    style: ButtonStyle(
-      backgroundColor: WidgetStateProperty.all(backgroundColor),
-      shape: WidgetStateProperty.all(
-        RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: BorderSide(color: labelColor, width: 3),
+  return SizedBox(
+    height: MediaQuery.of(context).size.height * 0.0175 * 3, // Testing
+    child: ElevatedButton(
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.all(backgroundColor),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: BorderSide(color: labelColor, width: 3),
+          ),
         ),
       ),
-    ),
-    onPressed: onPressed,
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Visibility(
-          visible: leadingIcon == null ? false : true,
-          child: Row(
-            children: [
-              Icon(leadingIcon, color: labelColor),
-              const SizedBox(width: 10),
-            ],
+      onPressed: onPressed,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Visibility(
+            visible: leadingIcon == null ? false : true,
+            child: Row(
+              children: [
+                Icon(leadingIcon, color: labelColor),
+                const SizedBox(width: 10),
+              ],
+            ),
           ),
-        ),
-        Text(
-          textAlign: TextAlign.center,
-          label,
-          style: localAppTheme['font'](
-            textStyle: TextStyle(fontSize: localAppTheme['header3Size'], color: labelColor, fontWeight: FontWeight.bold),
+          Text(
+            textAlign: TextAlign.center,
+            label,
+            style: localAppTheme['font'](
+              textStyle: TextStyle(fontSize: localAppTheme['header3Size'], color: labelColor, fontWeight: FontWeight.bold),
+            ),
           ),
-        ),
-        Visibility(
-          visible: trailingIcon == null ? false : true,
-          child: Row(
-            children: [
-              const SizedBox(width: 10),
-              Icon(trailingIcon, color: labelColor),
-            ],
+          Visibility(
+            visible: trailingIcon == null ? false : true,
+            child: Row(
+              children: [
+                const SizedBox(width: 10),
+                Icon(trailingIcon, color: labelColor),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     ),
   );
 }
@@ -357,7 +364,6 @@ Widget tickBox({required String label, required bool value, required ValueChange
 
 //------------------------------------------------------------------------
 //Date Picker Widget
-
 class DatePicker extends StatefulWidget {
   final Color? buttonBackgroundColor;
   final Color buttonLabelColor;
@@ -369,8 +375,9 @@ class DatePicker extends StatefulWidget {
   final DateTime? initialDate;
   final DateTime? firstDate;
   final DateTime? lastDate;
+  final List<DateTimeRange>? blockedRanges;
 
-  const DatePicker({super.key, this.buttonBackgroundColor, required this.buttonLabelColor, required this.label, required this.buttonVisibility, required this.initialDate, required this.validator, required this.controller, this.onChanged, this.firstDate, this.lastDate});
+  const DatePicker({super.key, this.buttonBackgroundColor, this.blockedRanges, required this.buttonLabelColor, required this.label, required this.buttonVisibility, required this.initialDate, required this.validator, required this.controller, this.onChanged, this.firstDate, this.lastDate});
 
   @override
   State<DatePicker> createState() => _DatePickerState();
@@ -392,10 +399,54 @@ class _DatePickerState extends State<DatePicker> {
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime now = DateTime.now();
-    final DateTime defaultFirstDate = now;
-    final DateTime defaultLastDate = DateTime(now.year + 100);
+    final DateTime today = DateTime(now.year, now.month, now.day);
+    final DateTime defaultFirstDate = widget.firstDate ?? today;
+    final DateTime defaultLastDate = widget.lastDate ?? DateTime(now.year + 100);
 
-    final DateTime? picked = await showDatePicker(context: context, initialDate: _selectedDate ?? now, firstDate: widget.firstDate ?? defaultFirstDate, lastDate: widget.lastDate ?? defaultLastDate);
+    bool isBlocked(DateTime date) {
+      if (widget.blockedRanges == null) return false;
+      final d = DateTime(date.year, date.month, date.day);
+      for (final range in widget.blockedRanges!) {
+        final start = DateTime(range.start.year, range.start.month, range.start.day);
+        final end = DateTime(range.end.year, range.end.month, range.end.day);
+        if (!d.isBefore(start) && !d.isAfter(end)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    DateTime? findFirstUnblocked(DateTime from, DateTime to) {
+      DateTime temp = DateTime(from.year, from.month, from.day);
+      final end = DateTime(to.year, to.month, to.day);
+      while (!temp.isAfter(end)) {
+        if (!isBlocked(temp)) return temp;
+        temp = temp.add(const Duration(days: 1));
+      }
+      return null;
+    }
+
+    DateTime? initialDate = _selectedDate;
+
+    if (initialDate == null) {
+      if (!isBlocked(now) && !now.isBefore(defaultFirstDate) && !now.isAfter(defaultLastDate)) {
+        initialDate = now;
+      } else {
+        initialDate = findFirstUnblocked(now, defaultLastDate);
+      }
+    } else if (initialDate.isBefore(defaultFirstDate) || initialDate.isAfter(defaultLastDate) || isBlocked(initialDate)) {
+      initialDate = findFirstUnblocked(defaultFirstDate, defaultLastDate);
+    }
+
+    print('Blocked ranges: ${widget.blockedRanges}');
+    print('Calculated initialDate: $initialDate');
+
+    if (initialDate == null || isBlocked(initialDate) || initialDate.isBefore(defaultFirstDate) || initialDate.isAfter(defaultLastDate)) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No selectable dates available.')));
+      return;
+    }
+
+    final DateTime? picked = await showDatePicker(context: context, initialDate: initialDate, firstDate: defaultFirstDate, lastDate: defaultLastDate, selectableDayPredicate: (date) => !isBlocked(date));
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;

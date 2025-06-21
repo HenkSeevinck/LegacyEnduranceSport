@@ -4,6 +4,7 @@ import 'package:legacyendurancesport/Coach/WorkoutCalendar/Functions/getfirstday
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/Providers/athletekeyrequests.dart';
+import 'package:legacyendurancesport/Home/Providers/macromesocycleprovider.dart';
 import 'package:provider/provider.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 
@@ -15,6 +16,7 @@ class LongRangePlanBuilder extends StatefulWidget {
 }
 
 class _LongRangePlanBuilderState extends State<LongRangePlanBuilder> {
+  late Future<void> _fetchDataFuture;
   late int selectedYear;
   late int firstYear;
   late int lastYear;
@@ -29,6 +31,20 @@ class _LongRangePlanBuilderState extends State<LongRangePlanBuilder> {
   bool _isJumpingYear = false;
 
   @override
+  void initState() {
+    super.initState();
+    final athleteKeyProvider = Provider.of<AthleteKeyProvider>(context, listen: false);
+    final macroMesoCycleProvider = Provider.of<MacroMesoCycleProvider>(context, listen: false);
+    _fetchDataFuture = fetchAppStartupInformation(athleteKeyProvider, macroMesoCycleProvider);
+  }
+
+  Future<void> fetchAppStartupInformation(AthleteKeyProvider athleteKeyProvider, MacroMesoCycleProvider macroMesoCycleProvider) async {
+    final athleteUID = athleteKeyProvider.selectedAthlete['uid'];
+    await macroMesoCycleProvider.getMacroMesoCyclesByAthleteUID(athleteUID);
+    // Remove or uncomment other startup calls as needed
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
@@ -36,12 +52,6 @@ class _LongRangePlanBuilderState extends State<LongRangePlanBuilder> {
     lastYear = internalStatusProvider.lastYear;
     selectedYear = DateTime.now().year;
     totalWeeks = internalStatusProvider.getTotalWeeks(selectedYear);
-
-    if (!_hasScrolledToCurrentWeek) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToCurrentWeek());
-      _hasScrolledToCurrentWeek = true;
-    }
-
     _scrollController.removeListener(_handleScrollEdge);
     _scrollController.addListener(_handleScrollEdge);
   }
@@ -64,6 +74,7 @@ class _LongRangePlanBuilderState extends State<LongRangePlanBuilder> {
   }
 
   void _scrollToCurrentWeek() {
+    if (!_scrollController.hasClients) return;
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
     final weekNumber = internalStatusProvider.getCurrentWeekNumber(selectedYear);
     final double screenWidth = MediaQuery.of(context).size.width;
@@ -119,164 +130,188 @@ class _LongRangePlanBuilderState extends State<LongRangePlanBuilder> {
 
   @override
   Widget build(BuildContext context) {
-    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
     final localAppTheme = ResponsiveTheme(context).theme;
-    final athleteKeyProvider = Provider.of<AthleteKeyProvider>(context, listen: true);
+    return FutureBuilder<void>(
+      future: _fetchDataFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(
+            child: body(header: 'Error: ${snapshot.error}', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+          );
+        } else {
+          final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
+          final athleteKeyProvider = Provider.of<AthleteKeyProvider>(context, listen: true);
+          final macroMesoCycleProvider = Provider.of<MacroMesoCycleProvider>(context, listen: true);
+          final blockGoals = macroMesoCycleProvider.blockGoals;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: header3(header: 'Athlete: ${athleteKeyProvider.selectedAthlete['name']} ${athleteKeyProvider.selectedAthlete['surname']}', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: header3(header: 'MACROCYCLE PLANNING:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-        ),
-        Expanded(
-          flex: 1,
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0),
-                top: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0),
-              ),
-            ),
-            child: internalStatusProvider.lrpbTopWidget,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: header3(header: 'MESOCYCLE PLANNING:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-        ),
-        Expanded(
-          flex: 4,
-          child: Column(
+          print(blockGoals);
+          // SCROLL TO CURRENT WEEK after build
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!_hasScrolledToCurrentWeek && _scrollController.hasClients) {
+              _scrollToCurrentWeek();
+              _hasScrolledToCurrentWeek = true;
+            }
+          });
+
+          return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: DropdownButton<int>(
-                  value: selectedYear,
-                  underline: Container(),
-                  dropdownColor: localAppTheme['anchorColors']['secondaryColor'],
-                  style: TextStyle(color: Colors.white, fontSize: 20),
-                  items: List.generate(lastYear - firstYear + 1, (index) => firstYear + index)
-                      .map(
-                        (y) => DropdownMenuItem(
-                          value: y,
-                          child: body(header: '$y', color: localAppTheme['anchorColors']['primaryColor'], context: context),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (newYear) {
-                    if (newYear != null) _onYearChanged(newYear);
-                  },
-                ),
+                child: header3(header: 'Athlete: ${athleteKeyProvider.selectedAthlete['name']} ${athleteKeyProvider.selectedAthlete['surname']}', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: header3(header: 'MACROCYCLE PLANNING:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
               ),
               Expanded(
-                child: Scrollbar(
-                  controller: _scrollController,
-                  thumbVisibility: true,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    controller: _scrollController,
-                    itemCount: totalWeeks,
-                    itemBuilder: (context, weekIndex) {
-                      final weekNumber = weekIndex + 1;
-                      final isCurrentWeek = (selectedYear == DateTime.now().year) && (weekNumber == internalStatusProvider.getCurrentWeekNumber(selectedYear));
-                      final weekStartDate = getWeekStartDate(selectedYear, weekIndex, firstDayOfWeek);
-                      final formattedWeekStart = DateFormat('dd-MMM-yyyy').format(weekStartDate);
-
-                      return Container(
-                        width: weekCardWidth,
-                        margin: EdgeInsets.symmetric(vertical: 24),
-                        decoration: BoxDecoration(
-                          color: isCurrentWeek ? Colors.lightBlue[50] : Colors.white,
-                          border: Border(
-                            bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                            right: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                            top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Expanded(
-                              flex: 1,
-                              child: Container(
-                                alignment: Alignment.centerLeft,
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
-                                ),
-                                child: header3(header: '$weekNumber: $formattedWeekStart', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: Container(
-                                alignment: Alignment.centerLeft,
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
-                                ),
-                                child: header3(header: 'RACES', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: Container(
-                                alignment: Alignment.centerLeft,
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
-                                ),
-                                child: header3(header: 'TRAINING BLOCK', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: Container(
-                                alignment: Alignment.centerLeft,
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
-                                ),
-                                child: header3(header: 'BLOCK GOALS', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: Container(
-                                alignment: Alignment.centerLeft,
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
-                                ),
-                                child: header3(header: 'TRAINING FOCUS', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 10,
-                              child: Container(
-                                alignment: Alignment.centerLeft,
-                                width: double.infinity,
-                                //decoration: BoxDecoration(border: Border.all(color: localAppTheme['anchorColors']['primaryColor']!)),
-                                child: header3(header: 'Goal Durations', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                flex: 1,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0),
+                      top: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0),
+                    ),
                   ),
+                  child: internalStatusProvider.lrpbTopWidget,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: header3(header: 'MESOCYCLE PLANNING:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+              ),
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: DropdownButton<int>(
+                        value: selectedYear,
+                        underline: Container(),
+                        dropdownColor: localAppTheme['anchorColors']['secondaryColor'],
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                        items: List.generate(lastYear - firstYear + 1, (index) => firstYear + index)
+                            .map(
+                              (y) => DropdownMenuItem(
+                                value: y,
+                                child: body(header: '$y', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (newYear) {
+                          if (newYear != null) _onYearChanged(newYear);
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: Scrollbar(
+                        controller: _scrollController,
+                        thumbVisibility: true,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          controller: _scrollController,
+                          itemCount: totalWeeks,
+                          itemBuilder: (context, weekIndex) {
+                            final weekNumber = weekIndex + 1;
+                            final isCurrentWeek = (selectedYear == DateTime.now().year) && (weekNumber == internalStatusProvider.getCurrentWeekNumber(selectedYear));
+                            final weekStartDate = getWeekStartDate(selectedYear, weekIndex, firstDayOfWeek);
+                            final formattedWeekStart = DateFormat('dd-MMM-yyyy').format(weekStartDate);
+
+                            return Container(
+                              width: weekCardWidth,
+                              margin: EdgeInsets.symmetric(vertical: 24),
+                              decoration: BoxDecoration(
+                                color: isCurrentWeek ? Colors.lightBlue[50] : Colors.white,
+                                border: Border(
+                                  bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                                  right: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                                  top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  Expanded(
+                                    flex: 1,
+                                    child: Container(
+                                      alignment: Alignment.centerLeft,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
+                                      ),
+                                      child: header3(header: '$weekNumber: $formattedWeekStart', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Container(
+                                      alignment: Alignment.centerLeft,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
+                                      ),
+                                      child: header3(header: 'RACES', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Container(
+                                      alignment: Alignment.centerLeft,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
+                                      ),
+                                      child: header3(header: 'TRAINING BLOCK', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Container(
+                                      alignment: Alignment.centerLeft,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
+                                      ),
+                                      child: header3(header: 'BLOCK GOALS', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Container(
+                                      alignment: Alignment.centerLeft,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
+                                      ),
+                                      child: header3(header: 'TRAINING FOCUS', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 10,
+                                    child: Container(
+                                      alignment: Alignment.centerLeft,
+                                      width: double.infinity,
+                                      //decoration: BoxDecoration(border: Border.all(color: localAppTheme['anchorColors']['primaryColor']!)),
+                                      child: header3(header: 'Goal Durations', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
-          ),
-        ),
-      ],
+          );
+        }
+      },
     );
   }
 }

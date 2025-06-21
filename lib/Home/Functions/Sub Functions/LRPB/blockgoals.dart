@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/Providers/athletekeyrequests.dart';
+import 'package:legacyendurancesport/Home/Providers/macromesocycleprovider.dart';
 import 'package:provider/provider.dart';
 
 class BlockGoals extends StatefulWidget {
@@ -32,7 +34,11 @@ class _BlockGoalsState extends State<BlockGoals> {
     final localAppTheme = ResponsiveTheme(context).theme;
     final athleteKeyProvider = Provider.of<AthleteKeyProvider>(context, listen: true);
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
-
+    final macroMesoCycleProvider = Provider.of<MacroMesoCycleProvider>(context, listen: true);
+    final blockGoals = macroMesoCycleProvider.blockGoals;
+    final blockGoalsDateRanges = macroMesoCycleProvider.blockGoalsDateRanges;
+    //print('trainingBlocks: $blockGoals');
+    print('blockGoalsDateRanges: $blockGoalsDateRanges');
     return Row(
       children: [
         Expanded(
@@ -58,8 +64,9 @@ class _BlockGoalsState extends State<BlockGoals> {
                             label: 'Start Date',
                             buttonVisibility: true,
                             initialDate: null,
-                            validator: (date) {
-                              if (date == null) {
+                            blockedRanges: blockGoalsDateRanges,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
                                 return 'Please select a start date';
                               }
                               return null;
@@ -76,8 +83,9 @@ class _BlockGoalsState extends State<BlockGoals> {
                             label: 'End Date',
                             buttonVisibility: true,
                             initialDate: null,
-                            validator: (date) {
-                              if (date == null) {
+                            blockedRanges: blockGoalsDateRanges,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
                                 return 'Please select an end date';
                               }
                               return null;
@@ -116,15 +124,23 @@ class _BlockGoalsState extends State<BlockGoals> {
                         ),
                         SizedBox(width: 10),
                         SizedBox(
-                          height: 50,
                           width: 150,
                           child: elevatedButton(
                             label: 'SAVE',
                             onPressed: () {
-                              blockGoal['atheleteUID'] = athleteKeyProvider.selectedAthlete['uid'];
-                              blockGoal['BlockTypeID'] = internalStatusProvider.selectedBlockTypeID;
-
-                              print('Block Goal: $blockGoal');
+                              if (_formKey.currentState!.validate()) {
+                                blockGoal['atheleteUID'] = athleteKeyProvider.selectedAthlete['uid'];
+                                blockGoal['blockTypeID'] = internalStatusProvider.selectedBlockTypeID;
+                                try {
+                                  macroMesoCycleProvider.addMacroMesoCycle(blockGoal);
+                                  snackbar(context: context, header: 'Block Goal Added Successfully');
+                                } catch (e) {
+                                  snackbar(context: context, header: 'Error: $e');
+                                }
+                                _goalController.clear();
+                                _startDateController.clear();
+                                _endDateController.clear();
+                              }
                             },
                             backgroundColor: localAppTheme['anchorColors']['primaryColor'],
                             labelColor: localAppTheme['anchorColors']['secondaryColor'],
@@ -143,9 +159,62 @@ class _BlockGoalsState extends State<BlockGoals> {
         ),
         Expanded(
           flex: 2,
-          child: SizedBox(
-            child: Center(
-              child: Text('Block Goals Setup', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                header3(header: 'BLOCK GOALS:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: blockGoals.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return ListTile(
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              flex: 7,
+                              child: body(header: blockGoals[index]['goal'] ?? 'N/A', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: body(header: DateFormat('dd-MMM-yyyy').format((blockGoals[index]['startDate'] is DateTime) ? blockGoals[index]['startDate'] : blockGoals[index]['startDate'].toDate()), color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: body(header: DateFormat('dd-MMM-yyyy').format((blockGoals[index]['endDate'] is DateTime) ? blockGoals[index]['endDate'] : blockGoals[index]['endDate'].toDate()), color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: IconButton(
+                                onPressed: () {},
+                                tooltip: 'Edit',
+                                icon: Icon(Icons.edit, color: localAppTheme['anchorColors']['primaryColor']),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: IconButton(
+                                onPressed: () async {
+                                  try {
+                                    macroMesoCycleProvider.deleteMacroMesoCycle(blockGoals[index]['macroMesoCycleID']);
+                                    snackbar(context: context, header: 'Block Goal Deleted Successfully');
+                                  } catch (e) {
+                                    snackbar(context: context, header: 'Error: $e');
+                                  }
+                                },
+                                icon: Icon(Icons.delete, color: localAppTheme['anchorColors']['primaryColor']),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         ),
