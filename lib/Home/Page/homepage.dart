@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/General/Functions/sidebar_onHover.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
-//import 'package:legacyendurancesport/General/Functions/sidebar_onHover.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/Functions/adminsidebar.dart';
 import 'package:legacyendurancesport/Home/Functions/athletesidebar.dart';

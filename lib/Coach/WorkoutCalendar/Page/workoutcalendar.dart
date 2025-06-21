@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:legacyendurancesport/Coach/LongRangePlanBuilder/Page/longrangeplanbuilder.dart';
+import 'package:legacyendurancesport/Home/Functions/longrangeplanbuilder.dart';
 import 'package:legacyendurancesport/Coach/WorkoutCalendar/Functions/editdialog.dart';
 import 'package:legacyendurancesport/Coach/WorkoutCalendar/Functions/isoweeknumber.dart';
 import 'package:legacyendurancesport/General/Functions/sidebar_onHover.dart';
@@ -17,8 +17,6 @@ class Workoutcalendar extends StatefulWidget {
 }
 
 class _WorkoutcalendarState extends State<Workoutcalendar> {
-  
-
   int selectedYear = DateTime.now().year;
   int firstDayOfWeek = DateTime.monday;
   final List<String> draggableItems = ['📅 Meeting', '🎉 Event', '📌 Reminder'];
@@ -70,7 +68,7 @@ class _WorkoutcalendarState extends State<Workoutcalendar> {
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
     final firstYear = internalStatusProvider.firstYear;
     final lastYear = internalStatusProvider.lastYear;
-    
+
     // If user scrolls above first month
     if (_scrollController.offset <= 0 && selectedYear > firstYear) {
       setState(() {
@@ -126,7 +124,6 @@ class _WorkoutcalendarState extends State<Workoutcalendar> {
         onHover: (details) => sidebarOnHover(details, _isExpanded, _updateSidebar),
         child: Row(
           children: [
-            
             // Sidebar with hover effect
             Container(
               padding: const EdgeInsets.all(0),
@@ -155,7 +152,7 @@ class _WorkoutcalendarState extends State<Workoutcalendar> {
                                 child: body(header: 'MAINTENANCE', context: context, color: localAppTheme['anchorColors']['secondaryColor']),
                               ),
                               onTap: () {
-                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const WeekScrollPage()));
+                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LongRangePlanBuilder()));
                               },
                             ),
                           ),

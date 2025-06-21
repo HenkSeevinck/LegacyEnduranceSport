@@ -4,6 +4,7 @@ import 'package:legacyendurancesport/General/Providers/internal_app_providers.da
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
+import 'package:legacyendurancesport/Home/Providers/athletekeyrequests.dart';
 import 'package:legacyendurancesport/SignInSignUp/Providers/appuser_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -92,6 +93,8 @@ class _AthleteprofilesetupState extends State<Athleteprofilesetup> {
     final user = FirebaseAuth.instance.currentUser;
     final appUser = appUserProvider.appUser;
     final userRole = appUser['userRole'] as List<dynamic>? ?? [];
+    final athleteKey = internalStatusProvider.athleteKey;
+    final athleteKeyProvider = Provider.of<AthleteKeyProvider>(context, listen: true);
 
     return Center(
       child: Padding(
@@ -574,8 +577,11 @@ class _AthleteprofilesetupState extends State<Athleteprofilesetup> {
                                     athleteProfile['userRole'] = userRole;
                                   }
                                   try {
-                                    await appUserProvider.updateUserRecord(user!, athleteProfile);
+                                    await athleteKeyProvider.updateAthleteKeyWithUID(athleteKey?['athleteEmail'], athleteKey?['athleteKey'], user!.uid);
+                                    await appUserProvider.updateUserRecord(user, athleteProfile);
+
                                     snackbar(context: context, header: 'Profile updated successfully!');
+
                                     if (selectedUserRole != null && selectedUserRole.isNotEmpty) {
                                       internalStatusProvider.setUserRole(null);
                                       Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const HomePage()));

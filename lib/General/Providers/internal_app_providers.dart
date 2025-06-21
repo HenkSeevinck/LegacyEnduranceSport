@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:legacyendurancesport/Home/Functions/Sub%20Functions/LRPB/blockgoals.dart';
+import 'package:legacyendurancesport/Home/Functions/Sub%20Functions/LRPB/lrpb_default_top.dart';
+import 'package:legacyendurancesport/Home/Functions/Sub%20Functions/LRPB/trainingblock.dart';
+import 'package:legacyendurancesport/Home/Functions/Sub%20Functions/LRPB/trainingfocus.dart';
 
 // Helper extension for dayOfYear
 extension DateTimeDayOfYear on DateTime {
@@ -19,14 +23,37 @@ class InternalStatusProvider with ChangeNotifier {
   late int totalWeeks = getTotalWeeks(currentYear);
   String homePageSidebar = '';
   Widget? homeMainContent;
+  Widget lrpbTopWidget = LRPBDefaultTop();
+  Map<String, dynamic>? athleteKey;
+  List<Map<String, dynamic>> longRangePlanBlocks = [
+    {'blockTypeID': 1, 'setting': 'SETUP TRAINING BLOCKS', 'navigate': const TrainingBlock()},
+    {'blockTypeID': 2, 'setting': 'SETUP BLOCK GOALS', 'navigate': const BlockGoals()},
+    {'blockTypeID': 3, 'setting': 'SETUP TRAINING FOCUS', 'navigate': const TrainingFocus()},
+  ];
+  int? selectedBlockTypeID; // Default to 'Training Block'
 
   void setAdminMode(bool status) {
     adminMode = status;
     notifyListeners();
   }
 
+  void setAthleteKey(Map<String, dynamic>? record) {
+    athleteKey = record;
+    notifyListeners();
+  }
+
+  void setBlockTypeID(int? value) {
+    selectedBlockTypeID = value;
+    notifyListeners();
+  }
+
   void setHomeMainContent(Widget? widget) {
     homeMainContent = widget;
+    notifyListeners();
+  }
+
+  void setlrpbTopWidget(Widget widget) {
+    lrpbTopWidget = widget;
     notifyListeners();
   }
 

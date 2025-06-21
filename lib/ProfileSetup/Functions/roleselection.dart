@@ -35,9 +35,9 @@ class Roleselection extends StatelessWidget {
                         ),
                         Center(
                           child: Container(
-                            color: Colors.white.withOpacity(0.5),
+                            decoration: BoxDecoration(color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.7), borderRadius: BorderRadius.circular(16)),
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            child: customHeader(header: 'I AM A COACH', context: context, color: localAppTheme['anchorColors']['primaryColor'], fontWeight: FontWeight.bold, size: 50),
+                            child: customHeader(header: 'I AM A COACH', context: context, color: localAppTheme['anchorColors']['secondaryColor'], fontWeight: FontWeight.bold, size: 50),
                           ),
                         ),
                       ],
@@ -60,9 +60,9 @@ class Roleselection extends StatelessWidget {
                         ),
                         Center(
                           child: Container(
-                            color: Colors.white.withOpacity(0.5),
+                            decoration: BoxDecoration(color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.7), borderRadius: BorderRadius.circular(16)),
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            child: customHeader(header: 'I AM AN ATHLETE', context: context, color: localAppTheme['anchorColors']['primaryColor'], fontWeight: FontWeight.bold, size: 50),
+                            child: customHeader(header: 'I AM AN ATHLETE', context: context, color: localAppTheme['anchorColors']['secondaryColor'], fontWeight: FontWeight.bold, size: 50),
                           ),
                         ),
                       ],

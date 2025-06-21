@@ -43,6 +43,14 @@ class _AdminSidebarState extends State<AdminSidebar> {
       initiallyExpanded: false,
       children: [
         ListTile(
+          leading: Icon(Icons.home, color: localAppTheme['anchorColors']['secondaryColor']),
+          title: Align(
+            alignment: Alignment.centerLeft,
+            child: body(header: 'Home', context: context, color: localAppTheme['anchorColors']['secondaryColor']),
+          ),
+          onTap: () {},
+        ),
+        ListTile(
           leading: Icon(Icons.people, color: localAppTheme['anchorColors']['secondaryColor']),
           title: Align(
             alignment: Alignment.centerLeft,

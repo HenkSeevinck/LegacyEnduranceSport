@@ -25,7 +25,12 @@ Widget pageHeader({required BuildContext context, required String topText, requi
     child: Row(
       children: [
         const SizedBox(width: 50),
-        Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            header1(header: topText, context: context, color: localAppTheme['anchorColors']['primaryColor']),
+            header2(header: bottomText, context: context, color: localAppTheme['anchorColors']['secondaryColor']),
           ],
         ),
         const Expanded(child: SizedBox(width: 50)),
@@ -146,11 +151,12 @@ class FormInputField extends StatefulWidget {
   final bool? enabled;
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
-  final Color? backgroundColor;
+  final bool? readOnly;
 
   const FormInputField({
     super.key,
     required this.label,
+    this.readOnly,
     required this.errorMessage,
     this.controller,
     required this.isMultiline,
@@ -162,7 +168,6 @@ class FormInputField extends StatefulWidget {
     this.enabled,
     this.validator,
     this.onChanged,
-    this.backgroundColor,
   });
 
   @override
@@ -197,9 +202,10 @@ class _FormInputFieldState extends State<FormInputField> {
       enableSuggestions: true,
       controller: widget.controller,
       obscureText: widget.isPassword ? _obscureText : false,
+      readOnly: widget.readOnly ?? false,
       decoration: InputDecoration(
         filled: true,
-        fillColor: widget.backgroundColor,
+        fillColor: localAppTheme['anchorColors']['secondaryColor'],
         suffixIcon: widget.isPassword ? IconButton(icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off), onPressed: _toggleVisibility) : (widget.suffixIcon != null ? Icon(widget.suffixIcon) : null),
         suffixIconColor: localAppTheme['anchorColors']['primaryColor'],
         prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
@@ -346,5 +352,113 @@ Widget tickBox({required String label, required bool value, required ValueChange
       Checkbox(value: value, onChanged: onChanged, activeColor: localAppTheme['anchorColors']['primaryColor']),
       body(header: label, color: localAppTheme['anchorColors']['primaryColor'], context: context),
     ],
+  );
+}
+
+//------------------------------------------------------------------------
+//Date Picker Widget
+
+class DatePicker extends StatefulWidget {
+  final Color? buttonBackgroundColor;
+  final Color buttonLabelColor;
+  final String label;
+  final bool buttonVisibility;
+  final String? Function(String?)? validator;
+  final TextEditingController controller;
+  final void Function(DateTime)? onChanged;
+  final DateTime? initialDate;
+  final DateTime? firstDate;
+  final DateTime? lastDate;
+
+  const DatePicker({super.key, this.buttonBackgroundColor, required this.buttonLabelColor, required this.label, required this.buttonVisibility, required this.initialDate, required this.validator, required this.controller, this.onChanged, this.firstDate, this.lastDate});
+
+  @override
+  State<DatePicker> createState() => _DatePickerState();
+}
+
+class _DatePickerState extends State<DatePicker> {
+  DateTime? _selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = widget.initialDate;
+    if (_selectedDate != null && widget.controller.text.isEmpty) {
+      widget.controller.text = _formatDate(_selectedDate!);
+    }
+  }
+
+  String _formatDate(DateTime date) => "${date.toLocal()}".split(' ')[0];
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime now = DateTime.now();
+    final DateTime defaultFirstDate = now;
+    final DateTime defaultLastDate = DateTime(now.year + 100);
+
+    final DateTime? picked = await showDatePicker(context: context, initialDate: _selectedDate ?? now, firstDate: widget.firstDate ?? defaultFirstDate, lastDate: widget.lastDate ?? defaultLastDate);
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+        widget.controller.text = _formatDate(picked);
+      });
+      if (widget.onChanged != null) {
+        widget.onChanged!(picked);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Expanded(
+            child: SizedBox(
+              child: FormInputField(label: widget.label, errorMessage: '', readOnly: true, controller: widget.controller, isMultiline: false, isPassword: false, prefixIcon: null, suffixIcon: null, showLabel: false, initialValue: null, enabled: true, validator: widget.validator, onChanged: null),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Visibility(
+            visible: widget.buttonVisibility,
+            child: iconButton(label: null, backgroundColor: widget.buttonBackgroundColor, iconColor: widget.buttonLabelColor, icon: Icons.calendar_month, size: 30, toolTip: 'Select Date:', context: context, onPressed: () => _selectDate(context)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+//------------------------------------------------------------------------
+//Icon Button
+Widget iconButton({required String? label, required Color? backgroundColor, required Color iconColor, required IconData icon, required double? size, required String? toolTip, required BuildContext context, required Function()? onPressed}) {
+  final localAppTheme = ResponsiveTheme(context).theme;
+  return Container(
+    decoration: BoxDecoration(
+      color: backgroundColor ?? Colors.transparent,
+      borderRadius: BorderRadius.circular(10),
+      border: Border.all(color: backgroundColor == null ? Colors.transparent : iconColor, width: 3),
+    ),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          tooltip: label == null ? toolTip : null,
+          onPressed: onPressed,
+          icon: Icon(icon, color: iconColor, size: size),
+        ),
+        label != null
+            ? Center(
+                child: Text(
+                  label,
+                  style: localAppTheme['font'](
+                    textStyle: TextStyle(fontSize: localAppTheme['header3Size'], color: iconColor, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              )
+            : const SizedBox(),
+      ],
+    ),
   );
 }

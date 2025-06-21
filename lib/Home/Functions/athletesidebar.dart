@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
-import 'package:legacyendurancesport/ProfileSetup/Page/athleteprofilesetup.dart';
+import 'package:legacyendurancesport/ProfileSetup/Functions/athleteprofilesetup.dart';
 import 'package:provider/provider.dart';
 
 class AthleteSidebar extends StatefulWidget {
@@ -43,6 +43,14 @@ class _AthleteSidebarState extends State<AthleteSidebar> {
       title: body(header: 'Athlete Menu', context: context, color: localAppTheme['anchorColors']['secondaryColor']),
       initiallyExpanded: false,
       children: [
+        ListTile(
+          leading: Icon(Icons.home, color: localAppTheme['anchorColors']['secondaryColor']),
+          title: Align(
+            alignment: Alignment.centerLeft,
+            child: body(header: 'Home', context: context, color: localAppTheme['anchorColors']['secondaryColor']),
+          ),
+          onTap: () {},
+        ),
         ListTile(
           leading: Icon(Icons.person, color: localAppTheme['anchorColors']['secondaryColor']),
           title: Align(
