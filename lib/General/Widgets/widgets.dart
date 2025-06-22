@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 //import 'package:provider/provider.dart';
 
@@ -438,8 +439,8 @@ class _DatePickerState extends State<DatePicker> {
       initialDate = findFirstUnblocked(defaultFirstDate, defaultLastDate);
     }
 
-    print('Blocked ranges: ${widget.blockedRanges}');
-    print('Calculated initialDate: $initialDate');
+    //print('Blocked ranges: ${widget.blockedRanges}');
+    //print('Calculated initialDate: $initialDate');
 
     if (initialDate == null || isBlocked(initialDate) || initialDate.isBefore(defaultFirstDate) || initialDate.isAfter(defaultLastDate)) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No selectable dates available.')));
@@ -512,4 +513,362 @@ Widget iconButton({required String? label, required Color? backgroundColor, requ
       ],
     ),
   );
+}
+
+//------------------------------------------------------------------------
+//Color Picker Widget
+class ColorPickerWidget extends StatefulWidget {
+  final Color initialColor;
+  final ValueChanged<Color> onColorChanged;
+
+  const ColorPickerWidget({super.key, required this.initialColor, required this.onColorChanged});
+
+  @override
+  State<ColorPickerWidget> createState() => _ColorPickerWidgetState();
+}
+
+class _ColorPickerWidgetState extends State<ColorPickerWidget> {
+  late Color _currentColor;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentColor = widget.initialColor;
+  }
+
+  @override
+  void didUpdateWidget(ColorPickerWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialColor != oldWidget.initialColor) {
+      _currentColor = widget.initialColor;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final localAppTheme = ResponsiveTheme(context).theme;
+
+    Color textColor = _currentColor == Colors.transparent ? localAppTheme['anchorColors']['primaryColor'] : _currentColor;
+
+    return Center(
+      child: ElevatedButton(
+        onPressed: () async {
+          Color tempColor = _currentColor;
+          final Color? pickedColor = await showDialog<Color>(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Pick a color'),
+                content: SingleChildScrollView(
+                  child: BlockPicker(
+                    pickerColor: tempColor,
+                    onColorChanged: (color) {
+                      tempColor = color;
+                    },
+                  ),
+                ),
+                actions: <Widget>[
+                  TextButton(child: const Text('Cancel'), onPressed: () => Navigator.of(context).pop()),
+                  TextButton(child: const Text('Submit'), onPressed: () => Navigator.of(context).pop(tempColor)),
+                ],
+              );
+            },
+          );
+          if (pickedColor != null) {
+            setState(() {
+              _currentColor = pickedColor;
+            });
+            widget.onColorChanged(pickedColor);
+          }
+        },
+        style: ElevatedButton.styleFrom(foregroundColor: textColor),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: _currentColor,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.grey),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text('Select Color', style: TextStyle(color: textColor)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+//------------------------------------------------------------------------
+// Searchable Dropdown Widget
+class SearchableDropdown extends StatefulWidget {
+  final String labelText;
+  final String hint;
+  final Color dropdownTextColor;
+  final bool searchBoxVisable;
+  final List<Map<String, dynamic>> dropDownList;
+  final String header;
+  final dynamic initialValue;
+  final Color iconColor;
+  final String idField;
+  final String displayField;
+  final ValueChanged<Map<String, dynamic>?>? onChanged;
+  final bool isEnabled;
+  final Color? backgroundColor;
+  final String? Function(Map<String, dynamic>?)? validator;
+
+  const SearchableDropdown({
+    super.key,
+    required this.labelText,
+    required this.hint,
+    required this.dropdownTextColor,
+    required this.searchBoxVisable,
+    required this.dropDownList,
+    required this.header,
+    this.initialValue,
+    this.validator,
+    required this.iconColor,
+    required this.idField,
+    required this.displayField,
+    required this.onChanged,
+    required this.isEnabled,
+    this.backgroundColor,
+  });
+
+  @override
+  State<SearchableDropdown> createState() => _SearchableDropdownState();
+}
+
+class _SearchableDropdownState extends State<SearchableDropdown> {
+  Map<String, dynamic>? selectedItem;
+  late List<Map<String, dynamic>> filteredItems;
+  bool searchBoxVisible = false;
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    filteredItems = List<Map<String, dynamic>>.from(widget.dropDownList);
+
+    if (widget.initialValue != null) {
+      selectedItem = widget.dropDownList.firstWhere((item) => item[widget.idField].toString() == widget.initialValue.toString(), orElse: () => <String, dynamic>{});
+      if (selectedItem!.isEmpty) selectedItem = null;
+    }
+  }
+
+  void resetSelectedItem() {
+    setState(() {
+      if (widget.initialValue != null) {
+        selectedItem = widget.dropDownList.firstWhere((item) => item[widget.idField].toString() == widget.initialValue.toString(), orElse: () => <String, dynamic>{});
+        if (selectedItem!.isEmpty) selectedItem = null;
+      } else {
+        selectedItem = null;
+      }
+    });
+  }
+
+  void _filterItems(String query) {
+    setState(() {
+      filteredItems = widget.dropDownList.where((item) => item[widget.displayField].toString().toLowerCase().contains(query.toLowerCase())).toList();
+      if (!filteredItems.contains(selectedItem)) {
+        selectedItem = null;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final localTheme = ResponsiveTheme(context).theme;
+    final double fontSize = localTheme['bodySize'];
+
+    return Column(
+      children: <Widget>[
+        if (widget.searchBoxVisable && searchBoxVisible)
+          Column(
+            children: [
+              TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  labelText: widget.labelText,
+                  labelStyle: TextStyle(fontSize: fontSize),
+                  filled: widget.backgroundColor != null,
+                  fillColor: widget.backgroundColor,
+                  border: const OutlineInputBorder(),
+                ),
+                onChanged: _filterItems,
+              ),
+              const SizedBox(height: 10),
+            ],
+          ),
+        Row(
+          children: [
+            Expanded(
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height * 0.0175 * 3, // Testing
+                child: FormField<Map<String, dynamic>>(
+                  validator: widget.validator,
+                  initialValue: selectedItem,
+                  builder: (FormFieldState<Map<String, dynamic>> field) {
+                    return InputDecorator(
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                        labelText: widget.header,
+                        labelStyle: TextStyle(fontSize: fontSize),
+                        filled: widget.backgroundColor != null,
+                        fillColor: widget.backgroundColor,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                          borderSide: BorderSide(color: widget.dropdownTextColor),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                          borderSide: BorderSide(color: widget.isEnabled ? widget.dropdownTextColor : Colors.grey.shade300),
+                        ),
+                        errorText: field.errorText,
+                      ),
+                      isEmpty: field.value == null,
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<Map<String, dynamic>>(
+                          isExpanded: true,
+                          hint: body(header: widget.hint, color: widget.dropdownTextColor, context: context),
+                          value: field.value,
+                          items: filteredItems.map((item) {
+                            return DropdownMenuItem<Map<String, dynamic>>(
+                              value: item,
+                              child: body(header: item[widget.displayField].toString(), color: widget.dropdownTextColor, context: context),
+                            );
+                          }).toList(),
+                          onChanged: widget.isEnabled
+                              ? (newValue) {
+                                  setState(() {
+                                    selectedItem = newValue;
+                                  });
+                                  field.didChange(newValue);
+                                  if (widget.onChanged != null) {
+                                    widget.onChanged!(newValue);
+                                  }
+                                }
+                              : null,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            if (widget.isEnabled && widget.searchBoxVisable)
+              iconButton(
+                label: null,
+                backgroundColor: null,
+                iconColor: widget.iconColor,
+                icon: Icons.search,
+                size: 30,
+                toolTip: 'Enable Search:',
+                context: context,
+                onPressed: () {
+                  setState(() {
+                    searchBoxVisible = !searchBoxVisible;
+                    if (!searchBoxVisible) {
+                      _searchController.clear();
+                      filteredItems = List<Map<String, dynamic>>.from(widget.dropDownList);
+                    }
+                  });
+                },
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+//------------------------------------------------------------------------
+// Slider Widget
+class SliderBarWidget extends StatefulWidget {
+  final double min;
+  final double max;
+  final int? divisions;
+  final double initialValue;
+  final String label;
+  final ValueChanged<double>? onChanged;
+  final Color? activeColor;
+  final Color? inactiveColor;
+  final int? headerFlex;
+  final int? sliderFlex;
+
+  const SliderBarWidget({super.key, required this.min, required this.max, this.divisions, required this.initialValue, required this.label, this.onChanged, this.activeColor, this.inactiveColor, this.headerFlex, this.sliderFlex});
+
+  @override
+  State<SliderBarWidget> createState() => _SliderBarWidgetState();
+}
+
+class _SliderBarWidgetState extends State<SliderBarWidget> {
+  late double _currentValue;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentValue = widget.initialValue;
+  }
+
+  @override
+  void didUpdateWidget(SliderBarWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialValue != oldWidget.initialValue) {
+      _currentValue = widget.initialValue;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final localAppTheme = ResponsiveTheme(context).theme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      child: SizedBox(
+        width: double.infinity,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Expanded(
+              flex: widget.headerFlex ?? 1,
+              child: body(header: widget.label, color: localAppTheme['anchorColors']['primaryColor'], context: context),
+            ),
+            Expanded(
+              flex: widget.sliderFlex ?? 1,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Slider(
+                      value: _currentValue,
+                      min: widget.min,
+                      max: widget.max,
+                      divisions: widget.divisions,
+                      label: _currentValue.toStringAsFixed(1),
+                      activeColor: widget.activeColor ?? localAppTheme['anchorColors']['primaryColor'],
+                      inactiveColor: widget.inactiveColor ?? localAppTheme['anchorColors']['secondaryColor'],
+                      onChanged: (value) {
+                        setState(() {
+                          _currentValue = value;
+                        });
+                        if (widget.onChanged != null) {
+                          widget.onChanged!(value);
+                        }
+                      },
+                    ),
+                  ),
+                  body(header: _currentValue.toStringAsFixed(1), color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

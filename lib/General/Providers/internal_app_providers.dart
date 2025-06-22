@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:legacyendurancesport/Home/Functions/Sub%20Functions/LRPB/blockgoals.dart';
+import 'package:legacyendurancesport/Home/Functions/Sub%20Functions/LRPB/macrocycleinput.dart';
 import 'package:legacyendurancesport/Home/Functions/Sub%20Functions/LRPB/lrpb_default_top.dart';
-import 'package:legacyendurancesport/Home/Functions/Sub%20Functions/LRPB/trainingblock.dart';
-import 'package:legacyendurancesport/Home/Functions/Sub%20Functions/LRPB/trainingfocus.dart';
 
 // Helper extension for dayOfYear
 extension DateTimeDayOfYear on DateTime {
@@ -24,13 +22,22 @@ class InternalStatusProvider with ChangeNotifier {
   String homePageSidebar = '';
   Widget? homeMainContent;
   Widget lrpbTopWidget = LRPBDefaultTop();
+  String lrpbFormStatus = 'MacroCycle';
   Map<String, dynamic>? athleteKey;
   List<Map<String, dynamic>> longRangePlanBlocks = [
-    {'blockTypeID': 1, 'setting': 'SETUP TRAINING BLOCKS', 'navigate': const TrainingBlock()},
-    {'blockTypeID': 2, 'setting': 'SETUP BLOCK GOALS', 'navigate': const BlockGoals()},
-    {'blockTypeID': 3, 'setting': 'SETUP TRAINING FOCUS', 'navigate': const TrainingFocus()},
+    {'planBlockID': 1, 'setting': 'ADD TRAINING BLOCKS', 'navigate': const MacroCycleInput()},
+    {'planBlockID': 2, 'setting': 'ADD BLOCK GOALS', 'navigate': const MacroCycleInput()},
+    {'planBlockID': 3, 'setting': 'ADD TRAINING FOCUS', 'navigate': const MacroCycleInput()},
   ];
-  int? selectedBlockTypeID; // Default to 'Training Block'
+  Map<String, dynamic>? selectedLongRangePlanBlocks;
+  int firstDayOfWeek = DateTime.sunday;
+  List<Map<String, dynamic>> focusBlocks = [
+    {'blockTypeID': 1, 'blockType': 'RECOVERY'},
+    {'blockTypeID': 2, 'blockType': 'TAPER'},
+    {'blockTypeID': 3, 'blockType': 'ENDURANCE'},
+    {'blockTypeID': 4, 'blockType': 'LACTATE'},
+    {'blockTypeID': 5, 'blockType': 'VO2 MAX'},
+  ];
 
   void setAdminMode(bool status) {
     adminMode = status;
@@ -42,8 +49,8 @@ class InternalStatusProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setBlockTypeID(int? value) {
-    selectedBlockTypeID = value;
+  void setSelectedLongRangePlanBlocks(Map<String, dynamic>? record) {
+    selectedLongRangePlanBlocks = record;
     notifyListeners();
   }
 
@@ -59,6 +66,11 @@ class InternalStatusProvider with ChangeNotifier {
 
   void setHomePageSidebar(String status) {
     homePageSidebar = status;
+    notifyListeners();
+  }
+
+  void setlrpbFormStatus(String status) {
+    lrpbFormStatus = status;
     notifyListeners();
   }
 

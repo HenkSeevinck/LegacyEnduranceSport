@@ -27,23 +27,23 @@ class MacroMesoCycleProvider with ChangeNotifier {
 
   //-----------------------------------------------------------------------------------------------------------
   // Fetches all macro/meso cycles for the given athleteUID
-  Future<void> getMacroMesoCyclesByAthleteUID(String athleteUID) async {
+  Future<void> getMacroMesoCyclesByAthleteAndCoachUID(String athleteUID, String coachUID) async {
     // Clear previous data to avoid duplicates
     _macroMesoCycles.clear();
     _trainingBlocks.clear();
     _blockGoals.clear();
     _trainingFocus.clear();
 
-    final QuerySnapshot snapshot = await _macroMesoCycleCollection.where('atheleteUID', isEqualTo: athleteUID).get();
+    final QuerySnapshot snapshot = await _macroMesoCycleCollection.where('atheleteUID', isEqualTo: athleteUID).where('coachUID', isEqualTo: coachUID).get();
 
     for (var doc in snapshot.docs) {
       Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-      if (data['blockTypeID'] == 1) {
+      if (data['planBlockID'] == 1) {
         _trainingBlocks.add(data);
-      } else if (data['blockTypeID'] == 2) {
+      } else if (data['planBlockID'] == 2) {
         _blockGoals.add(data);
-      } else if (data['blockTypeID'] == 3) {
+      } else if (data['planBlockID'] == 3) {
         _trainingFocus.add(data);
       }
       _macroMesoCycles.add(data);
@@ -64,11 +64,11 @@ class MacroMesoCycleProvider with ChangeNotifier {
     _macroMesoCycles.add(newData);
 
     // Add to the correct local section
-    if (newData['blockTypeID'] == 1) {
+    if (newData['planBlockID'] == 1) {
       _trainingBlocks.add(newData);
-    } else if (newData['blockTypeID'] == 2) {
+    } else if (newData['planBlockID'] == 2) {
       _blockGoals.add(newData);
-    } else if (newData['blockTypeID'] == 3) {
+    } else if (newData['planBlockID'] == 3) {
       _trainingFocus.add(newData);
     }
 

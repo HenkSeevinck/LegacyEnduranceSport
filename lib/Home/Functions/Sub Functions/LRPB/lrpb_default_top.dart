@@ -20,7 +20,7 @@ class LRPBDefaultTop extends StatelessWidget {
             //onTap: () => internalStatusProvider.setlrpbTopWidget(blocks[index]['Navigate']),
             onTap: () {
               internalStatusProvider.setlrpbTopWidget(blocks[index]['navigate']);
-              internalStatusProvider.setBlockTypeID(blocks[index]['blockTypeID']);
+              internalStatusProvider.setSelectedLongRangePlanBlocks(blocks[index]);
             },
             child: Container(
               margin: const EdgeInsets.all(8.0),
