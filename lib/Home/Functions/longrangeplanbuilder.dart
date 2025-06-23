@@ -4,10 +4,10 @@ import 'package:legacyendurancesport/Coach/WorkoutCalendar/Functions/getfirstand
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/Functions/Sub%20Functions/LRPB/helperfunctions.dart';
-import 'package:legacyendurancesport/Home/Functions/Sub%20Functions/LRPB/lrpb_default_top.dart';
+import 'package:legacyendurancesport/Home/Functions/Sub%20Functions/LRPB/macrocycleinput.dart';
 import 'package:legacyendurancesport/Home/Functions/Sub%20Functions/LRPB/mesocycleinput.dart';
 import 'package:legacyendurancesport/Home/Providers/athletekeyrequests.dart';
-import 'package:legacyendurancesport/Home/Providers/macromesocycleprovider.dart';
+import 'package:legacyendurancesport/Home/Providers/macrocycleprovider.dart';
 import 'package:legacyendurancesport/SignInSignUp/Providers/appuser_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
@@ -37,15 +37,15 @@ class _LongRangePlanBuilderState extends State<LongRangePlanBuilder> {
   void initState() {
     super.initState();
     final athleteKeyProvider = Provider.of<AthleteKeyProvider>(context, listen: false);
-    final macroMesoCycleProvider = Provider.of<MacroMesoCycleProvider>(context, listen: false);
+    final macroMesoCycleProvider = Provider.of<MacroCycleProvider>(context, listen: false);
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
     _fetchDataFuture = fetchAppStartupInformation(athleteKeyProvider, macroMesoCycleProvider, appUserProvider);
   }
 
-  Future<void> fetchAppStartupInformation(AthleteKeyProvider athleteKeyProvider, MacroMesoCycleProvider macroMesoCycleProvider, AppUserProvider appUserProvider) async {
+  Future<void> fetchAppStartupInformation(AthleteKeyProvider athleteKeyProvider, MacroCycleProvider macroMesoCycleProvider, AppUserProvider appUserProvider) async {
     final athleteUID = athleteKeyProvider.selectedAthlete['uid'];
     final coachUID = appUserProvider.appUser['uid'];
-    await macroMesoCycleProvider.getMacroMesoCyclesByAthleteAndCoachUID(athleteUID, coachUID);
+    await macroMesoCycleProvider.getMacroCyclesByAthleteAndCoachUID(athleteUID, coachUID);
   }
 
   @override
@@ -65,16 +65,6 @@ class _LongRangePlanBuilderState extends State<LongRangePlanBuilder> {
     _scrollController.removeListener(_handleScrollEdge);
     _scrollController.dispose();
     super.dispose();
-  }
-
-  void _onYearChanged(int year) {
-    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
-    setState(() {
-      selectedYear = year;
-      totalWeeks = internalStatusProvider.getTotalWeeks(selectedYear);
-      _hasScrolledToCurrentWeek = false;
-    });
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToCurrentWeek());
   }
 
   void _scrollToCurrentWeek() {
@@ -151,13 +141,12 @@ class _LongRangePlanBuilderState extends State<LongRangePlanBuilder> {
         } else {
           final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
           final athleteKeyProvider = Provider.of<AthleteKeyProvider>(context, listen: true);
-          final macroMesoCycleProvider = Provider.of<MacroMesoCycleProvider>(context, listen: true);
+          final macroMesoCycleProvider = Provider.of<MacroCycleProvider>(context, listen: true);
           final blockGoals = macroMesoCycleProvider.blockGoals;
           final trainingFocus = macroMesoCycleProvider.trainingFocus;
           final trainingBlocks = macroMesoCycleProvider.trainingBlocks;
           final firstDayOfWeek = internalStatusProvider.firstDayOfWeek;
 
-          //print(blockGoals);
           // SCROLL TO CURRENT WEEK after build
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!_hasScrolledToCurrentWeek && _scrollController.hasClients) {
@@ -169,244 +158,193 @@ class _LongRangePlanBuilderState extends State<LongRangePlanBuilder> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      internalStatusProvider.lrpbFormStatus == 'MacroCycle' ? internalStatusProvider.setlrpbFormStatus('MesoCycle') : internalStatusProvider.setlrpbFormStatus('MacroCycle');
-                    },
-                    icon: Icon(Icons.change_circle_outlined, color: localAppTheme['anchorColors']['primaryColor']),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: header3(header: internalStatusProvider.lrpbFormStatus == 'MacroCycle' ? 'MACROCYCLE PLANNING:' : 'MESOCYCLE PLANNING:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                  ),
-                ],
+              Align(
+                alignment: Alignment.center,
+                child: header3(header: '${athleteKeyProvider.selectedAthlete['name'].toString().toUpperCase()} ${athleteKeyProvider.selectedAthlete['surname'].toString().toUpperCase()}', context: context, color: localAppTheme['anchorColors']['primaryColor']),
               ),
-              Row(
-                children: [
-                  Visibility(
-                    visible: internalStatusProvider.lrpbTopWidget is! LRPBDefaultTop,
-                    child: elevatedButton(
-                      label: 'BACK',
-                      onPressed: () {
-                        internalStatusProvider.setlrpbTopWidget(LRPBDefaultTop());
-                        internalStatusProvider.setSelectedLongRangePlanBlocks(null);
-                      },
-                      backgroundColor: localAppTheme['anchorColors']['primaryColor'],
-                      labelColor: localAppTheme['anchorColors']['secondaryColor'],
-                      leadingIcon: Icons.arrow_back,
-                      trailingIcon: null,
-                      context: context,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: header3(header: 'Athlete: ${athleteKeyProvider.selectedAthlete['name']} ${athleteKeyProvider.selectedAthlete['surname']}', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                  ),
-                ],
-              ),
-              Visibility(
-                visible: internalStatusProvider.lrpbFormStatus == 'MacroCycle',
-                child: Expanded(
-                  flex: 3,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0),
-                        top: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0),
-                      ),
-                    ),
-                    child: internalStatusProvider.lrpbTopWidget,
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              Container(
+                color: localAppTheme['anchorColors']['primaryColor'],
+                child: Row(
                   children: [
+                    IconButton(
+                      onPressed: () {
+                        internalStatusProvider.lrpbFormStatus == 'MacroCycle' ? internalStatusProvider.setlrpbFormStatus('MesoCycle') : internalStatusProvider.setlrpbFormStatus('MacroCycle');
+                      },
+                      icon: Icon(Icons.change_circle_outlined, color: localAppTheme['anchorColors']['secondaryColor']),
+                    ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: DropdownButton<int>(
-                        value: selectedYear,
-                        underline: Container(),
-                        dropdownColor: localAppTheme['anchorColors']['secondaryColor'],
-                        style: TextStyle(color: Colors.white, fontSize: 20),
-                        items: List.generate(lastYear - firstYear + 1, (index) => firstYear + index)
-                            .map(
-                              (y) => DropdownMenuItem(
-                                value: y,
-                                child: body(header: '$y', color: localAppTheme['anchorColors']['primaryColor'], context: context),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (newYear) {
-                          if (newYear != null) _onYearChanged(newYear);
-                        },
-                      ),
-                    ),
-                    Expanded(
-                      child: Scrollbar(
-                        controller: _scrollController,
-                        thumbVisibility: true,
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          controller: _scrollController,
-                          itemCount: totalWeeks,
-                          itemBuilder: (context, weekIndex) {
-                            final weekNumber = weekIndex + 1;
-                            final isCurrentWeek = (selectedYear == DateTime.now().year) && (weekNumber == internalStatusProvider.getCurrentWeekNumber(selectedYear));
-                            final weekStartDate = getWeekStartDate(selectedYear, weekIndex, firstDayOfWeek);
-                            final weekEndDate = weekStartDate.add(const Duration(days: 6));
-                            final formattedWeekStart = DateFormat('dd-MMM-yyyy').format(weekStartDate);
-
-                            // Find all goals that overlap with this week
-                            final weekGoals = blockGoals.where((goal) {
-                              final startDate = toDateTime(goal['startDate']);
-                              final endDate = toDateTime(goal['endDate']);
-                              return isGoalInWeek(weekStartDate, weekEndDate, startDate, endDate);
-                            }).toList();
-
-                            // Find all Training Focus  that overlap with this week
-                            final weekFocus = trainingFocus.where((goal) {
-                              final startDate = toDateTime(goal['startDate']);
-                              final endDate = toDateTime(goal['endDate']);
-                              return isGoalInWeek(weekStartDate, weekEndDate, startDate, endDate);
-                            }).toList();
-
-                            // Find all Training blocks that overlap with this week
-                            final weekBlocks = trainingBlocks.where((goal) {
-                              final startDate = toDateTime(goal['startDate']);
-                              final endDate = toDateTime(goal['endDate']);
-                              return isGoalInWeek(weekStartDate, weekEndDate, startDate, endDate);
-                            }).toList();
-
-                            // Get week block names
-                            final weekBlockNames = weekBlocks.map((g) => getBlockTypeName(g['userInput'], internalStatusProvider.focusBlocks)).where((name) => name != null).join(", ");
-
-                            // Get week goals colors
-                            final weekGoalColor = getWeekGoalColor(weekGoals);
-
-                            // Get week Focus colors
-                            final weekFocusColor = getWeekGoalColor(weekFocus);
-
-                            // Get week blocks colors
-                            final weekBlockColor = getWeekGoalColor(weekBlocks);
-
-                            return Container(
-                              width: weekCardWidth,
-                              margin: EdgeInsets.symmetric(vertical: 24),
-                              decoration: BoxDecoration(
-                                color: isCurrentWeek ? Colors.lightBlue[50] : Colors.white,
-                                border: Border(
-                                  bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                                  right: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                                  top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                                ),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  //Expanded(
-                                  //  child:
-                                  Container(
-                                    alignment: Alignment.centerLeft,
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
-                                    ),
-                                    child: header3(header: '$weekNumber: $formattedWeekStart', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                                  ),
-                                  //),
-                                  //Expanded(
-                                  //  child:
-                                  Container(
-                                    alignment: Alignment.centerLeft,
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
-                                    ),
-                                    child: header3(header: 'RACES', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                                  ),
-                                  //),
-                                  //Expanded(
-                                  //  child:
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      customHeader(header: 'Training Block:', context: context, color: localAppTheme['anchorColors']['primaryColor'], fontWeight: FontWeight.bold, size: MediaQuery.of(context).size.width * 0.00875 / 1.75),
-                                      Container(
-                                        alignment: Alignment.centerLeft,
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                                        decoration: BoxDecoration(
-                                          color: weekBlockColor,
-                                          border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
-                                        ),
-                                        child: weekGoals.isNotEmpty ? body(header: weekBlockNames, context: context, color: localAppTheme['anchorColors']['primaryColor']) : body(header: '', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                                      ),
-                                    ],
-                                  ),
-                                  //),
-                                  //Expanded(
-                                  //  child:
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      customHeader(header: 'Block Goals:', context: context, color: localAppTheme['anchorColors']['primaryColor'], fontWeight: FontWeight.bold, size: MediaQuery.of(context).size.width * 0.00875 / 1.75),
-                                      Container(
-                                        alignment: Alignment.centerLeft,
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                                        decoration: BoxDecoration(
-                                          color: weekGoalColor,
-                                          border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
-                                        ),
-                                        child: weekGoals.isNotEmpty ? body(header: weekGoals.map((g) => g['userInput']).join(", "), context: context, color: localAppTheme['anchorColors']['primaryColor']) : body(header: '', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                                      ),
-                                    ],
-                                  ),
-                                  //),
-                                  //Expanded(
-                                  //child:
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      customHeader(header: 'Training Focus:', context: context, color: localAppTheme['anchorColors']['primaryColor'], fontWeight: FontWeight.bold, size: MediaQuery.of(context).size.width * 0.00875 / 1.75),
-                                      Container(
-                                        alignment: Alignment.centerLeft,
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                                        decoration: BoxDecoration(
-                                          color: weekFocusColor,
-                                          border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
-                                        ),
-                                        child: weekGoals.isNotEmpty ? body(header: weekFocus.map((g) => g['userInput']).join(", "), context: context, color: localAppTheme['anchorColors']['primaryColor']) : body(header: '', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                                      ),
-                                    ],
-                                  ),
-                                  //),
-                                  Visibility(
-                                    visible: internalStatusProvider.lrpbFormStatus == 'MesoCycle',
-                                    child:
-                                        //Expanded(flex: 9,
-                                        //child:
-                                        MesoCycleInput(),
-                                    //),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+                      child: header3(header: internalStatusProvider.lrpbFormStatus == 'MacroCycle' ? 'MACROCYCLE PLANNING:' : 'MESOCYCLE PLANNING:', context: context, color: localAppTheme['anchorColors']['secondaryColor']),
                     ),
                   ],
                 ),
               ),
+              Expanded(
+                child: Scrollbar(
+                  controller: _scrollController,
+                  thumbVisibility: true,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    controller: _scrollController,
+                    itemCount: totalWeeks,
+                    itemBuilder: (context, weekIndex) {
+                      final weekNumber = weekIndex + 1;
+                      final isCurrentWeek = (selectedYear == DateTime.now().year) && (weekNumber == internalStatusProvider.getCurrentWeekNumber(selectedYear));
+                      final weekStartDate = getWeekStartDate(selectedYear, weekIndex, firstDayOfWeek);
+                      final weekEndDate = weekStartDate.add(const Duration(days: 6));
+                      final formattedWeekStart = DateFormat('dd-MMM-yyyy').format(weekStartDate);
+
+                      // Find all goals that overlap with this week
+                      final weekGoals = blockGoals.where((goal) {
+                        final startDate = toDateTime(goal['startDate']);
+                        final endDate = toDateTime(goal['endDate']);
+                        return isGoalInWeek(weekStartDate, weekEndDate, startDate, endDate);
+                      }).toList();
+
+                      // Find all Training Focus  that overlap with this week
+                      final weekFocus = trainingFocus.where((goal) {
+                        final startDate = toDateTime(goal['startDate']);
+                        final endDate = toDateTime(goal['endDate']);
+                        return isGoalInWeek(weekStartDate, weekEndDate, startDate, endDate);
+                      }).toList();
+
+                      // Find all Training blocks that overlap with this week
+                      final weekBlocks = trainingBlocks.where((goal) {
+                        final startDate = toDateTime(goal['startDate']);
+                        final endDate = toDateTime(goal['endDate']);
+                        return isGoalInWeek(weekStartDate, weekEndDate, startDate, endDate);
+                      }).toList();
+
+                      // Get week block names
+                      final weekBlockNames = weekBlocks.map((g) => getBlockTypeName(g['userInput'], internalStatusProvider.focusBlocks)).where((name) => name != null).join(", ");
+
+                      // Get week goals colors
+                      final weekGoalColor = getWeekGoalColor(weekGoals);
+
+                      // Get week Focus colors
+                      final weekFocusColor = getWeekGoalColor(weekFocus);
+
+                      // Get week blocks colors
+                      final weekBlockColor = getWeekGoalColor(weekBlocks);
+
+                      return Container(
+                        width: weekCardWidth,
+                        margin: EdgeInsets.only(bottom: 24),
+                        decoration: BoxDecoration(
+                          color: isCurrentWeek ? Colors.lightBlue[50] : Colors.white,
+                          border: Border(
+                            bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                            right: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                            top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            customHeader(header: 'WEEK: $weekNumber', context: context, color: localAppTheme['anchorColors']['primaryColor'], fontWeight: FontWeight.bold, size: MediaQuery.of(context).size.width * 0.00875 / 1.75),
+                            Container(
+                              alignment: Alignment.centerLeft,
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                              decoration: BoxDecoration(
+                                border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
+                              ),
+                              child: body(header: formattedWeekStart, context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                            ),
+                            Container(
+                              alignment: Alignment.centerLeft,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
+                              ),
+                              child: header3(header: 'RACES', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                            ),
+                            Container(
+                              color: internalStatusProvider.planBlockID == 1 ? localAppTheme['utilityColorPair1']['color1'] : Colors.transparent,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  customHeader(header: 'Training Block:', context: context, color: localAppTheme['anchorColors']['primaryColor'], fontWeight: FontWeight.bold, size: MediaQuery.of(context).size.width * 0.00875 / 1.75),
+                                  Container(
+                                    alignment: Alignment.centerLeft,
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                                    decoration: BoxDecoration(
+                                      color: weekBlockColor,
+                                      border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
+                                    ),
+                                    child: weekBlocks.isNotEmpty ? body(header: weekBlockNames, context: context, color: localAppTheme['anchorColors']['primaryColor']) : body(header: '', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              color: internalStatusProvider.planBlockID == 2 ? localAppTheme['utilityColorPair1']['color1'] : Colors.transparent,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  customHeader(header: 'Block Goals:', context: context, color: localAppTheme['anchorColors']['primaryColor'], fontWeight: FontWeight.bold, size: MediaQuery.of(context).size.width * 0.00875 / 1.75),
+                                  Container(
+                                    alignment: Alignment.centerLeft,
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                                    decoration: BoxDecoration(
+                                      color: weekGoalColor,
+                                      border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
+                                    ),
+                                    child: weekGoals.isNotEmpty ? body(header: weekGoals.map((g) => g['userInput']).join(", "), context: context, color: localAppTheme['anchorColors']['primaryColor']) : body(header: '', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              color: internalStatusProvider.planBlockID == 3 ? localAppTheme['utilityColorPair1']['color1'] : Colors.transparent,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  customHeader(header: 'Training Focus:', context: context, color: localAppTheme['anchorColors']['primaryColor'], fontWeight: FontWeight.bold, size: MediaQuery.of(context).size.width * 0.00875 / 1.75),
+                                  Container(
+                                    alignment: Alignment.centerLeft,
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                                    decoration: BoxDecoration(
+                                      color: weekFocusColor,
+                                      border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
+                                    ),
+                                    child: weekGoals.isNotEmpty ? body(header: weekFocus.map((g) => g['userInput']).join(", "), context: context, color: localAppTheme['anchorColors']['primaryColor']) : body(header: '', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Visibility(visible: internalStatusProvider.lrpbFormStatus == 'MesoCycle', child: MesoCycleInput(weekNumber, selectedYear)),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              Visibility(
+                visible: internalStatusProvider.lrpbFormStatus == 'MacroCycle',
+                child: Expanded(
+                  //flex: 3,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0)),
+                    ),
+                    //child: internalStatusProvider.lrpbTopWidget,
+                    child: MacroCycleInput(),
+                  ),
+                ),
+              ),
+              //     ],
+              //   ),
+              // ),
             ],
           );
         }

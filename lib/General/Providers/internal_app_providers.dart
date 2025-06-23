@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:legacyendurancesport/Home/Functions/Sub%20Functions/LRPB/macrocycleinput.dart';
-import 'package:legacyendurancesport/Home/Functions/Sub%20Functions/LRPB/lrpb_default_top.dart';
 
 // Helper extension for dayOfYear
 extension DateTimeDayOfYear on DateTime {
@@ -21,13 +19,13 @@ class InternalStatusProvider with ChangeNotifier {
   late int totalWeeks = getTotalWeeks(currentYear);
   String homePageSidebar = '';
   Widget? homeMainContent;
-  Widget lrpbTopWidget = LRPBDefaultTop();
   String lrpbFormStatus = 'MacroCycle';
+  int planBlockID = 1;
   Map<String, dynamic>? athleteKey;
   List<Map<String, dynamic>> longRangePlanBlocks = [
-    {'planBlockID': 1, 'setting': 'ADD TRAINING BLOCKS', 'navigate': const MacroCycleInput()},
-    {'planBlockID': 2, 'setting': 'ADD BLOCK GOALS', 'navigate': const MacroCycleInput()},
-    {'planBlockID': 3, 'setting': 'ADD TRAINING FOCUS', 'navigate': const MacroCycleInput()},
+    {'planBlockID': 1, 'setting': 'ADD TRAINING BLOCKS'},
+    {'planBlockID': 2, 'setting': 'ADD BLOCK GOALS'},
+    {'planBlockID': 3, 'setting': 'ADD TRAINING FOCUS'},
   ];
   Map<String, dynamic>? selectedLongRangePlanBlocks;
   int firstDayOfWeek = DateTime.sunday;
@@ -59,11 +57,6 @@ class InternalStatusProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setlrpbTopWidget(Widget widget) {
-    lrpbTopWidget = widget;
-    notifyListeners();
-  }
-
   void setHomePageSidebar(String status) {
     homePageSidebar = status;
     notifyListeners();
@@ -79,15 +72,20 @@ class InternalStatusProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  int getTotalWeeks(int year) {
+    final dec28 = DateTime(year, 12, 28);
+    final week = ((dec28.dayOfYear - dec28.weekday + 10) / 7).floor();
+    return week;
+  }
+
   void setUserRole(String? status) {
     selectedUserRole = status;
     notifyListeners();
   }
 
-  int getTotalWeeks(int year) {
-    final dec28 = DateTime(year, 12, 28);
-    final week = ((dec28.dayOfYear - dec28.weekday + 10) / 7).floor();
-    return week;
+  void setPlanBlockID(int value) {
+    planBlockID = value;
+    notifyListeners();
   }
 
   int getCurrentWeekNumber(int year) {

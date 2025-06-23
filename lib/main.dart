@@ -3,7 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:legacyendurancesport/Home/Providers/athletekeyrequests.dart';
-import 'package:legacyendurancesport/Home/Providers/macromesocycleprovider.dart';
+import 'package:legacyendurancesport/Home/Providers/macrocycleprovider.dart';
 import 'package:legacyendurancesport/ProfileSetup/Page/profilesetup.dart';
 import 'package:legacyendurancesport/SignInSignUp/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/SignInSignUp/Providers/firebase_auth_service.dart';
@@ -26,7 +26,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => FirebaseAuthService()),
         ChangeNotifierProvider(create: (_) => AppUserProvider()),
         ChangeNotifierProvider(create: (_) => AthleteKeyProvider()),
-        ChangeNotifierProvider(create: (_) => MacroMesoCycleProvider()),
+        ChangeNotifierProvider(create: (_) => MacroCycleProvider()),
       ],
       child: MyApp(),
     ),

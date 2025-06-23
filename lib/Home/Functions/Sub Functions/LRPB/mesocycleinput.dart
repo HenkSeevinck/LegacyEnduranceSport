@@ -3,7 +3,10 @@ import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 
 class MesoCycleInput extends StatefulWidget {
-  const MesoCycleInput({super.key});
+  final int weekNumber;
+  final int year;
+
+  const MesoCycleInput(this.weekNumber, this.year, {super.key});
 
   @override
   State<MesoCycleInput> createState() => _MesoCycleInputState();
@@ -28,7 +31,7 @@ class _MesoCycleInputState extends State<MesoCycleInput> {
             activeColor: localAppTheme['anchorColors']['primaryColor'],
             onChanged: (value) {
               // Handle slider value change
-              print('Slider value changed: $value');
+              print('Slider value changed: $value, weekNumber: ${widget.weekNumber}, year: ${widget.year}');
             },
           ),
           SliderBarWidget(

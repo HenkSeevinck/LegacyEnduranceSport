@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class MacroMesoCycleProvider with ChangeNotifier {
-  final CollectionReference _macroMesoCycleCollection = FirebaseFirestore.instance.collection('MacroMesoCycle');
+class MacroCycleProvider with ChangeNotifier {
+  final CollectionReference _macroMesoCycleCollection = FirebaseFirestore.instance.collection('MacroCycle');
 
-  final List<Map<String, dynamic>> _macroMesoCycles = [];
-  List<Map<String, dynamic>> get macroMesoCycles => _macroMesoCycles;
+  final List<Map<String, dynamic>> _macroCycles = [];
+  List<Map<String, dynamic>> get macroCycles => _macroCycles;
 
   final List<Map<String, dynamic>> _trainingBlocks = [];
   List<Map<String, dynamic>> get trainingBlocks => _trainingBlocks;
@@ -27,9 +27,9 @@ class MacroMesoCycleProvider with ChangeNotifier {
 
   //-----------------------------------------------------------------------------------------------------------
   // Fetches all macro/meso cycles for the given athleteUID
-  Future<void> getMacroMesoCyclesByAthleteAndCoachUID(String athleteUID, String coachUID) async {
+  Future<void> getMacroCyclesByAthleteAndCoachUID(String athleteUID, String coachUID) async {
     // Clear previous data to avoid duplicates
-    _macroMesoCycles.clear();
+    _macroCycles.clear();
     _trainingBlocks.clear();
     _blockGoals.clear();
     _trainingFocus.clear();
@@ -46,7 +46,7 @@ class MacroMesoCycleProvider with ChangeNotifier {
       } else if (data['planBlockID'] == 3) {
         _trainingFocus.add(data);
       }
-      _macroMesoCycles.add(data);
+      _macroCycles.add(data);
     }
 
     _rebuildDateRanges();
@@ -55,13 +55,13 @@ class MacroMesoCycleProvider with ChangeNotifier {
 
   //-----------------------------------------------------------------------------------------------------------
   // Adds a new macro/meso cycle
-  Future<void> addMacroMesoCycle(Map<String, dynamic> data) async {
+  Future<void> addMacroCycle(Map<String, dynamic> data) async {
     DocumentReference docRef = await _macroMesoCycleCollection.add(data);
-    await docRef.update({'macroMesoCycleID': docRef.id});
-    final newData = {...data, 'macroMesoCycleID': docRef.id};
+    await docRef.update({'macroCycleID': docRef.id});
+    final newData = {...data, 'macroCycleID': docRef.id};
 
     // Add to the main list
-    _macroMesoCycles.add(newData);
+    _macroCycles.add(newData);
 
     // Add to the correct local section
     if (newData['planBlockID'] == 1) {
@@ -78,37 +78,42 @@ class MacroMesoCycleProvider with ChangeNotifier {
 
   //-----------------------------------------------------------------------------------------------------------
   // Selects a macro/meso cycle by its ID
-  Future<Map<String, dynamic>?> selectMacroMesoCycleByID(String macroMesoCycleID) async {
-    final QuerySnapshot snapshot = await _macroMesoCycleCollection.where('macroMesoCycleID', isEqualTo: macroMesoCycleID).get();
+  Map<String, dynamic> _selectedMacroCycle = {};
+  Map<String, dynamic> get selectedMacroCycle => _selectedMacroCycle;
+
+  Future<void> selectMacroCycleByID(String macroCycleID) async {
+    final QuerySnapshot snapshot = await _macroMesoCycleCollection.where('macroCycleID', isEqualTo: macroCycleID).get();
+
+    removeFromCollections(macroCycleID); // Testing
 
     if (snapshot.docs.isNotEmpty) {
       Map<String, dynamic> data = snapshot.docs.first.data() as Map<String, dynamic>;
-      return data;
+      _selectedMacroCycle = data;
+      notifyListeners();
     }
-    return null;
   }
 
   //-----------------------------------------------------------------------------------------------------------
   // Updates an existing macro/meso cycle
-  Future<void> updateMacroMesoCycle(String macroMesoCycleID, Map<String, dynamic> data) async {
+  Future<void> updateMacroCycle(String macroMesoCycleID, Map<String, dynamic> data) async {
     await _macroMesoCycleCollection.doc(macroMesoCycleID).update(data);
-    int index = _macroMesoCycles.indexWhere((cycle) => cycle['macroMesoCycleID'] == macroMesoCycleID);
+    int index = _macroCycles.indexWhere((cycle) => cycle['macroCycleID'] == macroMesoCycleID);
     if (index != -1) {
-      _macroMesoCycles[index] = {..._macroMesoCycles[index], ...data};
+      _macroCycles[index] = {..._macroCycles[index], ...data};
       notifyListeners();
     }
   }
 
   //-----------------------------------------------------------------------------------------------------------
   // Deletes a macro/meso cycle
-  Future<void> deleteMacroMesoCycle(String macroMesoCycleID) async {
+  Future<void> deleteMacroCycle(String macroMesoCycleID) async {
     await _macroMesoCycleCollection.doc(macroMesoCycleID).delete();
-    _macroMesoCycles.removeWhere((cycle) => cycle['macroMesoCycleID'] == macroMesoCycleID);
+    _macroCycles.removeWhere((cycle) => cycle['macroCycleID'] == macroMesoCycleID);
 
     // Remove from the specific lists
-    _trainingBlocks.removeWhere((block) => block['macroMesoCycleID'] == macroMesoCycleID);
-    _blockGoals.removeWhere((goal) => goal['macroMesoCycleID'] == macroMesoCycleID);
-    _trainingFocus.removeWhere((focus) => focus['macroMesoCycleID'] == macroMesoCycleID);
+    _trainingBlocks.removeWhere((block) => block['macroCycleID'] == macroMesoCycleID);
+    _blockGoals.removeWhere((goal) => goal['macroCycleID'] == macroMesoCycleID);
+    _trainingFocus.removeWhere((focus) => focus['macroCycleID'] == macroMesoCycleID);
 
     _rebuildDateRanges();
     notifyListeners();
@@ -150,6 +155,15 @@ class MacroMesoCycleProvider with ChangeNotifier {
       }
     }
   }
-}
 
-//-----------------------------------------------------------------------------------------------------------
+  //-----------------------------------------------------------------------------------------------------------
+  // Helpers to remove selected macro/meso cycle from the lists - Testing
+  void removeFromCollections(String macroCycleID) {
+    _macroCycles.removeWhere((cycle) => cycle['macroCycleID'] == macroCycleID);
+    _trainingBlocks.removeWhere((block) => block['macroCycleID'] == macroCycleID);
+    _blockGoals.removeWhere((goal) => goal['macroCycleID'] == macroCycleID);
+    _trainingFocus.removeWhere((focus) => focus['macroCycleID'] == macroCycleID);
+    _rebuildDateRanges();
+    notifyListeners();
+  }
+}
