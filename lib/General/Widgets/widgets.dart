@@ -660,6 +660,21 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
     }
   }
 
+  @override
+  void didUpdateWidget(covariant SearchableDropdown oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialValue != oldWidget.initialValue) {
+      setState(() {
+        if (widget.initialValue != null) {
+          selectedItem = widget.dropDownList.firstWhere((item) => item[widget.idField].toString() == widget.initialValue.toString(), orElse: () => <String, dynamic>{});
+          if (selectedItem!.isEmpty) selectedItem = null;
+        } else {
+          selectedItem = null;
+        }
+      });
+    }
+  }
+
   void resetSelectedItem() {
     setState(() {
       if (widget.initialValue != null) {

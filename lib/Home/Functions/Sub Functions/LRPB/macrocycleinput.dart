@@ -4,6 +4,7 @@ import 'package:legacyendurancesport/Coach/WorkoutCalendar/Functions/getfirstand
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
+import 'package:legacyendurancesport/Home/Functions/Sub%20Functions/LRPB/helperfunctions.dart';
 import 'package:legacyendurancesport/Home/Providers/athletekeyrequests.dart';
 import 'package:legacyendurancesport/Home/Providers/macrocycleprovider.dart';
 import 'package:legacyendurancesport/SignInSignUp/Providers/appuser_provider.dart';
@@ -34,25 +35,43 @@ class _MacroCycleInputState extends State<MacroCycleInput> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final macroCycleProvider = Provider.of<MacroCycleProvider>(context, listen: true);
+    final selectedMacroCycle = macroCycleProvider.selectedMacroCycle;
+    if (selectedMacroCycle.isNotEmpty) {
+      // Populate controllers with selected macro cycle data
+      //print('Selected Macro Cycle: $selectedMacroCycle');
+      userUnput = Map<String, dynamic>.from(selectedMacroCycle);
+      _goalController.text = selectedMacroCycle['userInput']?.toString() ?? '';
+      _startDateController.text = selectedMacroCycle['startDate'] != null ? DateFormat('yyyy-MM-dd').format(toDateTime(selectedMacroCycle['startDate'])) : '';
+      _endDateController.text = selectedMacroCycle['endDate'] != null ? DateFormat('yyyy-MM-dd').format(toDateTime(selectedMacroCycle['endDate'])) : '';
+      setState(() {
+        _selectedColor = selectedMacroCycle['color'] != null ? Color(selectedMacroCycle['color']) : Colors.transparent;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final localAppTheme = ResponsiveTheme(context).theme;
     final athleteKeyProvider = Provider.of<AthleteKeyProvider>(context, listen: true);
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
-    final macroMesoCycleProvider = Provider.of<MacroCycleProvider>(context, listen: true);
-    final blockGoals = macroMesoCycleProvider.blockGoals;
-    final trainingBlocks = macroMesoCycleProvider.trainingBlocks;
-    final trainingFocus = macroMesoCycleProvider.trainingFocus;
-    final blockGoalsDateRanges = macroMesoCycleProvider.blockGoalsDateRanges;
-    final trainingBlocksDateRanges = macroMesoCycleProvider.trainingBlocksDateRanges;
-    final trainingFocusDateRanges = macroMesoCycleProvider.trainingFocusDateRanges;
+    final macroCycleProvider = Provider.of<MacroCycleProvider>(context, listen: true);
+    final blockGoals = macroCycleProvider.blockGoals;
+    final trainingBlocks = macroCycleProvider.trainingBlocks;
+    final trainingFocus = macroCycleProvider.trainingFocus;
+    final blockGoalsDateRanges = macroCycleProvider.blockGoalsDateRanges;
+    final trainingBlocksDateRanges = macroCycleProvider.trainingBlocksDateRanges;
+    final trainingFocusDateRanges = macroCycleProvider.trainingFocusDateRanges;
     final firstDayOfWeek = internalStatusProvider.firstDayOfWeek;
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
     final currentUser = appUserProvider.appUser;
-    //final planBlockID = internalStatusProvider.selectedLongRangePlanBlocks?['planBlockID'];
     final planBlockID = internalStatusProvider.planBlockID;
     final List<Map<String, dynamic>> listToShow;
     final List<DateTimeRange> datesToShow;
     final focusBlocks = internalStatusProvider.focusBlocks;
+    final selectedMacroCycle = macroCycleProvider.selectedMacroCycle;
 
     if (planBlockID == 1) {
       listToShow = trainingBlocks;
@@ -68,6 +87,19 @@ class _MacroCycleInputState extends State<MacroCycleInput> {
       datesToShow = [];
     }
 
+    // Sort by startDate ascending
+    listToShow.sort((a, b) {
+      final aDate = toDateTime(a['startDate']);
+      final bDate = toDateTime(b['startDate']);
+      return aDate.compareTo(bDate);
+    });
+
+    print('Current macroCycleIDs in listToShow: ${listToShow.map((e) => e['macroCycleID']).toList()}');
+    print('Currently selected macroCycleID: ${selectedMacroCycle['macroCycleID']}');
+    for (var item in listToShow) {
+      print('Item in listToShow: $item');
+    }
+
     String blockPlanSetting = internalStatusProvider.longRangePlanBlocks.firstWhere((block) => block['planBlockID'] == planBlockID, orElse: () => {'setting': 'Error'})['setting'] ?? 'Error';
 
     return Column(
@@ -79,18 +111,22 @@ class _MacroCycleInputState extends State<MacroCycleInput> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              IconButton(
-                onPressed: () {
-                  if (planBlockID != 1) {
-                    internalStatusProvider.setPlanBlockID(planBlockID - 1);
-                  } else {
-                    internalStatusProvider.setPlanBlockID(3);
-                  }
-                  _goalController.clear();
-                  _startDateController.clear();
-                  _endDateController.clear();
-                },
-                icon: Icon(Icons.arrow_circle_left_outlined, color: localAppTheme['anchorColors']['secondaryColor']),
+              Visibility(
+                visible: selectedMacroCycle.isEmpty,
+                maintainSize: true,
+                maintainAnimation: true,
+                maintainState: true,
+                child: IconButton(
+                  onPressed: () {
+                    if (planBlockID != 1) {
+                      internalStatusProvider.setPlanBlockID(planBlockID - 1);
+                    } else {
+                      internalStatusProvider.setPlanBlockID(3);
+                    }
+                    clearInputForm(goalController: _goalController, startDateController: _startDateController, endDateController: _endDateController, setColor: (color) => setState(() => _selectedColor = color));
+                  },
+                  icon: Icon(Icons.arrow_circle_left_outlined, color: localAppTheme['anchorColors']['secondaryColor']),
+                ),
               ),
               SizedBox(
                 width: 300,
@@ -102,18 +138,22 @@ class _MacroCycleInputState extends State<MacroCycleInput> {
                   ),
                 ),
               ),
-              IconButton(
-                onPressed: () {
-                  if (planBlockID != 3) {
-                    internalStatusProvider.setPlanBlockID(planBlockID + 1);
-                  } else {
-                    internalStatusProvider.setPlanBlockID(1);
-                  }
-                  _goalController.clear();
-                  _startDateController.clear();
-                  _endDateController.clear();
-                },
-                icon: Icon(Icons.arrow_circle_right_outlined, color: localAppTheme['anchorColors']['secondaryColor']),
+              Visibility(
+                visible: selectedMacroCycle.isEmpty,
+                maintainSize: true,
+                maintainAnimation: true,
+                maintainState: true,
+                child: IconButton(
+                  onPressed: () {
+                    if (planBlockID != 3) {
+                      internalStatusProvider.setPlanBlockID(planBlockID + 1);
+                    } else {
+                      internalStatusProvider.setPlanBlockID(1);
+                    }
+                    clearInputForm(goalController: _goalController, startDateController: _startDateController, endDateController: _endDateController, setColor: (color) => setState(() => _selectedColor = color));
+                  },
+                  icon: Icon(Icons.arrow_circle_right_outlined, color: localAppTheme['anchorColors']['secondaryColor']),
+                ),
               ),
             ],
           ),
@@ -209,51 +249,50 @@ class _MacroCycleInputState extends State<MacroCycleInput> {
                         SizedBox(height: 10),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: Expanded(
-                            flex: 4,
-                            child: planBlockID != 1
-                                ? FormInputField(
-                                    label: blockPlanSetting,
-                                    errorMessage: 'Please provide a input',
-                                    isMultiline: false,
-                                    isPassword: false,
-                                    prefixIcon: Icons.flag,
-                                    suffixIcon: null,
-                                    showLabel: true,
-                                    controller: _goalController,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Please provide a input';
-                                      }
-                                      return null;
-                                    },
-                                    onChanged: (value) {
-                                      userUnput['userInput'] = value;
-                                    },
-                                  )
-                                : SearchableDropdown(
-                                    labelText: '',
-                                    hint: blockPlanSetting,
-                                    dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
-                                    searchBoxVisable: false,
-                                    dropDownList: focusBlocks,
-                                    header: '',
-                                    iconColor: localAppTheme['anchorColors']['primaryColor'],
-                                    idField: 'blockTypeID',
-                                    displayField: 'blockType',
-                                    onChanged: (value) {
-                                      userUnput['userInput'] = value?['blockTypeID'];
-                                    },
-                                    isEnabled: true,
-                                    backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
-                                    validator: (value) => value == null ? 'Please select an option' : null,
-                                  ),
-                          ),
+                          child: planBlockID != 1
+                              ? FormInputField(
+                                  label: blockPlanSetting,
+                                  errorMessage: 'Please provide a input',
+                                  isMultiline: false,
+                                  isPassword: false,
+                                  prefixIcon: Icons.flag,
+                                  suffixIcon: null,
+                                  showLabel: true,
+                                  controller: _goalController,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please provide a input';
+                                    }
+                                    return null;
+                                  },
+                                  onChanged: (value) {
+                                    userUnput['userInput'] = value;
+                                  },
+                                )
+                              : SearchableDropdown(
+                                  key: ValueKey(selectedMacroCycle['userInput']),
+                                  labelText: '',
+                                  hint: blockPlanSetting,
+                                  dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
+                                  searchBoxVisable: false,
+                                  dropDownList: focusBlocks,
+                                  initialValue: selectedMacroCycle['userInput'] ?? '',
+                                  header: '',
+                                  iconColor: localAppTheme['anchorColors']['primaryColor'],
+                                  idField: 'blockTypeID',
+                                  displayField: 'blockType',
+                                  onChanged: (value) {
+                                    userUnput['userInput'] = value?['blockTypeID'];
+                                  },
+                                  isEnabled: true,
+                                  backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
+                                  validator: (value) => value == null ? 'Please select an option' : null,
+                                ),
                         ),
                         SizedBox(height: 10),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: macroMesoCycleProvider.selectedMacroCycle.isEmpty
+                          child: selectedMacroCycle.isEmpty
                               ? SizedBox(
                                   width: double.infinity,
                                   child: elevatedButton(
@@ -264,18 +303,13 @@ class _MacroCycleInputState extends State<MacroCycleInput> {
                                         userUnput['planBlockID'] = planBlockID;
                                         userUnput['coachUID'] = currentUser['uid'];
                                         try {
-                                          await macroMesoCycleProvider.addMacroCycle(userUnput);
+                                          await macroCycleProvider.addMacroCycle(userUnput);
                                           snackbar(context: context, header: 'Item added successfully.');
                                           userUnput.clear();
                                         } catch (e) {
                                           snackbar(context: context, header: 'Error: $e');
                                         }
-                                        _goalController.clear();
-                                        _startDateController.clear();
-                                        _endDateController.clear();
-                                        setState(() {
-                                          _selectedColor = Colors.transparent;
-                                        });
+                                        clearInputForm(goalController: _goalController, startDateController: _startDateController, endDateController: _endDateController, setColor: (color) => setState(() => _selectedColor = color));
                                       }
                                     },
                                     backgroundColor: localAppTheme['anchorColors']['primaryColor'],
@@ -291,7 +325,17 @@ class _MacroCycleInputState extends State<MacroCycleInput> {
                                       child: elevatedButton(
                                         label: 'SAVE',
                                         onPressed: () async {
-                                          // Your update logic here
+                                          try {
+                                            if (_formKey.currentState!.validate()) {
+                                              await macroCycleProvider.updateMacroCycle(userUnput);
+                                              snackbar(context: context, header: 'Item updated successfully.');
+                                            }
+                                          } catch (e) {
+                                            snackbar(context: context, header: 'Error: $e');
+                                          }
+                                          userUnput.clear();
+                                          //macroCycleProvider.clearSelectedMacroCycle();
+                                          clearInputForm(goalController: _goalController, startDateController: _startDateController, endDateController: _endDateController, setColor: (color) => setState(() => _selectedColor = color));
                                         },
                                         backgroundColor: localAppTheme['anchorColors']['primaryColor'],
                                         labelColor: localAppTheme['anchorColors']['secondaryColor'],
@@ -305,7 +349,8 @@ class _MacroCycleInputState extends State<MacroCycleInput> {
                                       child: elevatedButton(
                                         label: 'CANCEL',
                                         onPressed: () async {
-                                          // Your cancel logic here
+                                          clearInputForm(goalController: _goalController, startDateController: _startDateController, endDateController: _endDateController, setColor: (color) => setState(() => _selectedColor = color));
+                                          macroCycleProvider.clearSelectedMacroCycle();
                                         },
                                         backgroundColor: localAppTheme['anchorColors']['primaryColor'],
                                         labelColor: localAppTheme['anchorColors']['secondaryColor'],
@@ -336,7 +381,7 @@ class _MacroCycleInputState extends State<MacroCycleInput> {
                         decoration: BoxDecoration(
                           border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
                         ),
-                        child: header3(header: 'Test', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                        child: header3(header: 'LIST OF INPUTS:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
                       ),
                       Expanded(
                         child: Padding(
@@ -360,28 +405,18 @@ class _MacroCycleInputState extends State<MacroCycleInput> {
                                     ),
                                     Expanded(
                                       flex: 2,
-                                      child: body(header: DateFormat('dd-MMM-yyyy').format((listToShow[index]['startDate'] is DateTime) ? listToShow[index]['startDate'] : listToShow[index]['startDate'].toDate()), color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                                      child: body(header: DateFormat('dd-MMM-yyyy').format(toDateTime(listToShow[index]['startDate'])), color: localAppTheme['anchorColors']['primaryColor'], context: context),
                                     ),
                                     Expanded(
                                       flex: 2,
-                                      child: body(header: DateFormat('dd-MMM-yyyy').format((listToShow[index]['endDate'] is DateTime) ? listToShow[index]['endDate'] : listToShow[index]['endDate'].toDate()), color: localAppTheme['anchorColors']['primaryColor'], context: context),
-                                    ),
-                                    Expanded(
-                                      flex: 1,
-                                      child: Container(
-                                        width: 20,
-                                        height: 20,
-                                        decoration: BoxDecoration(
-                                          color: Color(listToShow[index]['color'] ?? 0x00000000), // Default transparent if not set
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
+                                      child: body(header: DateFormat('dd-MMM-yyyy').format(toDateTime(listToShow[index]['endDate'])), color: localAppTheme['anchorColors']['primaryColor'], context: context),
                                     ),
                                     Expanded(
                                       flex: 1,
                                       child: IconButton(
                                         onPressed: () {
-                                          macroMesoCycleProvider.selectMacroCycleByID(listToShow[index]['macroCycleID']);
+                                          macroCycleProvider.clearSelectedMacroCycle();
+                                          macroCycleProvider.selectMacroCycleByID(listToShow[index]['macroCycleID']);
                                         },
                                         tooltip: 'Edit',
                                         icon: Icon(Icons.edit, color: localAppTheme['anchorColors']['primaryColor']),
@@ -392,7 +427,7 @@ class _MacroCycleInputState extends State<MacroCycleInput> {
                                       child: IconButton(
                                         onPressed: () async {
                                           try {
-                                            macroMesoCycleProvider.deleteMacroCycle(listToShow[index]['macroCycleID']);
+                                            macroCycleProvider.deleteMacroCycle(listToShow[index]['macroCycleID']);
                                             snackbar(context: context, header: 'Item deleted successfully');
                                           } catch (e) {
                                             snackbar(context: context, header: 'Error: $e');

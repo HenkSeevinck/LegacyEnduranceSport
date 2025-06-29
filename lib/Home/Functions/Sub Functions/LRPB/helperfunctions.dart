@@ -16,9 +16,12 @@ Color getWeekGoalColor(List<Map<String, dynamic>> weekGoals) {
 
 /// Converts Firestore Timestamp or DateTime to DateTime
 DateTime toDateTime(dynamic value) {
+  if (value == null) return DateTime(1970, 1, 1); // or handle null as needed
   if (value is Timestamp) return value.toDate();
   if (value is DateTime) return value;
-  throw ArgumentError('Unsupported date type');
+  if (value is String) return DateTime.tryParse(value) ?? DateTime(1970, 1, 1);
+  if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
+  throw ArgumentError('Unsupported date type: ${value.runtimeType}');
 }
 
 // Returns the name of the block type based on its ID.
@@ -26,4 +29,11 @@ String? getBlockTypeName(int? blockTypeID, List<Map<String, dynamic>> focusBlock
   if (blockTypeID == null) return null;
   final match = focusBlocks.firstWhere((block) => block['blockTypeID'] == blockTypeID, orElse: () => {});
   return match.isNotEmpty ? match['blockType'] as String? : null;
+}
+
+void clearInputForm({required TextEditingController goalController, required TextEditingController startDateController, required TextEditingController endDateController, required void Function(Color) setColor}) {
+  goalController.clear();
+  startDateController.clear();
+  endDateController.clear();
+  setColor(Colors.transparent);
 }

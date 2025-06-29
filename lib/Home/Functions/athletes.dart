@@ -5,6 +5,7 @@ import 'package:legacyendurancesport/General/Providers/internal_app_providers.da
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/Providers/athletekeyrequests.dart';
+import 'package:legacyendurancesport/Home/Providers/macrocycleprovider.dart';
 import 'package:legacyendurancesport/SignInSignUp/Providers/appuser_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -35,6 +36,7 @@ class _AthletesState extends State<Athletes> {
   @override
   Widget build(BuildContext context) {
     final localAppTheme = ResponsiveTheme(context).theme;
+    final macroCycleProvider = Provider.of<MacroCycleProvider>(context, listen: true);
 
     return FutureBuilder<void>(
       future: _fetchDataFuture,
@@ -97,6 +99,7 @@ class _AthletesState extends State<Athletes> {
                                     child: IconButton(
                                       onPressed: () async {
                                         try {
+                                          macroCycleProvider.clearSelectedMacroCycle();
                                           await athleteKeyProvider.setSelectedAthlete(athletes[index]['athleteUID']);
                                           internalStatusProvider.setHomeMainContent(const LongRangePlanBuilder());
                                         } catch (e) {

@@ -94,14 +94,64 @@ class MacroCycleProvider with ChangeNotifier {
   }
 
   //-----------------------------------------------------------------------------------------------------------
-  // Updates an existing macro/meso cycle
-  Future<void> updateMacroCycle(String macroMesoCycleID, Map<String, dynamic> data) async {
-    await _macroMesoCycleCollection.doc(macroMesoCycleID).update(data);
-    int index = _macroCycles.indexWhere((cycle) => cycle['macroCycleID'] == macroMesoCycleID);
-    if (index != -1) {
-      _macroCycles[index] = {..._macroCycles[index], ...data};
-      notifyListeners();
+  // Clear selected a macro/meso cycle
+  void clearSelectedMacroCycle() {
+    if (_selectedMacroCycle.isNotEmpty) {
+      final macroCycleID = _selectedMacroCycle['macroCycleID'];
+      final planBlockID = _selectedMacroCycle['planBlockID'];
+
+      // Add back to the main list if missing
+      if (!_macroCycles.any((cycle) => cycle['macroCycleID'] == macroCycleID)) {
+        _macroCycles.add(_selectedMacroCycle);
+      }
+      // Add back to the correct section
+      if (planBlockID == 1 && !_trainingBlocks.any((b) => b['macroCycleID'] == macroCycleID)) {
+        _trainingBlocks.add(_selectedMacroCycle);
+      } else if (planBlockID == 2 && !_blockGoals.any((g) => g['macroCycleID'] == macroCycleID)) {
+        _blockGoals.add(_selectedMacroCycle);
+      } else if (planBlockID == 3 && !_trainingFocus.any((f) => f['macroCycleID'] == macroCycleID)) {
+        _trainingFocus.add(_selectedMacroCycle);
+      }
+      _rebuildDateRanges();
     }
+    _selectedMacroCycle = {};
+    notifyListeners();
+  }
+
+  //-----------------------------------------------------------------------------------------------------------
+  // Updates an existing macro/meso cycle
+  Future<void> updateMacroCycle(Map<String, dynamic> data) async {
+    await _macroMesoCycleCollection.doc(data['macroCycleID']).update(data);
+    // Update the main list
+    if (_selectedMacroCycle.isNotEmpty) {
+      final macroCycleID = data['macroCycleID'];
+      final planBlockID = data['planBlockID'];
+
+      // Add back to the main list if missing
+      if (!_macroCycles.any((cycle) => cycle['macroCycleID'] == macroCycleID)) {
+        _macroCycles.add(data);
+        print('Added to macroCycles: $data');
+      }
+      // Add back to the correct section
+      if (planBlockID == 1 && !_trainingBlocks.any((cycle) => cycle['macroCycleID'] == macroCycleID)) {
+        _trainingBlocks.add(data);
+        print('Added to trainingBlocks: $data');
+        for (var item in _trainingBlocks) {
+          print('In training blocks: $item');
+        }
+      } else if (planBlockID == 2 && !_blockGoals.any((cycle) => cycle['macroCycleID'] == macroCycleID)) {
+        _blockGoals.add(data);
+        print('Added to blockGoals: $data');
+      } else if (planBlockID == 3 && !_trainingFocus.any((cycle) => cycle['macroCycleID'] == macroCycleID)) {
+        _trainingFocus.add(data);
+        print('Added to trainingFocus: $data');
+      }
+      _rebuildDateRanges();
+    }
+
+    //_rebuildDateRanges();
+    _selectedMacroCycle = {};
+    notifyListeners();
   }
 
   //-----------------------------------------------------------------------------------------------------------

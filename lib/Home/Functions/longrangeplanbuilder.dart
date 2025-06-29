@@ -141,10 +141,10 @@ class _LongRangePlanBuilderState extends State<LongRangePlanBuilder> {
         } else {
           final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
           final athleteKeyProvider = Provider.of<AthleteKeyProvider>(context, listen: true);
-          final macroMesoCycleProvider = Provider.of<MacroCycleProvider>(context, listen: true);
-          final blockGoals = macroMesoCycleProvider.blockGoals;
-          final trainingFocus = macroMesoCycleProvider.trainingFocus;
-          final trainingBlocks = macroMesoCycleProvider.trainingBlocks;
+          final macroCycleProvider = Provider.of<MacroCycleProvider>(context, listen: true);
+          final blockGoals = macroCycleProvider.blockGoals;
+          final trainingFocus = macroCycleProvider.trainingFocus;
+          final trainingBlocks = macroCycleProvider.trainingBlocks;
           final firstDayOfWeek = internalStatusProvider.firstDayOfWeek;
 
           // SCROLL TO CURRENT WEEK after build
@@ -168,6 +168,8 @@ class _LongRangePlanBuilderState extends State<LongRangePlanBuilder> {
                   children: [
                     IconButton(
                       onPressed: () {
+                        //clearInputForm(goalController: _goalController, startDateController: _startDateController, endDateController: _endDateController, setColor: (color) => setState(() => _selectedColor = color));
+                        macroCycleProvider.clearSelectedMacroCycle();
                         internalStatusProvider.lrpbFormStatus == 'MacroCycle' ? internalStatusProvider.setlrpbFormStatus('MesoCycle') : internalStatusProvider.setlrpbFormStatus('MacroCycle');
                       },
                       icon: Icon(Icons.change_circle_outlined, color: localAppTheme['anchorColors']['secondaryColor']),
@@ -316,7 +318,7 @@ class _LongRangePlanBuilderState extends State<LongRangePlanBuilder> {
                                       color: weekFocusColor,
                                       border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!)),
                                     ),
-                                    child: weekGoals.isNotEmpty ? body(header: weekFocus.map((g) => g['userInput']).join(", "), context: context, color: localAppTheme['anchorColors']['primaryColor']) : body(header: '', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                                    child: weekFocus.isNotEmpty ? body(header: weekFocus.map((g) => g['userInput']).join(", "), context: context, color: localAppTheme['anchorColors']['primaryColor']) : body(header: '', context: context, color: localAppTheme['anchorColors']['primaryColor']),
                                   ),
                                 ],
                               ),
