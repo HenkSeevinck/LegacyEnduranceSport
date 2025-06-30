@@ -40,8 +40,6 @@ class _MacroCycleInputState extends State<MacroCycleInput> {
     final macroCycleProvider = Provider.of<MacroCycleProvider>(context, listen: true);
     final selectedMacroCycle = macroCycleProvider.selectedMacroCycle;
     if (selectedMacroCycle.isNotEmpty) {
-      // Populate controllers with selected macro cycle data
-      //print('Selected Macro Cycle: $selectedMacroCycle');
       userUnput = Map<String, dynamic>.from(selectedMacroCycle);
       _goalController.text = selectedMacroCycle['userInput']?.toString() ?? '';
       _startDateController.text = selectedMacroCycle['startDate'] != null ? DateFormat('yyyy-MM-dd').format(toDateTime(selectedMacroCycle['startDate'])) : '';
@@ -74,6 +72,7 @@ class _MacroCycleInputState extends State<MacroCycleInput> {
     final selectedMacroCycle = macroCycleProvider.selectedMacroCycle;
 
     if (planBlockID == 1) {
+      //listToShow = trainingBlocks;
       listToShow = trainingBlocks;
       datesToShow = trainingBlocksDateRanges;
     } else if (planBlockID == 2) {
@@ -87,18 +86,13 @@ class _MacroCycleInputState extends State<MacroCycleInput> {
       datesToShow = [];
     }
 
-    // Sort by startDate ascending
-    listToShow.sort((a, b) {
-      final aDate = toDateTime(a['startDate']);
-      final bDate = toDateTime(b['startDate']);
-      return aDate.compareTo(bDate);
-    });
-
-    print('Current macroCycleIDs in listToShow: ${listToShow.map((e) => e['macroCycleID']).toList()}');
-    print('Currently selected macroCycleID: ${selectedMacroCycle['macroCycleID']}');
-    for (var item in listToShow) {
-      print('Item in listToShow: $item');
-    }
+    // Create a new sorted list for display to avoid mutating provider state.
+    final List<Map<String, dynamic>> sortedListToShow = List.from(listToShow)
+      ..sort((a, b) {
+        final aDate = toDateTime(a['startDate']);
+        final bDate = toDateTime(b['startDate']);
+        return aDate.compareTo(bDate);
+      });
 
     String blockPlanSetting = internalStatusProvider.longRangePlanBlocks.firstWhere((block) => block['planBlockID'] == planBlockID, orElse: () => {'setting': 'Error'})['setting'] ?? 'Error';
 
@@ -334,7 +328,7 @@ class _MacroCycleInputState extends State<MacroCycleInput> {
                                             snackbar(context: context, header: 'Error: $e');
                                           }
                                           userUnput.clear();
-                                          //macroCycleProvider.clearSelectedMacroCycle();
+                                          macroCycleProvider.clearSelectedMacroCycle();
                                           clearInputForm(goalController: _goalController, startDateController: _startDateController, endDateController: _endDateController, setColor: (color) => setState(() => _selectedColor = color));
                                         },
                                         backgroundColor: localAppTheme['anchorColors']['primaryColor'],
@@ -387,9 +381,9 @@ class _MacroCycleInputState extends State<MacroCycleInput> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 10),
                           child: ListView.builder(
-                            itemCount: listToShow.length,
+                            itemCount: sortedListToShow.length,
                             itemBuilder: (BuildContext context, int index) {
-                              String header = (planBlockID == 1) ? focusBlocks.firstWhere((block) => block['blockTypeID'] == listToShow[index]['userInput'], orElse: () => {'blockType': 'ERROR'})['blockType'] : listToShow[index]['userInput'].toString();
+                              String header = (planBlockID == 1) ? focusBlocks.firstWhere((block) => block['blockTypeID'] == sortedListToShow[index]['userInput'], orElse: () => {'blockType': 'ERROR'})['blockType'] : sortedListToShow[index]['userInput'].toString();
 
                               return ListTile(
                                 dense: true,
@@ -405,18 +399,18 @@ class _MacroCycleInputState extends State<MacroCycleInput> {
                                     ),
                                     Expanded(
                                       flex: 2,
-                                      child: body(header: DateFormat('dd-MMM-yyyy').format(toDateTime(listToShow[index]['startDate'])), color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                                      child: body(header: DateFormat('dd-MMM-yyyy').format(toDateTime(sortedListToShow[index]['startDate'])), color: localAppTheme['anchorColors']['primaryColor'], context: context),
                                     ),
                                     Expanded(
                                       flex: 2,
-                                      child: body(header: DateFormat('dd-MMM-yyyy').format(toDateTime(listToShow[index]['endDate'])), color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                                      child: body(header: DateFormat('dd-MMM-yyyy').format(toDateTime(sortedListToShow[index]['endDate'])), color: localAppTheme['anchorColors']['primaryColor'], context: context),
                                     ),
                                     Expanded(
                                       flex: 1,
                                       child: IconButton(
                                         onPressed: () {
                                           macroCycleProvider.clearSelectedMacroCycle();
-                                          macroCycleProvider.selectMacroCycleByID(listToShow[index]['macroCycleID']);
+                                          macroCycleProvider.selectMacroCycleByID(sortedListToShow[index]['macroCycleID']);
                                         },
                                         tooltip: 'Edit',
                                         icon: Icon(Icons.edit, color: localAppTheme['anchorColors']['primaryColor']),
@@ -427,7 +421,7 @@ class _MacroCycleInputState extends State<MacroCycleInput> {
                                       child: IconButton(
                                         onPressed: () async {
                                           try {
-                                            macroCycleProvider.deleteMacroCycle(listToShow[index]['macroCycleID']);
+                                            macroCycleProvider.deleteMacroCycle(sortedListToShow[index]['macroCycleID']);
                                             snackbar(context: context, header: 'Item deleted successfully');
                                           } catch (e) {
                                             snackbar(context: context, header: 'Error: $e');
