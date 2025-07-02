@@ -8,6 +8,7 @@ import 'package:legacyendurancesport/Home/Functions/Sub%20Functions/LRPB/macrocy
 import 'package:legacyendurancesport/Home/Functions/Sub%20Functions/LRPB/mesocycleinput.dart';
 import 'package:legacyendurancesport/Home/Providers/athletekeyrequests.dart';
 import 'package:legacyendurancesport/Home/Providers/macrocycleprovider.dart';
+import 'package:legacyendurancesport/Home/Providers/meseocycleprovider.dart';
 import 'package:legacyendurancesport/SignInSignUp/Providers/appuser_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
@@ -39,13 +40,15 @@ class _LongRangePlanBuilderState extends State<LongRangePlanBuilder> {
     final athleteKeyProvider = Provider.of<AthleteKeyProvider>(context, listen: false);
     final macroMesoCycleProvider = Provider.of<MacroCycleProvider>(context, listen: false);
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
-    _fetchDataFuture = fetchAppStartupInformation(athleteKeyProvider, macroMesoCycleProvider, appUserProvider);
+    final mesoCycleProvider = Provider.of<MesoCycleProvider>(context, listen: false);
+    _fetchDataFuture = fetchAppStartupInformation(athleteKeyProvider, macroMesoCycleProvider, appUserProvider, mesoCycleProvider);
   }
 
-  Future<void> fetchAppStartupInformation(AthleteKeyProvider athleteKeyProvider, MacroCycleProvider macroMesoCycleProvider, AppUserProvider appUserProvider) async {
+  Future<void> fetchAppStartupInformation(AthleteKeyProvider athleteKeyProvider, MacroCycleProvider macroMesoCycleProvider, AppUserProvider appUserProvider, MesoCycleProvider mesoCycleProvider) async {
     final athleteUID = athleteKeyProvider.selectedAthlete['uid'];
     final coachUID = appUserProvider.appUser['uid'];
     await macroMesoCycleProvider.getMacroCyclesByAthleteAndCoachUID(athleteUID, coachUID);
+    await mesoCycleProvider.getMesoCyclesByAthleteAndCoachAndYear(athleteUID, coachUID, DateTime.now().year);
   }
 
   @override

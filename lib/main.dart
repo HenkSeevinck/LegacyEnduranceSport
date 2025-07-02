@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:legacyendurancesport/Home/Providers/athletekeyrequests.dart';
 import 'package:legacyendurancesport/Home/Providers/macrocycleprovider.dart';
+import 'package:legacyendurancesport/Home/Providers/meseocycleprovider.dart';
+import 'package:legacyendurancesport/Home/Providers/workoutsprovider.dart';
 import 'package:legacyendurancesport/ProfileSetup/Page/profilesetup.dart';
 import 'package:legacyendurancesport/SignInSignUp/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/SignInSignUp/Providers/firebase_auth_service.dart';
@@ -27,6 +29,8 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => AppUserProvider()),
         ChangeNotifierProvider(create: (_) => AthleteKeyProvider()),
         ChangeNotifierProvider(create: (_) => MacroCycleProvider()),
+        ChangeNotifierProvider(create: (_) => MesoCycleProvider()),
+        ChangeNotifierProvider(create: (_) => WorkoutProvider()),
       ],
       child: MyApp(),
     ),
@@ -42,8 +46,6 @@ class MyApp extends StatelessWidget {
 
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
     final record = await appUserProvider.getUserRecord(user.uid);
-    //print('User Record: $record');
-    //print('User: $user');
 
     if (record?['userRole'] == null || (record?['userRole'] is List && (record?['userRole'] as List).isEmpty)) {
       // User record exists, but roles is empty, go to RoleSelection

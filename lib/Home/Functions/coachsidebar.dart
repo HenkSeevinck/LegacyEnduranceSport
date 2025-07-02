@@ -4,6 +4,7 @@ import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/Functions/athletes.dart';
 import 'package:legacyendurancesport/Home/Functions/newathlete.dart';
+import 'package:legacyendurancesport/Home/Functions/workoutbuilder.dart';
 import 'package:legacyendurancesport/ProfileSetup/Functions/coachprofilesetup.dart';
 import 'package:provider/provider.dart';
 
@@ -69,7 +70,9 @@ class _CoachSidebarState extends State<CoachSidebar> {
             alignment: Alignment.centerLeft,
             child: body(header: 'My Workouts', context: context, color: localAppTheme['anchorColors']['secondaryColor']),
           ),
-          onTap: () {},
+          onTap: () {
+            internalStatusProvider.setHomeMainContent(const WorkoutBuilder());
+          },
         ),
         ExpansionTile(
           title: body(header: 'My Athletes', context: context, color: localAppTheme['anchorColors']['secondaryColor']),

@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class MacroCycleProvider with ChangeNotifier {
-  final CollectionReference _macroMesoCycleCollection = FirebaseFirestore.instance.collection('MacroCycle');
+  final CollectionReference _macroCycleCollection = FirebaseFirestore.instance.collection('MacroCycle');
 
   final List<Map<String, dynamic>> _macroCycles = [];
   List<Map<String, dynamic>> get macroCycles {
@@ -46,7 +46,7 @@ class MacroCycleProvider with ChangeNotifier {
     _blockGoals.clear();
     _trainingFocus.clear();
 
-    final QuerySnapshot snapshot = await _macroMesoCycleCollection.where('atheleteUID', isEqualTo: athleteUID).where('coachUID', isEqualTo: coachUID).get();
+    final QuerySnapshot snapshot = await _macroCycleCollection.where('atheleteUID', isEqualTo: athleteUID).where('coachUID', isEqualTo: coachUID).get();
 
     for (var doc in snapshot.docs) {
       Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
@@ -75,7 +75,7 @@ class MacroCycleProvider with ChangeNotifier {
   //-----------------------------------------------------------------------------------------------------------
   // Adds a new macro/meso cycle
   Future<void> addMacroCycle(Map<String, dynamic> data) async {
-    DocumentReference docRef = await _macroMesoCycleCollection.add(data);
+    DocumentReference docRef = await _macroCycleCollection.add(data);
     await docRef.update({'macroCycleID': docRef.id});
     final newData = {...data, 'macroCycleID': docRef.id};
 
@@ -133,7 +133,7 @@ class MacroCycleProvider with ChangeNotifier {
   // Updates an existing macro/meso cycle
   Future<void> updateMacroCycle(Map<String, dynamic> data) async {
     final Map<String, dynamic> dataCopy = Map<String, dynamic>.from(data);
-    await _macroMesoCycleCollection.doc(dataCopy['macroCycleID']).update(dataCopy);
+    await _macroCycleCollection.doc(dataCopy['macroCycleID']).update(dataCopy);
 
     final macroCycleID = dataCopy['macroCycleID'];
     final planBlockID = dataCopy['planBlockID'];
@@ -179,7 +179,7 @@ class MacroCycleProvider with ChangeNotifier {
   //-----------------------------------------------------------------------------------------------------------
   // Deletes a macro/meso cycle
   Future<void> deleteMacroCycle(String macroMesoCycleID) async {
-    await _macroMesoCycleCollection.doc(macroMesoCycleID).delete();
+    await _macroCycleCollection.doc(macroMesoCycleID).delete();
     _macroCycles.removeWhere((cycle) => cycle['macroCycleID'] == macroMesoCycleID);
 
     // Remove from the specific lists
