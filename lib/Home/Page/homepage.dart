@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:legacyendurancesport/General/Functions/sidebar_onHover.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
-import 'package:legacyendurancesport/Home/Functions/adminsidebar.dart';
-import 'package:legacyendurancesport/Home/Functions/athletesidebar.dart';
-import 'package:legacyendurancesport/Home/Functions/coachsidebar.dart';
-import 'package:legacyendurancesport/SignInSignUp/Page/signin_signup.dart';
-import 'package:legacyendurancesport/SignInSignUp/Providers/appuser_provider.dart';
-import 'package:legacyendurancesport/SignInSignUp/Providers/firebase_auth_service.dart';
+import 'package:legacyendurancesport/Home/Functions/weekdays_table.dart';
+import 'package:legacyendurancesport/Home/Providers/clubsprovided.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -19,92 +14,188 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool _isExpanded = false;
-  double _sidebarWidth = 50;
+  bool showsearch = false;
+  String? searchPhrase;
+  Future<void>? _fetchDataFuture;
 
-  void _updateSidebar(bool expanded, double width) {
-    setState(() {
-      _isExpanded = expanded;
-      _sidebarWidth = width;
-    });
+  //----------------------------------------------------
+  // initState load data when form is built
+  @override
+  void initState() {
+    super.initState();
+    final clubsProvider = Provider.of<ClubsProvider>(context, listen: false);
+    
+    _fetchDataFuture = _fetchData(
+      clubsProvider
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final localAppTheme = ResponsiveTheme(context).theme;
-    final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
-    final appUser = appUserProvider.appUser;
-    final firebaseAuthService = Provider.of<FirebaseAuthService>(context, listen: true);
-    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
+  //----------------------------------------------------
+  // Fetch data function
+  Future<void> _fetchData(ClubsProvider clubsProvider) async {
+    await clubsProvider.fetchAllClubs();
+  }
 
-    return Scaffold(
-      body: MouseRegion(
-        onHover: (details) => sidebarOnHover(details, _isExpanded, _updateSidebar),
+  //----------------------------------------------------
+  // Mobile Layout
+  Widget _buildMobileHomePage() {
+    final localAppTheme = ResponsiveTheme(context).theme;
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
+    final homePageOptions = internalStatusProvider.homePageOptions;
+     return Scaffold(
+      appBar: AppBar(
+        title: SafeArea(
+          top: true,
+          child: Center(
+            child: Image.asset('images/Legacy-Endurance-Logo.png', 
+              height: 70, 
+              width: 70, 
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(10.0),
         child: Column(
           children: [
-            pageHeader(context: context, topText: "", bottomText: ""),
+            ExpansionTile(
+              collapsedShape: Border(
+                top: BorderSide(
+                  color: localAppTheme['anchorColors']['primaryColor'],
+                  width: 1.0,
+                ),
+              ),
+              showTrailingIcon: false,
+              title:  WeekDaysTable(),
+              children: [
+              body(header: 'Select an option to navigate to that page.', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+              ]
+            ),
             Expanded(
-              child: Row(
-                children: [
-                  // Expandable Sidebar
-                  Container(
-                    width: _sidebarWidth,
-                    decoration: BoxDecoration(
-                      color: localAppTheme['anchorColors']['primaryColor'],
-                      border: Border.all(color: localAppTheme['anchorColors']['primaryColor']),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final itemCount = homePageOptions.length;
+                  final availableHeight = constraints.maxHeight;
+                  final availableWidth = constraints.maxWidth;
+                  final itemHeight = itemCount > 0 ? availableHeight / itemCount : availableHeight;
+
+                  return GridView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 1,
+                      childAspectRatio: availableWidth / itemHeight,
                     ),
-                    child: Column(
-                      children: [
-                        if (!_isExpanded)
-                          const Center(child: Icon(Icons.menu, color: Colors.white))
-                        else ...[
-                          const SizedBox(height: 15),
-                          body(header: 'MENU:', context: context, color: localAppTheme['anchorColors']['secondaryColor']),
-                          const SizedBox(height: 5),
-                          Divider(color: localAppTheme['anchorColors']['secondaryColor']),
-                          Visibility(visible: (appUser['userRole'] is List && appUser['userRole'].contains('Coach')), child: CoachSidebar()),
-                          Visibility(visible: (appUser['userRole'] is List && appUser['userRole'].contains('Athlete')), child: AthleteSidebar()),
-                          Visibility(visible: (appUser['userRole'] is List && appUser['userRole'].contains('Admin')), child: AdminSidebar()),
-                          Expanded(child: SizedBox()),
-                          Divider(color: localAppTheme['anchorColors']['secondaryColor']),
-                          ListTile(
-                            leading: Icon(Icons.settings, color: localAppTheme['anchorColors']['secondaryColor']),
-                            title: Align(
-                              alignment: Alignment.center,
-                              child: body(header: 'SIGN OUT', context: context, color: localAppTheme['anchorColors']['secondaryColor']),
+                    itemCount: itemCount,
+                    itemBuilder: (BuildContext context, int index) {
+                      return InkWell(
+                        onTap: () {
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => homePageOptions[index]['navigateTo'],
+                              ),
+                            );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border(
+                              top: BorderSide(
+                                color: localAppTheme['anchorColors']['primaryColor'],
+                                width: index == 0 ? 1.0 : 0.0,
+                              ),
+                              bottom: BorderSide(
+                                color: localAppTheme['anchorColors']['primaryColor'],
+                                width: homePageOptions.length - 1 == index ? 1.0 : 0.0,
+                              ),
                             ),
-                            onTap: () async {
-                              try {
-                                await firebaseAuthService.signOut();
-                                appUserProvider.clearUserData();
-                                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const SigninPage()));
-                              } catch (e) {
-                                snackbar(context: context, header: e.toString());
-                              }
-                            },
+                            //borderRadius: BorderRadius.circular(8.0),
                           ),
-                          const SizedBox(height: 5),
-                        ],
-                      ],
-                    ),
-                  ),
-                  // Main content area (replace with your actual content)
-                  internalStatusProvider.homeMainContent != null
-                      ? Expanded(child: internalStatusProvider.homeMainContent!)
-                      : Expanded(
-                          child: Container(
-                            color: Colors.transparent,
-                            // Add your main content here
-                            child: Center(child: Text('Main Content Area')),
+                          child: Stack(
+                            children: [
+                              Center(
+                                  child: Icon(  
+                                    homePageOptions[index]['icon'],
+                                    color: localAppTheme['anchorColors']['primaryColor'],
+                                    size: double.parse((itemHeight*0.4).toStringAsFixed(0)),
+                                  ),
+                                ),
+                              Positioned(
+                                bottom: 10,
+                                left: 0,
+                                right: 0,
+                                child: Center(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                        
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.5),
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      border: Border.all(color: localAppTheme['anchorColors']['primaryColor']),
+                                    ),
+                                    child: header2(
+                                      header: homePageOptions[index]['pageName'],
+                                      color: localAppTheme['anchorColors']['primaryColor'],
+                                      context: context,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                ],
+                      );
+                    },
+                  );
+                },
               ),
             ),
-            pageFooter(context: context, userRole: ""),
           ],
         ),
       ),
+    );
+  }
+
+  //----------------------------------------------------
+  // Desktop Layout
+  Widget _buildDesktopHomePage() {
+    return Scaffold(body: const Center(child: Text('Landing Page - Desktop Layout Coming Soon')));
+  }
+
+  //----------------------------------------------------
+  // Fallback Layout
+  Widget _buildFallbackHomePage() {
+    return Scaffold(body: const Center(child: Text('Landing Page - Fallback Layout Coming Soon')));
+  }
+
+  //----------------------------------------------------
+  // Build method with FutureBuilder
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<void>(
+      future: _fetchDataFuture,
+      builder: (context, snapshot) {
+          final localAppTheme = ResponsiveTheme(context).theme;
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(
+            child: body(header: 'Error: ${snapshot.error}', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+          );
+        } else {
+          final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
+          final platform = internalStatusProvider.platform;
+
+          if (platform == 'MobileWeb' || platform == 'Mobile') {
+            return _buildMobileHomePage();
+          } else if (platform == 'ComputerWeb' || platform == 'Computer') {
+            return _buildDesktopHomePage();
+          } else {
+            return _buildFallbackHomePage();
+          }
+        }
+      },
     );
   }
 }

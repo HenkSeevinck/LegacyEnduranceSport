@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:legacyendurancesport/Profile/Page/profile_page.dart';
 
 // Helper extension for dayOfYear
 extension DateTimeDayOfYear on DateTime {
@@ -24,12 +25,25 @@ class InternalStatusProvider with ChangeNotifier {
   Map<String, dynamic>? athleteKey;
   Map<String, dynamic>? selectedLongRangePlanBlocks;
   int firstDayOfWeek = DateTime.sunday;
+  String platform = '';
+
+  Future<void> setPlatform(String value) async {
+    platform = value;
+    notifyListeners();
+  }
+
+  List<Map<String, dynamic>> homePageOptions = [
+    {'selection': 'myProfile', 'pageName': 'MY PROFILE', 'icon': Icons.person, 'navigateTo': UserProfile()},
+    {'selection': 'myGoals', 'pageName': 'MY GOALS', 'icon': Icons.flag, 'navigateTo': SizedBox()},
+    {'selection': 'events', 'pageName': 'EVENTS', 'icon': Icons.event, 'navigateTo': SizedBox()},
+  ];
 
   List<Map<String, dynamic>> longRangePlanBlocks = [
     {'planBlockID': 1, 'setting': 'ADD TRAINING BLOCKS'},
     {'planBlockID': 2, 'setting': 'ADD BLOCK GOALS'},
     {'planBlockID': 3, 'setting': 'ADD TRAINING FOCUS'},
   ];
+
   List<Map<String, dynamic>> focusBlocks = [
     {'blockTypeID': 1, 'blockType': 'RECOVERY'},
     {'blockTypeID': 2, 'blockType': 'TAPER'},
@@ -37,6 +51,7 @@ class InternalStatusProvider with ChangeNotifier {
     {'blockTypeID': 4, 'blockType': 'LACTATE'},
     {'blockTypeID': 5, 'blockType': 'VO2 MAX'},
   ];
+
   List<Map<String, dynamic>> mesoBlocks = [
     {'mesoBlockID': 7, 'mesoBlock': 'WARM UP'},
     {'mesoBlockID': 2, 'mesoBlock': 'ENDURANCE'},
@@ -48,15 +63,18 @@ class InternalStatusProvider with ChangeNotifier {
     {'mesoBlockID': 1, 'mesoBlock': 'RECOVERY'},
     {'mesoBlockID': 8, 'mesoBlock': 'COOL DOWN'},
   ];
+
   List<Map<String, dynamic>> workoutTypes = [
     {'workoutTypeID': 1, 'workoutType': 'run', 'icon': Icons.directions_run, 'color': Colors.blue},
     {'workoutTypeID': 2, 'workoutType': 'cycle', 'icon': Icons.directions_bike, 'color': Colors.green},
     {'workoutTypeID': 3, 'workoutType': 'swim', 'icon': Icons.pool, 'color': Colors.teal},
   ];
+
   List<Map<String, dynamic>> durationTypes = [
     {'durationTypeID': 1, 'durationType': 'Time', 'value': 'e.g., 10:00'},
     {'durationTypeID': 2, 'durationType': 'Distance', 'value': 'e.g., 5km'},
   ];
+  
   List<Map<String, dynamic>> intensityTargetTypes = [
     {'intensityTargetTypeID': 1, 'intensityTargetType': 'Pace', 'value': 'e.g., 5:00/km'},
     {'intensityTargetTypeID': 2, 'intensityTargetType': 'Heart Rate', 'value': 'e.g., 150 bpm'},

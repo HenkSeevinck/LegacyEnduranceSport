@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
-import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/SignInSignUp/Functions/usersignin.dart';
 import 'package:legacyendurancesport/SignInSignUp/Functions/usersignup.dart';
 import 'package:provider/provider.dart';
@@ -13,50 +12,72 @@ class SigninPage extends StatefulWidget {
 }
 
 class _SigninPageState extends State<SigninPage> {
-  @override
-  Widget build(BuildContext context) {
-    final localAppTheme = ResponsiveTheme(context).theme;
+
+  //----------------------------------------------------
+  // Mobile Layout
+  Widget _buildMobileLayout() {
+    //final localAppTheme = ResponsiveTheme(context).theme;
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
     final signInsignUpStatus = internalStatusProvider.signInsignUpStatus;
 
     return Scaffold(
-      body: Row(
+      appBar: AppBar(
+        title: SafeArea(
+          top: true,
+          child: Center(
+            child: Image.asset('images/Legacy-Endurance-Logo.png', 
+              height: 70, 
+              width: 70, 
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      ),
+      body: Column(
         children: [
-          Expanded(
-            flex: 2,
-            child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: BoxDecoration(border: BoxBorder.all(color: localAppTheme['anchorColors']['primaryColor'])),
-              child: Center(
-                child: Image.asset('images/login-image.jpg', fit: BoxFit.cover, height: double.infinity, alignment: const Alignment(0.3, 0.5)),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 7,
-            child: Column(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: Container(
-                    decoration: BoxDecoration(),
-                    child: Center(child: SizedBox(child: signInsignUpStatus == 'SignIn' ? UserSignIn() : UserSignUp())),
-                  ),
-                ),
-              ],
-            ),
-          ),
           Expanded(
             flex: 1,
             child: Container(
-              alignment: Alignment.topCenter,
               decoration: BoxDecoration(),
-              child: Image.asset('images/Legacy-Endurance-Logo.png', fit: BoxFit.cover),
+              child: Center(
+                child: SizedBox(
+                  child: signInsignUpStatus == 'SignIn' 
+                  ? UserSignIn(width: 0.8, height: 0.4) 
+                  : UserSignUp(width: 0.8, height: 0.4),
+                ),
+              ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  //----------------------------------------------------
+  // Desktop Layout
+  Widget _buildDesktopLayout() {
+    return Scaffold(body: const Center(child: Text('Desktop Layout Coming Soon')));
+  }
+
+  //----------------------------------------------------
+  // Fallback Layout
+  Widget _buildFallbackLayout() {
+    return Scaffold(body: const Center(child: Text('Desktop Layout Coming Soon')));
+  }
+
+  //----------------------------------------------------
+  // Build Method
+  @override
+  Widget build(BuildContext context) {
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
+    final platform = internalStatusProvider.platform;
+
+    if (platform == 'MobileWeb' || platform == 'Mobile') {
+      return _buildMobileLayout();
+    } else if (platform == 'ComputerWeb' || platform == 'Computer') {
+      return _buildDesktopLayout();
+    } else {
+      return _buildFallbackLayout();
+    }
   }
 }

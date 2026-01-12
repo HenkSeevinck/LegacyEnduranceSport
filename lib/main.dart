@@ -1,23 +1,29 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:legacyendurancesport/Home/Page/homepage.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:legacyendurancesport/Home/Providers/athletekeyrequests.dart';
-import 'package:legacyendurancesport/Home/Providers/macrocycleprovider.dart';
-import 'package:legacyendurancesport/Home/Providers/meseocycleprovider.dart';
+import 'package:legacyendurancesport/Home/Providers/clubsprovided.dart';
 import 'package:legacyendurancesport/Home/Providers/workoutsprovider.dart';
-import 'package:legacyendurancesport/ProfileSetup/Page/profilesetup.dart';
+import 'package:legacyendurancesport/Landing/Page/landing_page.dart';
 import 'package:legacyendurancesport/SignInSignUp/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/SignInSignUp/Providers/firebase_auth_service.dart';
-import 'package:legacyendurancesport/SignInSignUp/Page/signin_signup.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/firebase_options.dart';
 import 'package:provider/provider.dart';
 
+// Global navigator key (useful for navigation from outside widget tree)
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized(); // <-- Add this
+  // Prevent google_fonts from trying to read AssetManifest.json at runtime
+  // (some build setups use AssetManifest.bin.json which older google_fonts
+  // versions may not recognize). Disable runtime fetching so the app uses
+  // platform fonts instead of attempting to load remote/bundled assets.
+  GoogleFonts.config.allowRuntimeFetching = false;
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(
@@ -28,9 +34,8 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => FirebaseAuthService()),
         ChangeNotifierProvider(create: (_) => AppUserProvider()),
         ChangeNotifierProvider(create: (_) => AthleteKeyProvider()),
-        ChangeNotifierProvider(create: (_) => MacroCycleProvider()),
-        ChangeNotifierProvider(create: (_) => MesoCycleProvider()),
         ChangeNotifierProvider(create: (_) => WorkoutProvider()),
+        ChangeNotifierProvider(create:  (_) => ClubsProvider()),
       ],
       child: MyApp(),
     ),
@@ -40,40 +45,54 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  Future<Widget> _getStartScreen(BuildContext context) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return const SigninPage();
+  //------------------------------------------------------------
+  // Determine platform and record it in InternalStatusProvider.
+  // This is synchronous and safe to call from build().
+  String _detectAndSetPlatform(BuildContext context) {
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
+    String platform;
 
-    final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
-    final record = await appUserProvider.getUserRecord(user.uid);
-
-    if (record?['userRole'] == null || (record?['userRole'] is List && (record?['userRole'] as List).isEmpty)) {
-      // User record exists, but roles is empty, go to RoleSelection
-      return const ProfileSetup();
+    if (kIsWeb) {
+      // On web, use target platform to differentiate mobile web vs desktop web
+      if (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.android) {
+        platform = 'MobileWeb';
+      } else {
+        platform = 'ComputerWeb';
+      }
     } else {
-      // User record and roles exist, go to HomePage
-      return const HomePage();
+      // Native platforms
+      platform = 'Unknown';
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.iOS:
+        case TargetPlatform.fuchsia:
+          platform = 'Mobile';
+          break;
+        case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
+          platform = 'Computer';
+          break;
+      }
     }
+    // Defer notifying the provider until after the current build frame
+    // to avoid calling notifyListeners() during build.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      internalStatusProvider.setPlatform(platform);
+    });
+    return platform;
   }
 
   @override
   Widget build(BuildContext context) {
+    _detectAndSetPlatform(context);
     return MaterialApp(
-      title: 'Yearly Calendar',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: FutureBuilder<Widget>(
-        future: _getStartScreen(context),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator()));
-          }
-          if (snapshot.hasData) {
-            return snapshot.data!;
-          }
-          // Fallback in case of error
-          return const SigninPage();
-        },
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
+      navigatorKey: navigatorKey,
+      title: 'Legacy Endurance Sport',
+      home: const LandingPage(),
     );
   }
 }

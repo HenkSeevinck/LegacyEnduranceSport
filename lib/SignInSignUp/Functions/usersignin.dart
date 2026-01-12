@@ -4,14 +4,15 @@ import 'package:legacyendurancesport/General/Providers/internal_app_providers.da
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
-import 'package:legacyendurancesport/ProfileSetup/Page/profilesetup.dart';
 import 'package:legacyendurancesport/SignInSignUp/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/SignInSignUp/Providers/firebase_auth_service.dart';
 import 'package:legacyendurancesport/SignInSignUp/Functions/validators.dart';
 import 'package:provider/provider.dart';
 
 class UserSignIn extends StatefulWidget {
-  const UserSignIn({super.key});
+  final double? width;
+  final double? height;
+  const UserSignIn({super.key, this.width, this.height});
 
   @override
   State<UserSignIn> createState() => _UserSignInState();
@@ -38,31 +39,37 @@ class _UserSignInState extends State<UserSignIn> {
 
     return Center(
       child: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.3,
+        width: MediaQuery.of(context).size.width * (widget.width ?? 0.3),
+        height: MediaQuery.of(context).size.height * (widget.height ?? 0.6),
         child: Form(
           key: _formKey,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               header1(header: 'SIGN-IN:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-              const SizedBox(height: 20),
-              FormInputField(label: 'Enter Email', errorMessage: 'Please enter a valid email address', isMultiline: false, isPassword: false, prefixIcon: Icons.email, suffixIcon: null, showLabel: true, controller: emailController, validator: emailValidator),
-              const SizedBox(height: 20),
-              FormInputField(label: 'Enter Password', errorMessage: 'Please enter a valid password', isMultiline: false, isPassword: true, prefixIcon: Icons.lock, suffixIcon: Icons.visibility, showLabel: true, controller: passwordController, validator: passwordValidator),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  body(header: 'FORGOT YOUR PASSWORD?', color: localAppTheme['anchorColors']['primaryColor'], context: context),
-                  TextButton(
-                    onPressed: () {
-                      // Navigate to sign-up page
-                    },
-                    child: body(header: 'RESET PASSWORD', color: localAppTheme['utilityColorPair2']['color1'], context: context),
-                  ),
-                ],
+              FormInputField(label: 'EMAIL', errorMessage: 'Please enter a valid email address', isMultiline: false, isPassword: false, prefixIcon: Icons.email, suffixIcon: null, showLabel: true, controller: emailController, validator: emailValidator),
+              FormInputField(label: 'PASSWORD', errorMessage: 'Please enter a valid password', isMultiline: false, isPassword: true, prefixIcon: Icons.lock, suffixIcon: Icons.visibility, showLabel: true, controller: passwordController, validator: passwordValidator),
+              SizedBox(
+                height: 20,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    body(header: 'FORGOT YOUR PASSWORD?', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                    GestureDetector(
+                      child: body(
+                        header: 'RESET PASSWORD', 
+                        color: localAppTheme['utilityColorPair2']['color1'], 
+                        context: context,
+                        ),
+                      onTap: () {
+                        // Navigate to reset password page
+                      },
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 20),
               SizedBox(
                 height: 50,
                 child: elevatedButton(
@@ -78,7 +85,7 @@ class _UserSignInState extends State<UserSignIn> {
                             //Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const ProfileSetup()));
                             if (record?['userRole'] == null || (record?['userRole'] is List && (record?['userRole'] as List).isEmpty)) {
                               // User record exists, but roles is empty, go to RoleSelection
-                              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const ProfileSetup()));
+                              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const HomePage()));
                             } else {
                               // User record and roles exist, go to HomePage
                               Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const HomePage()));
@@ -99,17 +106,25 @@ class _UserSignInState extends State<UserSignIn> {
                   context: context,
                 ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  body(header: 'DONT\'T HAVE AN ACCOUNT?', color: localAppTheme['anchorColors']['primaryColor'], context: context),
-                  TextButton(
-                    onPressed: () {
-                      internalStatusProvider.setSignInSignUpStatus('SignUp');
-                    },
-                    child: body(header: 'SIGN-UP', color: localAppTheme['utilityColorPair2']['color1'], context: context),
-                  ),
-                ],
+              SizedBox(
+                height: 20,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    body(header: 'DONT\'T HAVE AN ACCOUNT?', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                    GestureDetector(
+                      child: body(
+                        header: 'SIGN-UP', 
+                        color: localAppTheme['utilityColorPair2']['color1'], 
+                        context: context,
+                      ),
+                      onTap: () {
+                        internalStatusProvider.setSignInSignUpStatus('SignUp');
+                      },
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

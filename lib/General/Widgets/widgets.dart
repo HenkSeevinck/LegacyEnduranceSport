@@ -196,10 +196,13 @@ class _FormInputFieldState extends State<FormInputField> {
     final localAppTheme = ResponsiveTheme(context).theme;
 
     return SizedBox(
-      height: !widget.isMultiline ? MediaQuery.of(context).size.height * 0.0175 * 3 : MediaQuery.of(context).size.height * 0.0175 * 3 * 3, // Testing
+      height: localAppTheme['formInputFieldHeight'],
       child: TextFormField(
         style: localAppTheme['font'](
-          textStyle: TextStyle(color: localAppTheme['anchorColors']['primaryColor'], fontSize: localAppTheme['bodySize']),
+          textStyle: TextStyle(
+            color: localAppTheme['anchorColors']['primaryColor'], 
+            fontSize: localAppTheme['bodySize']
+          ),
         ),
         autocorrect: true,
         enableSuggestions: true,
@@ -239,7 +242,7 @@ class _FormInputFieldState extends State<FormInputField> {
 Widget elevatedButton({required String label, required VoidCallback? onPressed, required Color? backgroundColor, required Color labelColor, required IconData? leadingIcon, required IconData? trailingIcon, required BuildContext context}) {
   final localAppTheme = ResponsiveTheme(context).theme;
   return SizedBox(
-    height: MediaQuery.of(context).size.height * 0.0175 * 3, // Testing
+    height: localAppTheme['formInputFieldHeight'],
     child: ElevatedButton(
       style: ButtonStyle(
         backgroundColor: WidgetStateProperty.all(backgroundColor),
@@ -353,11 +356,21 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackbar({required Bui
 //------------------------------------------------------------------------
 //Tick Box Widget
 
-Widget tickBox({required String label, required bool value, required ValueChanged<bool?> onChanged, required BuildContext context}) {
+Widget tickBox({
+  required String label, 
+  required bool value, 
+  required ValueChanged<bool?> onChanged, 
+  required BuildContext context,
+  required bool? enabled,
+  }) {
   final localAppTheme = ResponsiveTheme(context).theme;
   return Row(
     children: [
-      Checkbox(value: value, onChanged: onChanged, activeColor: localAppTheme['anchorColors']['primaryColor']),
+      Checkbox(
+        value: value, 
+        onChanged: enabled == true ? onChanged : null, 
+        activeColor: localAppTheme['anchorColors']['primaryColor'],
+      ),
       body(header: label, color: localAppTheme['anchorColors']['primaryColor'], context: context),
     ],
   );
@@ -377,8 +390,23 @@ class DatePicker extends StatefulWidget {
   final DateTime? firstDate;
   final DateTime? lastDate;
   final List<DateTimeRange>? blockedRanges;
+  final bool? enabled;
 
-  const DatePicker({super.key, this.buttonBackgroundColor, this.blockedRanges, required this.buttonLabelColor, required this.label, required this.buttonVisibility, required this.initialDate, required this.validator, required this.controller, this.onChanged, this.firstDate, this.lastDate});
+  const DatePicker({
+    super.key, 
+    this.buttonBackgroundColor, 
+    this.blockedRanges, 
+    required this.buttonLabelColor, 
+    required this.label, 
+    required this.buttonVisibility, 
+    required this.initialDate, 
+    required this.validator, 
+    required this.controller, 
+    this.onChanged, 
+    this.firstDate, 
+    this.lastDate,
+    this.enabled,
+    });
 
   @override
   State<DatePicker> createState() => _DatePickerState();
@@ -439,9 +467,6 @@ class _DatePickerState extends State<DatePicker> {
       initialDate = findFirstUnblocked(defaultFirstDate, defaultLastDate);
     }
 
-    //print('Blocked ranges: ${widget.blockedRanges}');
-    //print('Calculated initialDate: $initialDate');
-
     if (initialDate == null || isBlocked(initialDate) || initialDate.isBefore(defaultFirstDate) || initialDate.isAfter(defaultLastDate)) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No selectable dates available.')));
       return;
@@ -468,13 +493,38 @@ class _DatePickerState extends State<DatePicker> {
         children: <Widget>[
           Expanded(
             child: SizedBox(
-              child: FormInputField(label: widget.label, errorMessage: '', readOnly: true, controller: widget.controller, isMultiline: false, isPassword: false, prefixIcon: null, suffixIcon: null, showLabel: false, initialValue: null, enabled: true, validator: widget.validator, onChanged: null),
+              child: FormInputField(
+                label: widget.label, 
+                errorMessage: '', 
+                readOnly: true, 
+                controller: widget.controller, 
+                isMultiline: false, 
+                isPassword: false, 
+                prefixIcon: null, 
+                suffixIcon: null, 
+                showLabel: false, 
+                initialValue: null, 
+                enabled: widget.enabled ?? true, 
+                validator: widget.validator, 
+                onChanged: null,
+                ),
             ),
           ),
-          const SizedBox(width: 10),
-          Visibility(
-            visible: widget.buttonVisibility,
-            child: iconButton(label: null, backgroundColor: widget.buttonBackgroundColor, iconColor: widget.buttonLabelColor, icon: Icons.calendar_month, size: 30, toolTip: 'Select Date:', context: context, onPressed: () => _selectDate(context)),
+          if (widget.buttonVisibility && widget.enabled == true)
+            Row(
+              children: [
+                const SizedBox(width: 10),
+                iconButton(
+                  label: null,
+                  backgroundColor: widget.buttonBackgroundColor,
+                  iconColor: widget.buttonLabelColor,
+                  icon: Icons.calendar_month,
+                  size: 30,
+                  toolTip: 'Select Date:',
+                  context: context,
+                  onPressed: () => _selectDate(context),
+                ),
+              ],
           ),
         ],
       ),
@@ -484,34 +534,26 @@ class _DatePickerState extends State<DatePicker> {
 
 //------------------------------------------------------------------------
 //Icon Button
-Widget iconButton({required String? label, required Color? backgroundColor, required Color iconColor, required IconData icon, required double? size, required String? toolTip, required BuildContext context, required Function()? onPressed}) {
-  final localAppTheme = ResponsiveTheme(context).theme;
+Widget iconButton({
+  required String? label, 
+  required Color? 
+  backgroundColor, 
+  required Color iconColor, 
+  required IconData icon, 
+  required double? size, 
+  required String? toolTip, 
+  required BuildContext context, 
+  required Function()? onPressed,
+  }) {
   return Container(
     decoration: BoxDecoration(
       color: backgroundColor ?? Colors.transparent,
-      borderRadius: BorderRadius.circular(10),
-      border: Border.all(color: backgroundColor == null ? Colors.transparent : iconColor, width: 3),
     ),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        IconButton(
-          tooltip: label == null ? toolTip : null,
-          onPressed: onPressed,
-          icon: Icon(icon, color: iconColor, size: size),
-        ),
-        label != null
-            ? Center(
-                child: Text(
-                  label,
-                  style: localAppTheme['font'](
-                    textStyle: TextStyle(fontSize: localAppTheme['header3Size'], color: iconColor, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              )
-            : const SizedBox(),
-      ],
-    ),
+    child: IconButton(
+        tooltip: toolTip,
+        onPressed: onPressed,
+        icon: Icon(icon, color: iconColor, size: size),
+      )
   );
 }
 
@@ -705,17 +747,17 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
         if (widget.searchBoxVisable && searchBoxVisible)
           Column(
             children: [
-              TextField(
+              FormInputField(
+                label: widget.labelText, 
+                errorMessage: '', 
+                isMultiline: false, 
+                isPassword: false, 
+                prefixIcon: null, 
+                suffixIcon: null, 
+                showLabel: true,
                 controller: _searchController,
-                decoration: InputDecoration(
-                  labelText: widget.labelText,
-                  labelStyle: TextStyle(fontSize: fontSize),
-                  filled: widget.backgroundColor != null,
-                  fillColor: widget.backgroundColor,
-                  border: const OutlineInputBorder(),
+                onChanged: (value) => _filterItems(value),
                 ),
-                onChanged: _filterItems,
-              ),
               const SizedBox(height: 10),
             ],
           ),
