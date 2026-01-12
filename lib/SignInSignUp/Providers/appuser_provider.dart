@@ -13,6 +13,9 @@ class AppUserProvider with ChangeNotifier {
   Map<String, dynamic> _appUserDeepStore = {};
   Map<String, dynamic> get appUserDeepStore => _appUserDeepStore;
 
+  List<Map<String, dynamic>> _allUsers = [];
+  List<Map<String, dynamic>> get allUsers => _allUsers;
+
   //--------------------------------------------------------------
   // Method to create a new user record in Firestore
   Future<void> createUserRecord(User user) async {
@@ -40,7 +43,13 @@ class AppUserProvider with ChangeNotifier {
       final data = doc.data();
       if (data != null) {
         _appUser = {'uid': uid, ...data};
+        
+        await _isUserCoach(uid).then((isCoach) {
+          _appUser['isCoach'] = isCoach;
+        });
+        
         _appUserDeepStore = jsonDecode(jsonEncode(_appUser));
+
         notifyListeners();
       }
       return data;
@@ -48,7 +57,17 @@ class AppUserProvider with ChangeNotifier {
     return null;
   }
 
-  // //--------------------------------------------------------------
+  //--------------------------------------------------------------
+  // Get all user records from Firestore
+  Future<void> getAllUserRecords() async {
+    final querySnapshot = await _firestore.collection('AppUsers').get();
+    _allUsers = querySnapshot.docs.map((doc) {
+      final data = doc.data();
+      return {'uid': doc.id, ...data};
+    }).toList();
+    notifyListeners();
+  }
+
   //--------------------------------------------------------------
   // Update local app user without touching the deep-store (for UI edits)
   void updateLocalUser(Map<String, dynamic> data) {
@@ -70,5 +89,64 @@ class AppUserProvider with ChangeNotifier {
     // so subsequent local edits don't modify the deep store.
     _appUser = jsonDecode(jsonEncode(_appUserDeepStore));
     notifyListeners();
+  }
+
+  //--------------------------------------------------------------
+  // Check if user is in the coach role
+  Future<bool> _isUserCoach(String userID) async {
+    try {
+      final query = await FirebaseFirestore.instance.collection('Coaches').where('userID', isEqualTo: userID).limit(1).get();
+      if (query.docs.isNotEmpty) {
+        final Map<String, dynamic> data = query.docs.first.data();
+        if (data.isNotEmpty) {
+          _appUser['athletes'] = List<Map<String, dynamic>>.from(data['athletes'] ?? []);
+          _appUser['coachDocID'] = query.docs.first.id;
+          notifyListeners();
+          return true;
+        }
+      }
+      return false;
+    } catch (e) {
+      Exception('Error checking admin status: $e'); // Log the error
+      rethrow;
+    }
+  }
+
+  //--------------------------------------------------------------
+  // Add athlete to coach's athlete list
+  Future<void> addAthleteToCoach(String coachUserID, String athleteUID, String email) async {
+    try {
+      final coachDocRef = _firestore.collection('Coaches').doc(coachUserID);
+      final Map<String, dynamic> athleteEntry = {'uid': athleteUID, 'email': email};
+      await coachDocRef.update({
+        'athletes': FieldValue.arrayUnion([athleteEntry])
+      });
+      _appUser['athletes'].add(athleteEntry);
+      notifyListeners();
+    } catch (e) {
+      Exception('Error adding athlete to coach: $e'); // Log the error
+      rethrow;
+    }
+  }
+
+  //--------------------------------------------------------------
+  // Remove athlete from coach's athlete list
+  Future<void> removeAthleteFromCoach(String coachUserID, String athleteUID) async {
+    try {
+      final coachDocRef = _firestore.collection('Coaches').doc(coachUserID);
+      final athleteList = List<Map<String, dynamic>>.from(_appUser['athletes'] ?? []);
+      final athleteToRemove = athleteList.firstWhere((athlete) => athlete['uid'] == athleteUID, orElse: () => {});
+      if (athleteToRemove.isNotEmpty) {
+        await coachDocRef.update({
+          'athletes': FieldValue.arrayRemove([athleteToRemove])
+        });
+        athleteList.removeWhere((athlete) => athlete['uid'] == athleteUID);
+        _appUser['athletes'] = athleteList;
+        notifyListeners();
+      }
+    } catch (e) {
+      Exception('Error removing athlete from coach: $e'); // Log the error
+      rethrow;
+    }
   }
 }

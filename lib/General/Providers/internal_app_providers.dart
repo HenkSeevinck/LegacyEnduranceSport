@@ -1,41 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:legacyendurancesport/MyAthletes/Page/my_athletes_page.dart';
 import 'package:legacyendurancesport/Profile/Page/profile_page.dart';
-
-// Helper extension for dayOfYear
-extension DateTimeDayOfYear on DateTime {
-  int get dayOfYear {
-    return int.parse(DateFormat("D").format(this));
-  }
-}
 
 //Form Status Provider
 class InternalStatusProvider with ChangeNotifier {
-  bool adminMode = false;
   String signInsignUpStatus = 'SignIn';
-  int get currentYear => DateTime.now().year;
-  String? selectedUserRole;
-  late int firstYear = currentYear - 3;
-  late int lastYear = currentYear + 3;
-  late int totalWeeks = getTotalWeeks(currentYear);
-  String homePageSidebar = '';
-  Widget? homeMainContent;
-  String lrpbFormStatus = 'MacroCycle';
-  int planBlockID = 1;
-  Map<String, dynamic>? athleteKey;
-  Map<String, dynamic>? selectedLongRangePlanBlocks;
-  int firstDayOfWeek = DateTime.sunday;
   String platform = '';
 
-  Future<void> setPlatform(String value) async {
-    platform = value;
-    notifyListeners();
-  }
-
   List<Map<String, dynamic>> homePageOptions = [
-    {'selection': 'myProfile', 'pageName': 'MY PROFILE', 'icon': Icons.person, 'navigateTo': UserProfile()},
-    {'selection': 'myGoals', 'pageName': 'MY GOALS', 'icon': Icons.flag, 'navigateTo': SizedBox()},
-    {'selection': 'events', 'pageName': 'EVENTS', 'icon': Icons.event, 'navigateTo': SizedBox()},
+    {'selection': 'myProfile', 'pageName': 'MY PROFILE', 'icon': Icons.person, 'navigateTo': UserProfile(isCoachView: false), 'coachOnly': false},
+    {'selection': 'myGoals', 'pageName': 'MY GOALS', 'icon': Icons.flag, 'navigateTo': SizedBox(), 'coachOnly': false},
+    {'selection': 'events', 'pageName': 'EVENTS', 'icon': Icons.event, 'navigateTo': SizedBox(), 'coachOnly': false},
+    {'selection': 'athletes', 'pageName': 'MY ATHLETES', 'icon': Icons.people, 'navigateTo': MyAthletesPage(), 'coachOnly': true},
   ];
 
   List<Map<String, dynamic>> longRangePlanBlocks = [
@@ -82,62 +58,13 @@ class InternalStatusProvider with ChangeNotifier {
     {'intensityTargetTypeID': 4, 'intensityTargetType': 'RPE', 'value': 'e.g., 7/10'},
   ];
 
-  void setAdminMode(bool status) {
-    adminMode = status;
-    notifyListeners();
-  }
-
-  void setAthleteKey(Map<String, dynamic>? record) {
-    athleteKey = record;
-    notifyListeners();
-  }
-
-  void setSelectedLongRangePlanBlocks(Map<String, dynamic>? record) {
-    selectedLongRangePlanBlocks = record;
-    notifyListeners();
-  }
-
-  void setHomeMainContent(Widget? widget) {
-    homeMainContent = widget;
-    notifyListeners();
-  }
-
-  void setHomePageSidebar(String status) {
-    homePageSidebar = status;
-    notifyListeners();
-  }
-
-  void setlrpbFormStatus(String status) {
-    lrpbFormStatus = status;
-    notifyListeners();
-  }
-
   void setSignInSignUpStatus(String status) {
     signInsignUpStatus = status;
     notifyListeners();
   }
 
-  int getTotalWeeks(int year) {
-    final dec28 = DateTime(year, 12, 28);
-    final week = ((dec28.dayOfYear - dec28.weekday + 10) / 7).floor();
-    return week;
-  }
-
-  void setUserRole(String? status) {
-    selectedUserRole = status;
+  Future<void> setPlatform(String value) async {
+    platform = value;
     notifyListeners();
-  }
-
-  void setPlanBlockID(int value) {
-    planBlockID = value;
-    notifyListeners();
-  }
-
-  int getCurrentWeekNumber(int year) {
-    final now = DateTime.now();
-    if (now.year != year) return 1;
-    final jan4 = DateTime(year, 1, 4);
-    final diff = now.difference(jan4.subtract(Duration(days: jan4.weekday - 1)));
-    return (diff.inDays / 7).floor() + 1;
   }
 }

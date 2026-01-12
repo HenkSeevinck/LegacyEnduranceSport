@@ -8,7 +8,9 @@ import 'package:legacyendurancesport/SignInSignUp/Providers/appuser_provider.dar
 import 'package:provider/provider.dart';
 
 class UserProfile extends StatefulWidget {
-  const UserProfile({super.key});
+  final bool isCoachView;
+
+  const UserProfile({super.key, required this.isCoachView});
 
   @override
   State<UserProfile> createState() => _UserProfileState();
@@ -33,9 +35,7 @@ class _UserProfileState extends State<UserProfile> {
     super.initState();
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
 
-    _fetchDataFuture = _fetchData(
-        appUserProvider
-      );
+    _fetchDataFuture = _fetchData(appUserProvider);
   }
 
   //----------------------------------------------------
@@ -47,7 +47,9 @@ class _UserProfileState extends State<UserProfile> {
     appUser['surname'] == null ? lastNameController.text = '' : lastNameController.text = appUser['surname'];
     appUser['email'] == null ? emailController.text = '' : emailController.text = appUser['email'];
     appUser['dateOfBirth'] == null ? dateOfBirthController.text = '' : dateOfBirthController.text = appUser['dateOfBirth'];
-    appUser['athleteDisciplines']['otherDiscipline'] == null ? disciplineOtherController.text = '' : disciplineOtherController.text = appUser['athleteDisciplines']['otherDiscipline'];
+    appUser['athleteDisciplines']['otherDiscipline'] == null
+        ? disciplineOtherController.text = ''
+        : disciplineOtherController.text = appUser['athleteDisciplines']['otherDiscipline'];
   }
 
   //----------------------------------------------------
@@ -72,33 +74,29 @@ class _UserProfileState extends State<UserProfile> {
     final clubs = clubsProvider.Clubs;
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
     final userProfile = appUserProvider.appUser;
-    
+
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // User must tap button to dismiss
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
-          title: header1(
-            header: 'Select Club:', 
-            color: localAppTheme['anchorColors']['primaryColor'], 
-            context: context
-          ),
+          title: header1(header: 'Select Club:', color: localAppTheme['anchorColors']['primaryColor'], context: context),
           content: SingleChildScrollView(
             child: SearchableDropdown(
-              labelText: 'Search Clubs:', 
-              hint: 'Select Club', 
-              dropdownTextColor: localAppTheme['anchorColors']['primaryColor'], 
-              searchBoxVisable: true, 
-              dropDownList: clubs!, 
-              header: '', 
-              iconColor: localAppTheme['anchorColors']['primaryColor'], 
-              idField: 'clubId', 
-              displayField: 'clubName', 
+              labelText: 'Search Clubs:',
+              hint: 'Select Club',
+              dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
+              searchBoxVisable: true,
+              dropDownList: clubs!,
+              header: '',
+              iconColor: localAppTheme['anchorColors']['primaryColor'],
+              idField: 'clubId',
+              displayField: 'clubName',
               onChanged: (value) {
                 selectedClub = value;
-              }, 
-              isEnabled: true
+              },
+              isEnabled: true,
             ),
           ),
           actions: <Widget>[
@@ -107,36 +105,36 @@ class _UserProfileState extends State<UserProfile> {
               children: [
                 Expanded(
                   child: elevatedButton(
-                    label: 'CANCEL', 
+                    label: 'CANCEL',
                     onPressed: () {
                       selectedClub = null;
                       Navigator.of(context).pop();
-                    }, 
-                    backgroundColor: localAppTheme['anchorColors']['primaryColor'], 
-                    labelColor: localAppTheme['anchorColors']['secondaryColor'], 
-                    leadingIcon: null, 
-                    trailingIcon: null, 
+                    },
+                    backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                    labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                    leadingIcon: null,
+                    trailingIcon: null,
                     context: context,
                   ),
                 ),
                 Expanded(
                   child: elevatedButton(
-                    label: 'SUBMIT', 
+                    label: 'SUBMIT',
                     onPressed: () {
                       if (selectedClub != null) {
                         if (userProfile['clubs'] == null) {
                           userProfile['clubs'] = [];
                         }
                         setState(() {
-                        userProfile['clubs'].add(selectedClub);
+                          userProfile['clubs'].add(selectedClub);
                         });
                       }
                       Navigator.of(context).pop();
-                    }, 
-                    backgroundColor: localAppTheme['anchorColors']['primaryColor'], 
-                    labelColor: localAppTheme['anchorColors']['secondaryColor'], 
-                    leadingIcon: null, 
-                    trailingIcon: null, 
+                    },
+                    backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                    labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                    leadingIcon: null,
+                    trailingIcon: null,
                     context: context,
                   ),
                 ),
@@ -154,20 +152,14 @@ class _UserProfileState extends State<UserProfile> {
     final localAppTheme = ResponsiveTheme(context).theme;
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
     final appUser = appUserProvider.appUser;
-     return Scaffold(
+    return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: SafeArea(
           top: true,
           child: Stack(
             children: [
-              Center(
-                child: Image.asset(
-                  'images/Legacy-Endurance-Logo.png',
-                  height: 70,
-                  width: 70,
-                  fit: BoxFit.contain,
-                ),
-              ),
+              Center(child: Image.asset('images/Legacy-Endurance-Logo.png', height: 70, width: 70, fit: BoxFit.contain)),
               Positioned(
                 left: 0,
                 top: 0,
@@ -181,11 +173,16 @@ class _UserProfileState extends State<UserProfile> {
                   toolTip: 'BACK',
                   context: context,
                   onPressed: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) => HomePage(),
-                      ),
-                    );
+                    if (widget.isCoachView) {
+                      Navigator.of(context).pop();
+                      return;
+                    } else {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => HomePage()
+                          ),
+                        );
+                    }
                   },
                 ),
               ),
@@ -201,10 +198,7 @@ class _UserProfileState extends State<UserProfile> {
             width: double.infinity,
             height: double.infinity,
             decoration: BoxDecoration(
-              border: Border.all(
-                color: localAppTheme['anchorColors']['primaryColor'],
-                width: 1.0,
-              ),
+              border: Border.all(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
               borderRadius: BorderRadius.circular(8.0),
             ),
             child: SingleChildScrollView(
@@ -212,148 +206,142 @@ class _UserProfileState extends State<UserProfile> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  header1(
-                    header: 'Profile:', 
-                    context: context, 
-                    color: localAppTheme['anchorColors']['primaryColor'],
-                  ),
+                  header1(header: 'Profile:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
                   SizedBox(height: 20.0),
                   FormInputField(
-                    label: 'First Name:', 
-                    errorMessage: 'Please enter your first name', 
-                    isMultiline: false, 
-                    isPassword: false, 
-                    prefixIcon: null, 
-                    suffixIcon: null, 
+                    label: 'First Name:',
+                    errorMessage: 'Please enter your first name',
+                    isMultiline: false,
+                    isPassword: false,
+                    prefixIcon: null,
+                    suffixIcon: null,
                     showLabel: true,
                     controller: firstNameController,
                     enabled: formEditable,
-                    onChanged: (value){
+                    onChanged: (value) {
                       appUser['name'] = firstNameController.text;
                     },
                   ),
                   SizedBox(height: 10.0),
                   FormInputField(
-                    label: 'Last Name:', 
-                    errorMessage: 'Please enter your first name', 
-                    isMultiline: false, 
-                    isPassword: false, 
-                    prefixIcon: null, 
-                    suffixIcon: null, 
+                    label: 'Last Name:',
+                    errorMessage: 'Please enter your first name',
+                    isMultiline: false,
+                    isPassword: false,
+                    prefixIcon: null,
+                    suffixIcon: null,
                     showLabel: true,
                     controller: lastNameController,
                     enabled: formEditable,
-                    onChanged: (value){
+                    onChanged: (value) {
                       appUser['surname'] = lastNameController.text;
                     },
                   ),
                   SizedBox(height: 10.0),
                   FormInputField(
-                    label: 'Email Name:', 
-                    errorMessage: 'Please enter your first name', 
-                    isMultiline: false, 
-                    isPassword: false, 
-                    prefixIcon: null, 
-                    suffixIcon: null, 
+                    label: 'Email Name:',
+                    errorMessage: 'Please enter your first name',
+                    isMultiline: false,
+                    isPassword: false,
+                    prefixIcon: null,
+                    suffixIcon: null,
                     showLabel: true,
                     enabled: false,
                     controller: emailController,
                   ),
                   SizedBox(height: 10.0),
                   DatePicker(
-                    buttonLabelColor: localAppTheme['anchorColors']['primaryColor'], 
-                    label: 'Date of Birth:', 
-                    buttonVisibility: true, 
+                    buttonLabelColor: localAppTheme['anchorColors']['primaryColor'],
+                    label: 'Date of Birth:',
+                    buttonVisibility: true,
                     initialDate: null,
                     enabled: formEditable,
+                    firstDate: DateTime.now().subtract(const Duration(days: 365 * 100)),
+                    lastDate: DateTime.now(),
                     validator: (date) {
                       if (date == null) {
                         return 'Please select your date of birth';
                       }
                       return null;
-                    }, 
+                    },
                     controller: dateOfBirthController,
                     onChanged: (selectedDate) {
                       appUser['dateOfBirth'] = dateOfBirthController.text;
                     },
                   ),
                   SizedBox(height: 20.0),
-                  header1(
-                    header: 'Disciplines:', 
-                    context: context, 
-                    color: localAppTheme['anchorColors']['primaryColor'],
-                  ),
+                  header1(header: 'Disciplines:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
                   SizedBox(height: 20.0),
                   tickBox(
-                    label: 'Running', 
+                    label: 'Running',
                     value: appUser['athleteDisciplines']['runningBool'],
                     enabled: formEditable,
                     onChanged: (bool? newValue) {
                       setState(() {
                         appUser['athleteDisciplines']['runningBool'] = newValue ?? false;
-                    }); 
-                    }, 
+                      });
+                    },
                     context: context,
                   ),
                   tickBox(
-                    label: 'Ultra Running', 
+                    label: 'Ultra Running',
                     value: appUser['athleteDisciplines']['ultraRunningBool'] ?? false,
                     enabled: formEditable,
                     onChanged: (bool? newValue) {
                       setState(() {
                         appUser['athleteDisciplines']['ultraRunningBool'] = newValue ?? false;
                       });
-                    }, 
+                    },
                     context: context,
                   ),
                   SizedBox(height: 10.0),
                   tickBox(
-                    label: 'Cycling', 
+                    label: 'Cycling',
                     value: appUser['athleteDisciplines']['cyclingBool'] ?? false,
                     enabled: formEditable,
                     onChanged: (bool? newValue) {
                       setState(() {
                         appUser['athleteDisciplines']['cyclingBool'] = newValue ?? false;
                       });
-                    }, 
+                    },
                     context: context,
                   ),
                   SizedBox(height: 10.0),
                   tickBox(
-                    label: 'Swimming', 
+                    label: 'Swimming',
                     value: appUser['athleteDisciplines']['swimmingBool'] ?? false,
                     enabled: formEditable,
                     onChanged: (bool? newValue) {
                       setState(() {
                         appUser['athleteDisciplines']['swimmingBool'] = newValue ?? false;
                       });
-                    }, 
+                    },
                     context: context,
                   ),
                   SizedBox(height: 10.0),
                   tickBox(
-                    label: 'Triathlon', 
+                    label: 'Triathlon',
                     value: appUser['athleteDisciplines']['triathlonBool'] ?? false,
-                    enabled: formEditable, 
+                    enabled: formEditable,
                     onChanged: (bool? newValue) {
                       setState(() {
                         appUser['athleteDisciplines']['triathlonBool'] = newValue ?? false;
                       });
-                    }, 
+                    },
                     context: context,
                   ),
                   SizedBox(height: 10.0),
                   Row(
                     children: [
                       tickBox(
-                        label: 'Other', 
+                        label: 'Other',
                         value: appUser['athleteDisciplines']['otherBool'] ?? false,
-                        enabled: formEditable, 
+                        enabled: formEditable,
                         onChanged: (bool? newValue) {
                           setState(() {
                             appUser['athleteDisciplines']['otherBool'] = newValue ?? false;
                           });
-                        }, 
+                        },
                         context: context,
                       ),
                       SizedBox(width: 20.0),
@@ -361,15 +349,15 @@ class _UserProfileState extends State<UserProfile> {
                         visible: appUser['athleteDisciplines']['otherBool'] ?? false,
                         child: Expanded(
                           child: FormInputField(
-                            label: 'Please specify:', 
-                            errorMessage: 'Please enter your discipline', 
-                            isMultiline: false, 
-                            isPassword: false, 
-                            prefixIcon: null, 
-                            suffixIcon: null, 
+                            label: 'Please specify:',
+                            errorMessage: 'Please enter your discipline',
+                            isMultiline: false,
+                            isPassword: false,
+                            prefixIcon: null,
+                            suffixIcon: null,
                             showLabel: true,
                             controller: disciplineOtherController,
-                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -381,79 +369,66 @@ class _UserProfileState extends State<UserProfile> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        header1(
-                          header: 'Clubs:', 
-                          context: context, 
-                          color: localAppTheme['anchorColors']['primaryColor'],
-                        ),
+                        header1(header: 'Clubs:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
                         Visibility(
                           visible: formEditable,
                           child: iconButton(
-                            label: null, 
-                            backgroundColor: null, 
-                            iconColor: localAppTheme['anchorColors']['primaryColor'], 
-                            icon: Icons.add, 
-                            size: 30, 
-                            toolTip: 'ADD CLUB', 
+                            label: null,
+                            backgroundColor: null,
+                            iconColor: localAppTheme['anchorColors']['primaryColor'],
+                            icon: Icons.add,
+                            size: 30,
+                            toolTip: 'ADD CLUB',
                             onPressed: () {
-                              _showClubSelectionPopupDialog(
-                                context, 
-                              );
+                              _showClubSelectionPopupDialog(context);
                             },
-                            context: context, 
+                            context: context,
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),
                   SizedBox(height: 10.0),
                   appUser['clubs'] != null && (appUser['clubs'] as List).isNotEmpty
-                  ? Column(
-                      children: List<Widget>.generate(
-                        (appUser['clubs'] as List).length,
-                        (index) {
-                          final club = appUser['clubs'][index];
-                          return ListTile(
-                            title: body(
-                              header: club['clubName'], 
-                              color: localAppTheme['anchorColors']['primaryColor'], 
-                              context: context,
-                            ),
-                            trailing: formEditable
-                              ? iconButton(
-                                  label: null, 
-                                  backgroundColor: null, 
-                                  iconColor: localAppTheme['anchorColors']['primaryColor'], 
-                                  icon: Icons.delete, 
-                                  size: 30, 
-                                  toolTip: 'REMOVE CLUB', 
-                                  onPressed: () {
-                                    setState(() {
-                                      appUser['clubs'].removeAt(index);
-                                    });
-                                  },
-                                  context: context, 
-                                )
-                              : null,
-                          );
-                        },
-                      ),
-                    )
-                  : Container(),
+                      ? Column(
+                          children: List<Widget>.generate((appUser['clubs'] as List).length, (index) {
+                            final club = appUser['clubs'][index];
+                            return ListTile(
+                              title: body(header: club['clubName'], color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                              trailing: formEditable
+                                  ? iconButton(
+                                      label: null,
+                                      backgroundColor: null,
+                                      iconColor: localAppTheme['anchorColors']['primaryColor'],
+                                      icon: Icons.delete,
+                                      size: 30,
+                                      toolTip: 'REMOVE CLUB',
+                                      onPressed: () {
+                                        setState(() {
+                                          appUser['clubs'].removeAt(index);
+                                        });
+                                      },
+                                      context: context,
+                                    )
+                                  : null,
+                            );
+                          }),
+                        )
+                      : Container(),
                   SizedBox(height: 20.0),
                   Visibility(
-                    visible: !formEditable,
+                    visible: !formEditable && !widget.isCoachView,
                     child: elevatedButton(
-                      label: 'EDIT PROFILE', 
+                      label: 'EDIT PROFILE',
                       onPressed: () {
                         setState(() {
                           formEditable = true;
                         });
-                      }, 
-                      backgroundColor: localAppTheme['anchorColors']['primaryColor'], 
-                      labelColor: localAppTheme['anchorColors']['secondaryColor'], 
-                      leadingIcon: null, 
-                      trailingIcon: null, 
+                      },
+                      backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                      labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                      leadingIcon: null,
+                      trailingIcon: null,
                       context: context,
                     ),
                   ),
@@ -463,47 +438,39 @@ class _UserProfileState extends State<UserProfile> {
                       children: [
                         Expanded(
                           child: elevatedButton(
-                            label: 'CANCEL', 
-                            onPressed: () async{
+                            label: 'CANCEL',
+                            onPressed: () async {
                               await _resetControllers(appUserProvider);
                               setState(() {
                                 formEditable = false;
                               });
-                            }, 
-                            backgroundColor: localAppTheme['anchorColors']['primaryColor'], 
-                            labelColor: localAppTheme['anchorColors']['secondaryColor'], 
-                            leadingIcon: null, 
-                            trailingIcon: null, 
+                            },
+                            backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                            labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                            leadingIcon: null,
+                            trailingIcon: null,
                             context: context,
                           ),
                         ),
                         SizedBox(width: 10.0),
                         Expanded(
                           child: elevatedButton(
-                            label: 'SAVE CHANGES', 
+                            label: 'SAVE CHANGES',
                             onPressed: () async {
                               try {
                                 await appUserProvider.updateUserRecord(appUser);
-                                showGeneralPopupDialog(
-                                  context, 
-                                  'Success!',
-                                  'Your profile has been updated successfully.',
-                                );
+                                showGeneralPopupDialog(context, 'Success!', 'Your profile has been updated successfully.');
                                 setState(() {
                                   formEditable = false;
                                 });
                               } catch (e) {
-                                showGeneralPopupDialog(
-                                  context, 
-                                  'Error',
-                                  'An error occurred while updating your profile. Please try again.',
-                                );
+                                showGeneralPopupDialog(context, 'Error', 'An error occurred while updating your profile. Please try again.');
                               }
-                            }, 
-                            backgroundColor: localAppTheme['anchorColors']['primaryColor'], 
-                            labelColor: localAppTheme['anchorColors']['secondaryColor'], 
-                            leadingIcon: null, 
-                            trailingIcon: null, 
+                            },
+                            backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                            labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                            leadingIcon: null,
+                            trailingIcon: null,
                             context: context,
                           ),
                         ),
@@ -538,7 +505,7 @@ class _UserProfileState extends State<UserProfile> {
     return FutureBuilder<void>(
       future: _fetchDataFuture,
       builder: (context, snapshot) {
-          final localAppTheme = ResponsiveTheme(context).theme;
+        final localAppTheme = ResponsiveTheme(context).theme;
 
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());

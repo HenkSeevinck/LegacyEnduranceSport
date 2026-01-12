@@ -4,6 +4,7 @@ import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/Functions/weekdays_table.dart';
 import 'package:legacyendurancesport/Home/Providers/clubsprovided.dart';
+import 'package:legacyendurancesport/SignInSignUp/Providers/appuser_provider.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -42,6 +43,10 @@ class _HomePageState extends State<HomePage> {
     final localAppTheme = ResponsiveTheme(context).theme;
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
     final homePageOptions = internalStatusProvider.homePageOptions;
+    final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
+    final appUser = appUserProvider.appUser;
+    final isCoach = appUser['isCoach'] ?? false;
+
      return Scaffold(
       appBar: AppBar(
         title: SafeArea(
@@ -75,7 +80,10 @@ class _HomePageState extends State<HomePage> {
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final itemCount = homePageOptions.length;
+                  //final itemCount = homePageOptions.length;
+                  final itemCount = isCoach
+                    ? homePageOptions.length
+                    : homePageOptions.where((option) => option['coachOnly'] == false).length;
                   final availableHeight = constraints.maxHeight;
                   final availableWidth = constraints.maxWidth;
                   final itemHeight = itemCount > 0 ? availableHeight / itemCount : availableHeight;
@@ -87,7 +95,9 @@ class _HomePageState extends State<HomePage> {
                       crossAxisCount: 1,
                       childAspectRatio: availableWidth / itemHeight,
                     ),
-                    itemCount: itemCount,
+                    itemCount: isCoach
+                      ? homePageOptions.length
+                      : homePageOptions.where((option) => option['coachOnly'] == false).length,
                     itemBuilder: (BuildContext context, int index) {
                       return InkWell(
                         onTap: () {
