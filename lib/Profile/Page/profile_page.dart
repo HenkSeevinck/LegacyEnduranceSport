@@ -41,103 +41,119 @@ class _UserProfileState extends State<UserProfile> {
   //----------------------------------------------------
   // Fetch data function
   Future<void> _fetchData(AppUserProvider appUserProvider) async {
-    final userProfile = appUserProvider.appUser;
+    final appUser = appUserProvider.appUser;
 
-    userProfile['name'] == null ? firstNameController.text = '' : firstNameController.text = userProfile['name'];
-    userProfile['surname'] == null ? lastNameController.text = '' : lastNameController.text = userProfile['surname'];
-    userProfile['email'] == null ? emailController.text = '' : emailController.text = userProfile['email'];
-    userProfile['dateOfBirth'] == null ? dateOfBirthController.text = '' : dateOfBirthController.text = userProfile['dateOfBirth'];
-    userProfile['athleteDisciplines']['otherDiscipline'] == null ? disciplineOtherController.text = '' : disciplineOtherController.text = userProfile['athleteDisciplines']['otherDiscipline'];
+    appUser['name'] == null ? firstNameController.text = '' : firstNameController.text = appUser['name'];
+    appUser['surname'] == null ? lastNameController.text = '' : lastNameController.text = appUser['surname'];
+    appUser['email'] == null ? emailController.text = '' : emailController.text = appUser['email'];
+    appUser['dateOfBirth'] == null ? dateOfBirthController.text = '' : dateOfBirthController.text = appUser['dateOfBirth'];
+    appUser['athleteDisciplines']['otherDiscipline'] == null ? disciplineOtherController.text = '' : disciplineOtherController.text = appUser['athleteDisciplines']['otherDiscipline'];
   }
 
-//----------------------------------------------------
-// Club Selection Popup Dialog
-Future<void> _showClubSelectionPopupDialog(BuildContext context) async {
-  final localAppTheme = ResponsiveTheme(context).theme;
-  final clubsProvider = Provider.of<ClubsProvider>(context, listen: false);
-  final clubs = clubsProvider.Clubs;
-  final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
-  final userProfile = appUserProvider.appUser;
-  
-  return showDialog<void>(
-    context: context,
-    barrierDismissible: false, // User must tap button to dismiss
-    builder: (BuildContext context) {
-      return AlertDialog(
-        backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
-        title: header1(
-          header: 'Select Club:', 
-          color: localAppTheme['anchorColors']['primaryColor'], 
-          context: context
-        ),
-        content: SingleChildScrollView(
-          child: SearchableDropdown(
-            labelText: 'Search Clubs:', 
-            hint: 'Select Club', 
-            dropdownTextColor: localAppTheme['anchorColors']['primaryColor'], 
-            searchBoxVisable: true, 
-            dropDownList: clubs!, 
-            header: '', 
-            iconColor: localAppTheme['anchorColors']['primaryColor'], 
-            idField: 'clubId', 
-            displayField: 'clubName', 
-            onChanged: (value) {
-              selectedClub = value;
-            }, 
-            isEnabled: true
+  //----------------------------------------------------
+  //Reset controllers
+  Future<void> _resetControllers(AppUserProvider appUserProvider) async {
+    // Refresh user data from deep store first, then read the provider value
+    await appUserProvider.refreshDeepStore();
+    final appUser = appUserProvider.appUser;
+
+    firstNameController.text = appUser['name'] ?? '';
+    lastNameController.text = appUser['surname'] ?? '';
+    emailController.text = appUser['email'] ?? '';
+    dateOfBirthController.text = appUser['dateOfBirth'] ?? '';
+    disciplineOtherController.text = appUser['athleteDisciplines']['otherDiscipline'] ?? '';
+  }
+
+  //----------------------------------------------------
+  // Club Selection Popup Dialog
+  Future<void> _showClubSelectionPopupDialog(BuildContext context) async {
+    final localAppTheme = ResponsiveTheme(context).theme;
+    final clubsProvider = Provider.of<ClubsProvider>(context, listen: false);
+    final clubs = clubsProvider.Clubs;
+    final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
+    final userProfile = appUserProvider.appUser;
+    
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // User must tap button to dismiss
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
+          title: header1(
+            header: 'Select Club:', 
+            color: localAppTheme['anchorColors']['primaryColor'], 
+            context: context
           ),
-        ),
-        actions: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: elevatedButton(
-                  label: 'CANCEL', 
-                  onPressed: () {
-                    selectedClub = null;
-                    Navigator.of(context).pop();
-                  }, 
-                  backgroundColor: localAppTheme['anchorColors']['primaryColor'], 
-                  labelColor: localAppTheme['anchorColors']['secondaryColor'], 
-                  leadingIcon: null, 
-                  trailingIcon: null, 
-                  context: context,
+          content: SingleChildScrollView(
+            child: SearchableDropdown(
+              labelText: 'Search Clubs:', 
+              hint: 'Select Club', 
+              dropdownTextColor: localAppTheme['anchorColors']['primaryColor'], 
+              searchBoxVisable: true, 
+              dropDownList: clubs!, 
+              header: '', 
+              iconColor: localAppTheme['anchorColors']['primaryColor'], 
+              idField: 'clubId', 
+              displayField: 'clubName', 
+              onChanged: (value) {
+                selectedClub = value;
+              }, 
+              isEnabled: true
+            ),
+          ),
+          actions: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: elevatedButton(
+                    label: 'CANCEL', 
+                    onPressed: () {
+                      selectedClub = null;
+                      Navigator.of(context).pop();
+                    }, 
+                    backgroundColor: localAppTheme['anchorColors']['primaryColor'], 
+                    labelColor: localAppTheme['anchorColors']['secondaryColor'], 
+                    leadingIcon: null, 
+                    trailingIcon: null, 
+                    context: context,
+                  ),
                 ),
-              ),
-              Expanded(
-                child: elevatedButton(
-                  label: 'SUBMIT', 
-                  onPressed: () {
-                    if (selectedClub != null) {
-                      if (userProfile['clubs'] == null) {
-                        userProfile['clubs'] = [];
+                Expanded(
+                  child: elevatedButton(
+                    label: 'SUBMIT', 
+                    onPressed: () {
+                      if (selectedClub != null) {
+                        if (userProfile['clubs'] == null) {
+                          userProfile['clubs'] = [];
+                        }
+                        setState(() {
+                        userProfile['clubs'].add(selectedClub);
+                        });
                       }
-                      userProfile['clubs'].add(selectedClub);
-                    }
-                    Navigator.of(context).pop();
-                  }, 
-                  backgroundColor: localAppTheme['anchorColors']['primaryColor'], 
-                  labelColor: localAppTheme['anchorColors']['secondaryColor'], 
-                  leadingIcon: null, 
-                  trailingIcon: null, 
-                  context: context,
+                      Navigator.of(context).pop();
+                    }, 
+                    backgroundColor: localAppTheme['anchorColors']['primaryColor'], 
+                    labelColor: localAppTheme['anchorColors']['secondaryColor'], 
+                    leadingIcon: null, 
+                    trailingIcon: null, 
+                    context: context,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
-      );
-    },
-  );
-}
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   //----------------------------------------------------
   // Mobile Layout
   Widget _buildMobileUserProfile() {
     final localAppTheme = ResponsiveTheme(context).theme;
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
-    final userProfile = appUserProvider.appUser;
+    final appUser = appUserProvider.appUser;
      return Scaffold(
       appBar: AppBar(
         title: SafeArea(
@@ -206,6 +222,9 @@ Future<void> _showClubSelectionPopupDialog(BuildContext context) async {
                     showLabel: true,
                     controller: firstNameController,
                     enabled: formEditable,
+                    onChanged: (value){
+                      appUser['name'] = firstNameController.text;
+                    },
                   ),
                   SizedBox(height: 10.0),
                   FormInputField(
@@ -218,6 +237,9 @@ Future<void> _showClubSelectionPopupDialog(BuildContext context) async {
                     showLabel: true,
                     controller: lastNameController,
                     enabled: formEditable,
+                    onChanged: (value){
+                      appUser['surname'] = lastNameController.text;
+                    },
                   ),
                   SizedBox(height: 10.0),
                   FormInputField(
@@ -245,6 +267,9 @@ Future<void> _showClubSelectionPopupDialog(BuildContext context) async {
                       return null;
                     }, 
                     controller: dateOfBirthController,
+                    onChanged: (selectedDate) {
+                      appUser['dateOfBirth'] = dateOfBirthController.text;
+                    },
                   ),
                   SizedBox(height: 20.0),
                   header1(
@@ -255,22 +280,22 @@ Future<void> _showClubSelectionPopupDialog(BuildContext context) async {
                   SizedBox(height: 20.0),
                   tickBox(
                     label: 'Running', 
-                    value: userProfile['athleteDisciplines']['runningBool'],
+                    value: appUser['athleteDisciplines']['runningBool'],
                     enabled: formEditable,
                     onChanged: (bool? newValue) {
                       setState(() {
-                        userProfile['athleteDisciplines']['runningBool'] = newValue ?? false;
-                      });
+                        appUser['athleteDisciplines']['runningBool'] = newValue ?? false;
+                    }); 
                     }, 
                     context: context,
                   ),
                   tickBox(
                     label: 'Ultra Running', 
-                    value: userProfile['athleteDisciplines']['ultraRunningBool'] ?? false,
+                    value: appUser['athleteDisciplines']['ultraRunningBool'] ?? false,
                     enabled: formEditable,
                     onChanged: (bool? newValue) {
                       setState(() {
-                        userProfile['athleteDisciplines']['ultraRunningBool'] = newValue ?? false;
+                        appUser['athleteDisciplines']['ultraRunningBool'] = newValue ?? false;
                       });
                     }, 
                     context: context,
@@ -278,11 +303,11 @@ Future<void> _showClubSelectionPopupDialog(BuildContext context) async {
                   SizedBox(height: 10.0),
                   tickBox(
                     label: 'Cycling', 
-                    value: userProfile['athleteDisciplines']['cyclingBool'] ?? false,
+                    value: appUser['athleteDisciplines']['cyclingBool'] ?? false,
                     enabled: formEditable,
                     onChanged: (bool? newValue) {
                       setState(() {
-                        userProfile['athleteDisciplines']['cyclingBool'] = newValue ?? false;
+                        appUser['athleteDisciplines']['cyclingBool'] = newValue ?? false;
                       });
                     }, 
                     context: context,
@@ -290,11 +315,11 @@ Future<void> _showClubSelectionPopupDialog(BuildContext context) async {
                   SizedBox(height: 10.0),
                   tickBox(
                     label: 'Swimming', 
-                    value: userProfile['athleteDisciplines']['swimmingBool'] ?? false,
+                    value: appUser['athleteDisciplines']['swimmingBool'] ?? false,
                     enabled: formEditable,
                     onChanged: (bool? newValue) {
                       setState(() {
-                        userProfile['athleteDisciplines']['swimmingBool'] = newValue ?? false;
+                        appUser['athleteDisciplines']['swimmingBool'] = newValue ?? false;
                       });
                     }, 
                     context: context,
@@ -302,11 +327,11 @@ Future<void> _showClubSelectionPopupDialog(BuildContext context) async {
                   SizedBox(height: 10.0),
                   tickBox(
                     label: 'Triathlon', 
-                    value: userProfile['athleteDisciplines']['triathlonBool'] ?? false,
+                    value: appUser['athleteDisciplines']['triathlonBool'] ?? false,
                     enabled: formEditable, 
                     onChanged: (bool? newValue) {
                       setState(() {
-                        userProfile['athleteDisciplines']['triathlonBool'] = newValue ?? false;
+                        appUser['athleteDisciplines']['triathlonBool'] = newValue ?? false;
                       });
                     }, 
                     context: context,
@@ -316,18 +341,18 @@ Future<void> _showClubSelectionPopupDialog(BuildContext context) async {
                     children: [
                       tickBox(
                         label: 'Other', 
-                        value: userProfile['athleteDisciplines']['otherBool'] ?? false,
+                        value: appUser['athleteDisciplines']['otherBool'] ?? false,
                         enabled: formEditable, 
                         onChanged: (bool? newValue) {
                           setState(() {
-                            userProfile['athleteDisciplines']['otherBool'] = newValue ?? false;
+                            appUser['athleteDisciplines']['otherBool'] = newValue ?? false;
                           });
                         }, 
                         context: context,
                       ),
                       SizedBox(width: 20.0),
                       Visibility(
-                        visible: userProfile['athleteDisciplines']['otherBool'] ?? false,
+                        visible: appUser['athleteDisciplines']['otherBool'] ?? false,
                         child: Expanded(
                           child: FormInputField(
                             label: 'Please specify:', 
@@ -376,12 +401,12 @@ Future<void> _showClubSelectionPopupDialog(BuildContext context) async {
                     ),
                   ),
                   SizedBox(height: 10.0),
-                  userProfile['clubs'] != null && (userProfile['clubs'] as List).isNotEmpty
+                  appUser['clubs'] != null && (appUser['clubs'] as List).isNotEmpty
                   ? Column(
                       children: List<Widget>.generate(
-                        (userProfile['clubs'] as List).length,
+                        (appUser['clubs'] as List).length,
                         (index) {
-                          final club = userProfile['clubs'][index];
+                          final club = appUser['clubs'][index];
                           return ListTile(
                             title: Text(
                               club['clubName'],
@@ -399,7 +424,7 @@ Future<void> _showClubSelectionPopupDialog(BuildContext context) async {
                                   toolTip: 'REMOVE CLUB', 
                                   onPressed: () {
                                     setState(() {
-                                      userProfile['clubs'].removeAt(index);
+                                      appUser['clubs'].removeAt(index);
                                     });
                                   },
                                   context: context, 
@@ -434,7 +459,8 @@ Future<void> _showClubSelectionPopupDialog(BuildContext context) async {
                         Expanded(
                           child: elevatedButton(
                             label: 'CANCEL', 
-                            onPressed: () {
+                            onPressed: () async{
+                              await _resetControllers(appUserProvider);
                               setState(() {
                                 formEditable = false;
                               });
