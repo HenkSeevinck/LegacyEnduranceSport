@@ -24,8 +24,8 @@ class AppUserProvider with ChangeNotifier {
 
   //--------------------------------------------------------------
   // Method to update an existing user record in Firestore
-  Future<void> updateUserRecord(User user, Map<String, dynamic> data) async {
-    await _firestore.collection('AppUsers').doc(user.uid).update(data);
+  Future<void> updateUserRecord(Map<String, dynamic> data) async {
+    await _firestore.collection('AppUsers').doc(data['uid']).update(data);
     _appUser = {..._appUser, ...data};
     // Only update deep store after a successful submit to Firestore.
     _appUserDeepStore = jsonDecode(jsonEncode(_appUser));

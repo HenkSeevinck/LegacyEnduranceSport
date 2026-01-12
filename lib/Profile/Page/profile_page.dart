@@ -476,10 +476,24 @@ class _UserProfileState extends State<UserProfile> {
                         Expanded(
                           child: elevatedButton(
                             label: 'SAVE CHANGES', 
-                            onPressed: () {
-                              setState(() {
-                                formEditable = false;
-                              });
+                            onPressed: () async {
+                              try {
+                                await appUserProvider.updateUserRecord(appUser);
+                                showGeneralPopupDialog(
+                                  context, 
+                                  'Success!',
+                                  'Your profile has been updated successfully.',
+                                );
+                                setState(() {
+                                  formEditable = false;
+                                });
+                              } catch (e) {
+                                showGeneralPopupDialog(
+                                  context, 
+                                  'Error',
+                                  'An error occurred while updating your profile. Please try again.',
+                                );
+                              }
                             }, 
                             backgroundColor: localAppTheme['anchorColors']['primaryColor'], 
                             labelColor: localAppTheme['anchorColors']['secondaryColor'], 
@@ -513,7 +527,7 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   //----------------------------------------------------
-  //
+  // Build Method
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<void>(

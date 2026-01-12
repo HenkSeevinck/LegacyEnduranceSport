@@ -100,13 +100,15 @@ class _HomePageState extends State<HomePage> {
                         child: Container(
                           decoration: BoxDecoration(
                             border: Border(
+                              // Draw a top border for every tile (this creates the separators),
+                              // and draw a bottom border only on the last tile to close the list.
                               top: BorderSide(
                                 color: localAppTheme['anchorColors']['primaryColor'],
-                                width: index == 0 ? 1.0 : 0.0,
+                                width: 1.0,
                               ),
                               bottom: BorderSide(
                                 color: localAppTheme['anchorColors']['primaryColor'],
-                                width: homePageOptions.length - 1 == index ? 1.0 : 0.0,
+                                width: index == (itemCount - 1) ? 1.0 : 0.0,
                               ),
                             ),
                             //borderRadius: BorderRadius.circular(8.0),

@@ -929,3 +929,39 @@ class _SliderBarWidgetState extends State<SliderBarWidget> {
     );
   }
 }
+
+//----------------------------------------------------
+// General Popup Dialog
+Future<void> showGeneralPopupDialog(BuildContext context, String title, String message) async {
+  final localAppTheme = ResponsiveTheme(context).theme;
+
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false, // User must tap button to dismiss
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
+        title: header3(
+          header: title, 
+          context: context, 
+          color: localAppTheme['anchorColors']['primaryColor'],
+        ),
+        content: SingleChildScrollView(
+          child: body(
+            header: message, 
+            color: localAppTheme['anchorColors']['primaryColor'], 
+            context: context,
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text('OK', style: TextStyle(color: localAppTheme['anchorColors']['primaryColor'])),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
