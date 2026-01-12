@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
+import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 
 /// WeekDaysTable
 /// - shows 7 days for a current week (Mon-Sun by default)
@@ -57,6 +59,7 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
   Widget build(BuildContext context) {
     final weekDays = List<DateTime>.generate(7, (i) => _weekStart.add(Duration(days: i)));
     final weekLabel = '${DateFormat.yMMMd().format(weekDays.first)} - ${DateFormat.yMMMd().format(weekDays.last)}';
+    final localAppTheme = ResponsiveTheme(context).theme;
 
     return Column(
       children: [
@@ -68,7 +71,8 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
               IconButton(onPressed: _prevWeek, icon: const Icon(Icons.chevron_left)),
               Expanded(
                 child: Center(
-                  child: Text(weekLabel, style: Theme.of(context).textTheme.bodyLarge),
+                  child: body(header: weekLabel, color: localAppTheme['anchorColors']['primaryColor'], context: context)
+                  //Text(weekLabel, style: Theme.of(context).textTheme.bodyLarge),
                 ),
               ),
               IconButton(onPressed: _nextWeek, icon: const Icon(Icons.chevron_right)),

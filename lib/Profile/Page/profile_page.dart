@@ -158,31 +158,37 @@ class _UserProfileState extends State<UserProfile> {
       appBar: AppBar(
         title: SafeArea(
           top: true,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Stack(
             children: [
-              iconButton(
-                label: null, 
-                backgroundColor: null, 
-                iconColor: localAppTheme['anchorColors']['primaryColor'], 
-                icon: Icons.arrow_back, 
-                size: 30, 
-                toolTip: 'BACK', 
-                context: context, 
-                onPressed: () {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) => HomePage()
+              Center(
+                child: Image.asset(
+                  'images/Legacy-Endurance-Logo.png',
+                  height: 70,
+                  width: 70,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              Positioned(
+                left: 0,
+                top: 0,
+                bottom: 0,
+                child: iconButton(
+                  label: null,
+                  backgroundColor: null,
+                  iconColor: localAppTheme['anchorColors']['primaryColor'],
+                  icon: Icons.arrow_back,
+                  size: 30,
+                  toolTip: 'BACK',
+                  context: context,
+                  onPressed: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => HomePage(),
                       ),
                     );
                   },
                 ),
-              Image.asset('images/Legacy-Endurance-Logo.png', 
-                  height: 70, 
-                  width: 70, 
-                  fit: BoxFit.cover,
-                ),
-                SizedBox(width: 36.0),
+              ),
             ],
           ),
         ),
@@ -408,11 +414,10 @@ class _UserProfileState extends State<UserProfile> {
                         (index) {
                           final club = appUser['clubs'][index];
                           return ListTile(
-                            title: Text(
-                              club['clubName'],
-                              style: TextStyle(
-                                color: localAppTheme['anchorColors']['primaryColor'],
-                              ),
+                            title: body(
+                              header: club['clubName'], 
+                              color: localAppTheme['anchorColors']['primaryColor'], 
+                              context: context,
                             ),
                             trailing: formEditable
                               ? iconButton(
