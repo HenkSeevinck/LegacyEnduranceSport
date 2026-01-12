@@ -101,6 +101,7 @@ class _HomePageState extends State<HomePage> {
                     itemBuilder: (BuildContext context, int index) {
                       return InkWell(
                         onTap: () {
+                          internalStatusProvider.setUserUIDToShow(appUser['uid']);
                           Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
                               builder: (context) => homePageOptions[index]['navigateTo'],

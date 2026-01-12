@@ -134,6 +134,7 @@ class _MyAthletesPageState extends State<MyAthletesPage> {
     final localAppTheme = ResponsiveTheme(context).theme;
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
     final appUser = appUserProvider.appUser;
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -269,6 +270,7 @@ class _MyAthletesPageState extends State<MyAthletesPage> {
                                     size: 30, 
                                     toolTip: 'VIEW PROFILE', 
                                     onPressed: () {
+                                      internalStatusProvider.setUserUIDToShow(athlete['uid']);
                                       // Navigate to athlete profile page
                                       Navigator.of(context).push(
                                         MaterialPageRoute(

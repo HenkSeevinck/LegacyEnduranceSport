@@ -10,6 +10,9 @@ class AppUserProvider with ChangeNotifier {
   Map<String, dynamic> _appUser = {};
   Map<String, dynamic> get appUser => _appUser;
 
+  Map<String, dynamic> _userProfileToShow = {};
+  Map<String, dynamic> get userProfileToShow => _userProfileToShow;
+
   Map<String, dynamic> _appUserDeepStore = {};
   Map<String, dynamic> get appUserDeepStore => _appUserDeepStore;
 
@@ -48,7 +51,25 @@ class AppUserProvider with ChangeNotifier {
           _appUser['isCoach'] = isCoach;
         });
         
-        _appUserDeepStore = jsonDecode(jsonEncode(_appUser));
+        //_appUserDeepStore = jsonDecode(jsonEncode(_appUser));
+
+        notifyListeners();
+      }
+      return data;
+    }
+    return null;
+  }
+
+  //--------------------------------------------------------------
+  // Method to get the user record from Firestore
+  Future<Map<String, dynamic>?> getUserProfileToShow (String uid) async {
+    final doc = await _firestore.collection('AppUsers').doc(uid).get();
+    if (doc.exists) {
+      final data = doc.data();
+      if (data != null) {
+       
+        _userProfileToShow = {'uid': uid, ...data};
+        _appUserDeepStore = jsonDecode(jsonEncode(_userProfileToShow));
 
         notifyListeners();
       }
@@ -87,7 +108,7 @@ class AppUserProvider with ChangeNotifier {
   Future<void> refreshDeepStore() async {
     // Use a deep-copy to avoid assigning the same Map instance
     // so subsequent local edits don't modify the deep store.
-    _appUser = jsonDecode(jsonEncode(_appUserDeepStore));
+    _userProfileToShow = jsonDecode(jsonEncode(_appUserDeepStore));
     notifyListeners();
   }
 

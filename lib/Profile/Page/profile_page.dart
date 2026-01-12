@@ -34,22 +34,28 @@ class _UserProfileState extends State<UserProfile> {
   void initState() {
     super.initState();
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
 
-    _fetchDataFuture = _fetchData(appUserProvider);
+    _fetchDataFuture = _fetchData(appUserProvider, internalStatusProvider);
   }
 
   //----------------------------------------------------
   // Fetch data function
-  Future<void> _fetchData(AppUserProvider appUserProvider) async {
-    final appUser = appUserProvider.appUser;
+  Future<void> _fetchData(AppUserProvider appUserProvider, InternalStatusProvider internalStatusProvider) async {
+    final userUIDToShow = internalStatusProvider.userUIDToShow;
+    
+    // Load user data
+    await appUserProvider.getUserProfileToShow(userUIDToShow);
+    
+    final userProfileToShow = appUserProvider.userProfileToShow;
 
-    appUser['name'] == null ? firstNameController.text = '' : firstNameController.text = appUser['name'];
-    appUser['surname'] == null ? lastNameController.text = '' : lastNameController.text = appUser['surname'];
-    appUser['email'] == null ? emailController.text = '' : emailController.text = appUser['email'];
-    appUser['dateOfBirth'] == null ? dateOfBirthController.text = '' : dateOfBirthController.text = appUser['dateOfBirth'];
-    appUser['athleteDisciplines']['otherDiscipline'] == null
+    userProfileToShow['name'] == null ? firstNameController.text = '' : firstNameController.text = userProfileToShow['name'];
+    userProfileToShow['surname'] == null ? lastNameController.text = '' : lastNameController.text = userProfileToShow['surname'];
+    userProfileToShow['email'] == null ? emailController.text = '' : emailController.text = userProfileToShow['email'];
+    userProfileToShow['dateOfBirth'] == null ? dateOfBirthController.text = '' : dateOfBirthController.text = userProfileToShow['dateOfBirth'];
+    userProfileToShow['athleteDisciplines'] == null || userProfileToShow['athleteDisciplines']['otherDiscipline'] == null
         ? disciplineOtherController.text = ''
-        : disciplineOtherController.text = appUser['athleteDisciplines']['otherDiscipline'];
+        : disciplineOtherController.text = userProfileToShow['athleteDisciplines']['otherDiscipline'];
   }
 
   //----------------------------------------------------
@@ -57,13 +63,13 @@ class _UserProfileState extends State<UserProfile> {
   Future<void> _resetControllers(AppUserProvider appUserProvider) async {
     // Refresh user data from deep store first, then read the provider value
     await appUserProvider.refreshDeepStore();
-    final appUser = appUserProvider.appUser;
+    final userProfileToShow = appUserProvider.userProfileToShow;
 
-    firstNameController.text = appUser['name'] ?? '';
-    lastNameController.text = appUser['surname'] ?? '';
-    emailController.text = appUser['email'] ?? '';
-    dateOfBirthController.text = appUser['dateOfBirth'] ?? '';
-    disciplineOtherController.text = appUser['athleteDisciplines']['otherDiscipline'] ?? '';
+    firstNameController.text = userProfileToShow['name'] ?? '';
+    lastNameController.text = userProfileToShow['surname'] ?? '';
+    emailController.text = userProfileToShow['email'] ?? '';
+    dateOfBirthController.text = userProfileToShow['dateOfBirth'] ?? '';
+    disciplineOtherController.text = userProfileToShow['athleteDisciplines']['otherDiscipline'] ?? '';
   }
 
   //----------------------------------------------------
@@ -73,7 +79,7 @@ class _UserProfileState extends State<UserProfile> {
     final clubsProvider = Provider.of<ClubsProvider>(context, listen: false);
     final clubs = clubsProvider.Clubs;
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
-    final userProfile = appUserProvider.appUser;
+    final userProfile = appUserProvider.userProfileToShow;
 
     return showDialog<void>(
       context: context,
@@ -151,7 +157,7 @@ class _UserProfileState extends State<UserProfile> {
   Widget _buildMobileUserProfile() {
     final localAppTheme = ResponsiveTheme(context).theme;
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
-    final appUser = appUserProvider.appUser;
+    final userProfileToShow = appUserProvider.userProfileToShow;
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -219,7 +225,7 @@ class _UserProfileState extends State<UserProfile> {
                     controller: firstNameController,
                     enabled: formEditable,
                     onChanged: (value) {
-                      appUser['name'] = firstNameController.text;
+                      userProfileToShow['name'] = firstNameController.text;
                     },
                   ),
                   SizedBox(height: 10.0),
@@ -234,7 +240,7 @@ class _UserProfileState extends State<UserProfile> {
                     controller: lastNameController,
                     enabled: formEditable,
                     onChanged: (value) {
-                      appUser['surname'] = lastNameController.text;
+                      userProfileToShow['surname'] = lastNameController.text;
                     },
                   ),
                   SizedBox(height: 10.0),
@@ -266,7 +272,7 @@ class _UserProfileState extends State<UserProfile> {
                     },
                     controller: dateOfBirthController,
                     onChanged: (selectedDate) {
-                      appUser['dateOfBirth'] = dateOfBirthController.text;
+                      userProfileToShow['dateOfBirth'] = dateOfBirthController.text;
                     },
                   ),
                   SizedBox(height: 20.0),
@@ -274,22 +280,22 @@ class _UserProfileState extends State<UserProfile> {
                   SizedBox(height: 20.0),
                   tickBox(
                     label: 'Running',
-                    value: appUser['athleteDisciplines']['runningBool'],
+                    value: userProfileToShow['athleteDisciplines']['runningBool'] ?? false,
                     enabled: formEditable,
                     onChanged: (bool? newValue) {
                       setState(() {
-                        appUser['athleteDisciplines']['runningBool'] = newValue ?? false;
+                        userProfileToShow['athleteDisciplines']['runningBool'] = newValue ?? false;
                       });
                     },
                     context: context,
                   ),
                   tickBox(
                     label: 'Ultra Running',
-                    value: appUser['athleteDisciplines']['ultraRunningBool'] ?? false,
+                    value: userProfileToShow['athleteDisciplines']['ultraRunningBool'] ?? false,
                     enabled: formEditable,
                     onChanged: (bool? newValue) {
                       setState(() {
-                        appUser['athleteDisciplines']['ultraRunningBool'] = newValue ?? false;
+                        userProfileToShow['athleteDisciplines']['ultraRunningBool'] = newValue ?? false;
                       });
                     },
                     context: context,
@@ -297,11 +303,11 @@ class _UserProfileState extends State<UserProfile> {
                   SizedBox(height: 10.0),
                   tickBox(
                     label: 'Cycling',
-                    value: appUser['athleteDisciplines']['cyclingBool'] ?? false,
+                    value: userProfileToShow['athleteDisciplines']['cyclingBool'] ?? false,
                     enabled: formEditable,
                     onChanged: (bool? newValue) {
                       setState(() {
-                        appUser['athleteDisciplines']['cyclingBool'] = newValue ?? false;
+                        userProfileToShow['athleteDisciplines']['cyclingBool'] = newValue ?? false;
                       });
                     },
                     context: context,
@@ -309,11 +315,11 @@ class _UserProfileState extends State<UserProfile> {
                   SizedBox(height: 10.0),
                   tickBox(
                     label: 'Swimming',
-                    value: appUser['athleteDisciplines']['swimmingBool'] ?? false,
+                    value: userProfileToShow['athleteDisciplines']['swimmingBool'] ?? false,
                     enabled: formEditable,
                     onChanged: (bool? newValue) {
                       setState(() {
-                        appUser['athleteDisciplines']['swimmingBool'] = newValue ?? false;
+                        userProfileToShow['athleteDisciplines']['swimmingBool'] = newValue ?? false;
                       });
                     },
                     context: context,
@@ -321,11 +327,11 @@ class _UserProfileState extends State<UserProfile> {
                   SizedBox(height: 10.0),
                   tickBox(
                     label: 'Triathlon',
-                    value: appUser['athleteDisciplines']['triathlonBool'] ?? false,
+                    value: userProfileToShow['athleteDisciplines']['triathlonBool'] ?? false,
                     enabled: formEditable,
                     onChanged: (bool? newValue) {
                       setState(() {
-                        appUser['athleteDisciplines']['triathlonBool'] = newValue ?? false;
+                        userProfileToShow['athleteDisciplines']['triathlonBool'] = newValue ?? false;
                       });
                     },
                     context: context,
@@ -335,18 +341,18 @@ class _UserProfileState extends State<UserProfile> {
                     children: [
                       tickBox(
                         label: 'Other',
-                        value: appUser['athleteDisciplines']['otherBool'] ?? false,
+                        value: userProfileToShow['athleteDisciplines']['otherBool'] ?? false,
                         enabled: formEditable,
                         onChanged: (bool? newValue) {
                           setState(() {
-                            appUser['athleteDisciplines']['otherBool'] = newValue ?? false;
+                            userProfileToShow['athleteDisciplines']['otherBool'] = newValue ?? false;
                           });
                         },
                         context: context,
                       ),
                       SizedBox(width: 20.0),
                       Visibility(
-                        visible: appUser['athleteDisciplines']['otherBool'] ?? false,
+                        visible: userProfileToShow['athleteDisciplines']['otherBool'] ?? false,
                         child: Expanded(
                           child: FormInputField(
                             label: 'Please specify:',
@@ -389,10 +395,10 @@ class _UserProfileState extends State<UserProfile> {
                     ),
                   ),
                   SizedBox(height: 10.0),
-                  appUser['clubs'] != null && (appUser['clubs'] as List).isNotEmpty
+                  userProfileToShow['clubs'] != null && (userProfileToShow['clubs'] as List).isNotEmpty
                       ? Column(
-                          children: List<Widget>.generate((appUser['clubs'] as List).length, (index) {
-                            final club = appUser['clubs'][index];
+                          children: List<Widget>.generate((userProfileToShow['clubs'] as List).length, (index) {
+                            final club = userProfileToShow['clubs'][index];
                             return ListTile(
                               title: body(header: club['clubName'], color: localAppTheme['anchorColors']['primaryColor'], context: context),
                               trailing: formEditable
@@ -405,7 +411,7 @@ class _UserProfileState extends State<UserProfile> {
                                       toolTip: 'REMOVE CLUB',
                                       onPressed: () {
                                         setState(() {
-                                          appUser['clubs'].removeAt(index);
+                                          userProfileToShow['clubs'].removeAt(index);
                                         });
                                       },
                                       context: context,
@@ -458,7 +464,7 @@ class _UserProfileState extends State<UserProfile> {
                             label: 'SAVE CHANGES',
                             onPressed: () async {
                               try {
-                                await appUserProvider.updateUserRecord(appUser);
+                                await appUserProvider.updateUserRecord(userProfileToShow);
                                 showGeneralPopupDialog(context, 'Success!', 'Your profile has been updated successfully.');
                                 setState(() {
                                   formEditable = false;

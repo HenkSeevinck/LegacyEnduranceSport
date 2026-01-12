@@ -6,6 +6,7 @@ import 'package:legacyendurancesport/Profile/Page/profile_page.dart';
 class InternalStatusProvider with ChangeNotifier {
   String signInsignUpStatus = 'SignIn';
   String platform = '';
+  String userUIDToShow = '';
 
   List<Map<String, dynamic>> homePageOptions = [
     {'selection': 'myProfile', 'pageName': 'MY PROFILE', 'icon': Icons.person, 'navigateTo': UserProfile(isCoachView: false), 'coachOnly': false},
@@ -65,6 +66,11 @@ class InternalStatusProvider with ChangeNotifier {
 
   Future<void> setPlatform(String value) async {
     platform = value;
+    notifyListeners();
+  }
+
+  Future<void> setUserUIDToShow(String value) async {
+    userUIDToShow = value;
     notifyListeners();
   }
 }
