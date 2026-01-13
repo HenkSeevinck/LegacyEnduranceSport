@@ -965,3 +965,131 @@ Future<void> showGeneralPopupDialog(BuildContext context, String title, String m
     },
   );
 }
+
+//----------------------------------------------------
+// Duration input Widget
+Widget durationInputWidget({
+  required BuildContext context,
+  Duration? initialDuration,
+  ValueChanged<Duration>? onChanged,
+  bool showSeconds = true,
+}) {
+  return DurationInputWidget(
+    initialDuration: initialDuration,
+    onChanged: onChanged,
+    showSeconds: showSeconds,
+  );
+}
+
+class DurationInputWidget extends StatefulWidget {
+  final Duration? initialDuration;
+  final ValueChanged<Duration>? onChanged;
+  final bool showSeconds;
+
+  const DurationInputWidget({
+    super.key,
+    this.initialDuration,
+    this.onChanged,
+    this.showSeconds = true,
+  });
+
+  @override
+  State<DurationInputWidget> createState() => _DurationInputWidgetState();
+}
+
+class _DurationInputWidgetState extends State<DurationInputWidget> {
+  late TextEditingController _hoursController;
+  late TextEditingController _minutesController;
+  late TextEditingController _secondsController;
+
+  @override
+  void initState() {
+    super.initState();
+    final d = widget.initialDuration ?? Duration.zero;
+    _hoursController = TextEditingController(text: d.inHours.toString());
+    _minutesController = TextEditingController(text: (d.inMinutes % 60).toString().padLeft(2, '0'));
+    _secondsController = TextEditingController(text: (d.inSeconds % 60).toString().padLeft(2, '0'));
+  }
+
+  @override
+  void dispose() {
+    _hoursController.dispose();
+    _minutesController.dispose();
+    _secondsController.dispose();
+    super.dispose();
+  }
+
+  void _notifyChange() {
+    final int h = int.tryParse(_hoursController.text) ?? 0;
+    int m = int.tryParse(_minutesController.text) ?? 0;
+    int s = int.tryParse(_secondsController.text) ?? 0;
+    if (m < 0) m = 0;
+    if (s < 0) s = 0;
+    if (m > 59) m = 59;
+    if (s > 59) s = 59;
+    widget.onChanged?.call(Duration(hours: h, minutes: m, seconds: s));
+    setState(() {
+      _minutesController.text = m.toString().padLeft(2, '0');
+      _secondsController.text = s.toString().padLeft(2, '0');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final localAppTheme = ResponsiveTheme(context).theme;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Expanded(
+          child: FormInputField(
+            label: 'HH', 
+            errorMessage: '', 
+            isMultiline: false, 
+            isPassword: false, 
+            prefixIcon: null,
+            suffixIcon: null, 
+            showLabel: true,
+            controller: _hoursController,
+            onChanged: (_) => _notifyChange(),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          child: body(header: ':', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+        ),
+        Expanded(
+          child: FormInputField(
+            label: 'MM', 
+            errorMessage: '', 
+            isMultiline: false, 
+            isPassword: false, 
+            prefixIcon: null,
+            suffixIcon: null, 
+            showLabel: true,
+            controller: _minutesController,
+            onChanged: (_) => _notifyChange(),
+          ),
+        ),
+        if (widget.showSeconds) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: body(header: ':', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+          ),
+          Expanded(
+          child: FormInputField(
+            label: 'SS', 
+            errorMessage: '', 
+            isMultiline: false, 
+            isPassword: false, 
+            prefixIcon: null,
+            suffixIcon: null, 
+            showLabel: true,
+            controller: _secondsController,
+            onChanged: (_) => _notifyChange(),
+          ),
+        ),
+        ],
+      ],
+    );
+  }
+}

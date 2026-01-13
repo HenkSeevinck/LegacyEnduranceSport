@@ -10,6 +10,14 @@ class InternalStatusProvider with ChangeNotifier {
   String platform = '';
   String userUIDToShow = '';
 
+  List<Map<String, dynamic>> eventTypes = [
+    {'id': 1, 'eventType': 'Run'},
+    {'id': 2, 'eventType': 'Cycle'},
+    {'id': 3, 'eventType': 'Swim'},
+    {'id': 4, 'eventType': 'Triathlon'},
+    {'id': 5, 'eventType': 'Other'},
+  ];
+
   List<Map<String, dynamic>> homePageOptions = [
     {'selection': 'myProfile', 'pageName': 'MY PROFILE', 'icon': Icons.person, 'navigateTo': UserProfile(isCoachView: false), 'coachOnly': false},
     {'selection': 'myGoals', 'pageName': 'MY GOALS', 'icon': Icons.flag, 'navigateTo': GoalsPage(), 'coachOnly': false},

@@ -37,11 +37,16 @@ class _EventPageState extends State<EventPage> {
   // Mobile Layout
   Widget _buildMobileEventPage() {
     final localAppTheme = ResponsiveTheme(context).theme;
-    //final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
-    //final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
     final eventsProvider = Provider.of<EventsProvider>(context, listen: true);
-    //final appUser = appUserProvider.appUser;
-    final events = eventsProvider.events;
+    final events = eventsProvider.events?.where((event) {
+      final eventDate = event['eventDate'];
+      if (eventDate is Timestamp) {
+        return eventDate.toDate().isAfter(DateTime.now());
+      } else if (eventDate is DateTime) {
+        return eventDate.isAfter(DateTime.now());
+      }
+      return false;
+    }).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -91,7 +96,7 @@ class _EventPageState extends State<EventPage> {
                   color: localAppTheme['anchorColors']['primaryColor'],
                 ),
                 SizedBox(height: 20.0),
-              events != null && (events as List).isNotEmpty
+              events != null && events.isNotEmpty
                   ? Column(
                       children: List<Widget>.generate(events.length, (index) {
                         final itemCount = events.length;
