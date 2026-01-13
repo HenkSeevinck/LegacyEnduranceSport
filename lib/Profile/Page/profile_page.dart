@@ -73,6 +73,18 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   //----------------------------------------------------
+  // Dispose controllers
+  @override
+  void dispose() {
+    dateOfBirthController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
+    emailController.dispose();
+    disciplineOtherController.dispose();
+    super.dispose();
+  }
+
+  //----------------------------------------------------
   // Club Selection Popup Dialog
   Future<void> _showClubSelectionPopupDialog(BuildContext context) async {
     final localAppTheme = ResponsiveTheme(context).theme;

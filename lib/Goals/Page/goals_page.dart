@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
@@ -19,6 +21,7 @@ class _GoalsPageState extends State<GoalsPage> {
   TextEditingController titleController = TextEditingController();
   TextEditingController distanceController = TextEditingController();
   TextEditingController dateController = TextEditingController();
+  TextEditingController durationController = TextEditingController();
 
   //----------------------------------------------------
   // initState load data when form is built
@@ -33,14 +36,31 @@ class _GoalsPageState extends State<GoalsPage> {
   // Fetch data function
   Future<void> _fetchData() async {
     //Add fetch functions from Providers you want to fetch data from here
+  }
+
+  //----------------------------------------------------
+  // Set Controlles
+  Future<void> _setControllers() async {
     titleController.text = '';
     distanceController.text = '';
     dateController.text = '';
+    durationController.text = 'hh:mm:ss';
+  }
+
+  //----------------------------------------------------
+  // Dispose controllers
+  @override
+  void dispose() {
+    titleController.dispose();
+    distanceController.dispose();
+    dateController.dispose();
+    durationController.dispose();
+    super.dispose();
   }
 
   //----------------------------------------------------
   // Athlete Selection Popup Dialog
-  Future<void> _showCreateGoalPopupDialog(BuildContext context) async {
+  Future<void> _showCreateGoalPopupDialog(BuildContext context, Map<String, dynamic>? goal, int? index) async {
     final localAppTheme = ResponsiveTheme(context).theme;
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
@@ -48,6 +68,7 @@ class _GoalsPageState extends State<GoalsPage> {
     //final allUsers = appUserProvider.allUsers;
     final eventTypes = internalStatusProvider.eventTypes;
     Map<String, dynamic>? selectedAthlete;
+    await _setControllers();
 
     return showDialog<void>(
       context: context,
@@ -59,7 +80,7 @@ class _GoalsPageState extends State<GoalsPage> {
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [ 
+              children: [
                 FormInputField(
                   label: 'Title:',
                   errorMessage: 'Please enter a valid goal title.',
@@ -74,11 +95,25 @@ class _GoalsPageState extends State<GoalsPage> {
                     }
                     return null;
                   },
-                  controller: titleController
+                  controller: titleController,
+                ),
+                SizedBox(height: 10.0),
+                DatePicker(
+                  buttonLabelColor: localAppTheme['anchorColors']['primaryColor'],
+                  label: 'Date:',
+                  buttonVisibility: true,
+                  initialDate: null,
+                  validator: (date) {
+                    if (date == null) {
+                      return 'Please select a valid date.';
+                    }
+                    return null;
+                  },
+                  controller: dateController,
                 ),
                 SizedBox(height: 10.0),
                 SearchableDropdown(
-                  labelText: 'Event Type:',
+                  labelText: 'Type:',
                   hint: 'Event Type',
                   dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
                   searchBoxVisable: false,
@@ -112,29 +147,28 @@ class _GoalsPageState extends State<GoalsPage> {
                     }
                     return null;
                   },
-                  controller: distanceController
+                  controller: distanceController,
                 ),
                 SizedBox(height: 10.0),
-                body(
-                  header: 'Duration:', 
-                  color: localAppTheme['anchorColors']['primaryColor'], 
-                  context: context
-                  ),
-                SizedBox(height: 5.0),
-                durationInputWidget(context: context),
-                SizedBox(height: 10.0),
-                DatePicker(
-                  buttonLabelColor: localAppTheme['anchorColors']['primaryColor'], 
-                  label: 'Date:', 
-                  buttonVisibility: true, 
-                  initialDate: null, 
-                  validator: (date) {
-                    if (date == null) {
-                      return 'Please select a valid date.';
+                FormInputField(
+                  label: 'Duration:',
+                  errorMessage: 'Please enter a valid goal duration.',
+                  isMultiline: false,
+                  isPassword: false,
+                  prefixIcon: null,
+                  suffixIcon: null,
+                  showLabel: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a valid goal duration (hh:mm:ss).';
+                    }
+                    final pattern = RegExp(r'^\d{2}:[0-5]\d:[0-5]\d$');
+                    if (!pattern.hasMatch(value)) {
+                      return 'Please enter duration in hh:mm:ss format (e.g. 01:30:00).';
                     }
                     return null;
-                  }, 
-                  controller: dateController,
+                  },
+                  controller: durationController,
                 ),
               ],
             ),
@@ -200,9 +234,19 @@ class _GoalsPageState extends State<GoalsPage> {
   // Mobile Layout
   Widget _buildMobileGoalsPage() {
     final localAppTheme = ResponsiveTheme(context).theme;
-    //final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
-    //final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
-    //final appUser = appUserProvider.appUser;
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
+    final eventTypes = internalStatusProvider.eventTypes;
+    final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
+    //final goals = appUserProvider.appUser['goals'];
+    final goals = appUserProvider.appUser['goals'].where((goal) {
+      final eventDate = goal['date'];
+      if (eventDate is Timestamp) {
+        return eventDate.toDate().isAfter(DateTime.now());
+      } else if (eventDate is DateTime) {
+        return eventDate.isAfter(DateTime.now());
+      }
+      return false;
+    }).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -261,7 +305,7 @@ class _GoalsPageState extends State<GoalsPage> {
                         size: 30,
                         toolTip: 'ADD GOAL',
                         onPressed: () {
-                          _showCreateGoalPopupDialog(context);
+                          _showCreateGoalPopupDialog(context, null, null);
                         },
                         context: context,
                       ),
@@ -269,6 +313,135 @@ class _GoalsPageState extends State<GoalsPage> {
                   ),
                 ),
                 SizedBox(height: 20.0),
+                goals != null && goals.isNotEmpty
+                    ? Column(
+                        children: List<Widget>.generate(goals.length, (index) {
+                          final itemCount = goals.length;
+                          final goal = goals[index];
+                          String eventDateStr = 'No Date Provided';
+                          final rawDate = goal['date'];
+                          if (rawDate != null) {
+                            if (rawDate is Timestamp) {
+                              eventDateStr = DateFormat.yMMMMd().add_jm().format(rawDate.toDate());
+                            } else if (rawDate is DateTime) {
+                              eventDateStr = DateFormat.yMMMMd().add_jm().format(rawDate);
+                            } else {
+                              eventDateStr = rawDate.toString();
+                            }
+                          }
+                          return Container(
+                            decoration: BoxDecoration(
+                              border: Border(
+                                top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                                bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: index == (itemCount - 1) ? 1.0 : 0.0),
+                              ),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                            child: Column(
+                              children: [
+                                SizedBox(height: 10.0),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: header2(
+                                    header: goal['title'] ?? 'Unnamed Goal',
+                                    color: localAppTheme['anchorColors']['primaryColor'],
+                                    context: context,
+                                  ),
+                                ),
+                                SizedBox(height: 10.0),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(Icons.event, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
+                                            SizedBox(width: 20.0),
+                                            body(header: eventDateStr, color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                                          ],
+                                        ),
+                                        SizedBox(height: 10.0),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.flag_outlined, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
+                                            SizedBox(width: 20.0),
+                                            body(
+                                              header: eventTypes.where((type) => type['id'] == goal['type']).map((type) => type['eventType']).first ?? 'No Type Provided',
+                                              color: localAppTheme['anchorColors']['primaryColor'],
+                                              context: context,
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 10.0),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.straighten, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
+                                            SizedBox(width: 20.0),
+                                            body(
+                                              header: '${goal['distance'].toString()} km',
+                                              color: localAppTheme['anchorColors']['primaryColor'],
+                                              context: context,
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 10.0),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.timer_outlined, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
+                                            SizedBox(width: 20.0),
+                                            body(header: goal['duration'].toString(), color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(width: 20.0),
+                                    Expanded(
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          border: Border(left: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            iconButton(
+                                              label: null,
+                                              backgroundColor: null,
+                                              iconColor: localAppTheme['anchorColors']['primaryColor'],
+                                              icon: Icons.edit_outlined,
+                                              size: 30,
+                                              toolTip: 'Edit Goal',
+                                              context: context,
+                                              onPressed: () {
+                                                _showCreateGoalPopupDialog(context, goal, index);
+                                              },
+                                            ),
+                                            SizedBox(height: 10.0),
+                                            iconButton(
+                                              label: null,
+                                              backgroundColor: null,
+                                              iconColor: localAppTheme['anchorColors']['primaryColor'],
+                                              icon: Icons.delete_outlined,
+                                              size: 30,
+                                              toolTip: 'Remove Goal',
+                                              context: context,
+                                              onPressed: () {
+                                                // Remove action
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 10.0),
+                              ],
+                            ),
+                          );
+                        }),
+                      )
+                    : Container(),
               ],
             ),
           ),

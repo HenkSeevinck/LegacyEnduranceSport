@@ -128,6 +128,7 @@ class _EventPageState extends State<EventPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 10.0),
                           child: Column(
                             children: [
+                              SizedBox(height: 10.0),
                               SizedBox(
                                 width: double.infinity,
                                 child: header2(
@@ -178,7 +179,7 @@ class _EventPageState extends State<EventPage> {
                                       Row(
                                         children: [
                                           Icon( 
-                                            Icons.flag,
+                                            Icons.flag_outlined,
                                             color: localAppTheme['anchorColors']['primaryColor'],
                                             size: 20,
                                           ),
