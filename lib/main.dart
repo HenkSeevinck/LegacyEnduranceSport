@@ -88,7 +88,7 @@ class MyApp extends StatelessWidget {
     _detectAndSetPlatform(context);
     return MaterialApp(
       theme: ThemeData(
-        primaryColor: Colors.black,
+        primaryColor: Colors.white,
       ),
       navigatorKey: navigatorKey,
       title: 'Legacy Endurance Sport',

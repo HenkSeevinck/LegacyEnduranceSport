@@ -133,68 +133,121 @@ class _EventPageState extends State<EventPage> {
                               ),
                               SizedBox(height: 10.0),
                               Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Icon( 
-                                    Icons.event,
-                                    color: localAppTheme['anchorColors']['primaryColor'],
-                                    size: 20,
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon( 
+                                            Icons.event,
+                                            color: localAppTheme['anchorColors']['primaryColor'],
+                                            size: 20,
+                                          ),
+                                          SizedBox(width: 20.0),
+                                          body(
+                                            header: eventDateStr,
+                                            color: localAppTheme['anchorColors']['primaryColor'], 
+                                            context: context,
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 10.0),
+                                      Row(
+                                        children: [
+                                          Icon( 
+                                            Icons.terrain,
+                                            color: localAppTheme['anchorColors']['primaryColor'],
+                                            size: 20,
+                                          ),
+                                          SizedBox(width: 20.0),
+                                          body(
+                                            header: event['terrain'],
+                                            color: localAppTheme['anchorColors']['primaryColor'], 
+                                            context: context,
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 10.0),
+                                      Row(
+                                        children: [
+                                          Icon( 
+                                            Icons.flag,
+                                            color: localAppTheme['anchorColors']['primaryColor'],
+                                            size: 20,
+                                          ),
+                                          SizedBox(width: 20.0),
+                                          body(
+                                            header: event['type']?.toString() ?? 'No Type Provided',
+                                            color: localAppTheme['anchorColors']['primaryColor'], 
+                                            context: context,
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 10.0),
+                                      Row(
+                                        children: [
+                                          Icon( 
+                                            Icons.straighten,
+                                            color: localAppTheme['anchorColors']['primaryColor'],
+                                            size: 20,
+                                          ),
+                                          SizedBox(width: 20.0),
+                                          body(
+                                            header: '${event['distance'].toString()} km',
+                                            color: localAppTheme['anchorColors']['primaryColor'], 
+                                            context: context,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
                                   SizedBox(width: 20.0),
-                                  body(
-                                    header: eventDateStr,
-                                    color: localAppTheme['anchorColors']['primaryColor'], 
-                                    context: context,
+                                  Expanded(
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          left: BorderSide(
+                                            color: localAppTheme['anchorColors']['primaryColor'],
+                                            width: 1.0,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Column(
+                                          children: [
+                                            iconButton(
+                                              label: null, 
+                                              backgroundColor: null, 
+                                              iconColor: localAppTheme['anchorColors']['primaryColor'], 
+                                              icon: Icons.rsvp_outlined, 
+                                              size: 30, 
+                                              toolTip: 'RSVP', 
+                                              context: context, 
+                                              onPressed: () {
+                                                // RSVP action
+                                              },
+                                            ),
+                                            SizedBox(height: 10.0),
+                                            iconButton(
+                                              label: null, 
+                                              backgroundColor: null, 
+                                              iconColor: localAppTheme['anchorColors']['primaryColor'], 
+                                              icon: Icons.group_outlined, 
+                                              size: 30, 
+                                              toolTip: 'See Attendees', 
+                                              context: context, 
+                                              onPressed: () {
+                                                // RSVP action
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                    ),
                                   ),
                                 ],
                               ),
                               SizedBox(height: 10.0),
-                              Row(
-                                children: [
-                                  Icon( 
-                                    Icons.terrain,
-                                    color: localAppTheme['anchorColors']['primaryColor'],
-                                    size: 20,
-                                  ),
-                                  SizedBox(width: 20.0),
-                                  body(
-                                    header: event['terrain'],
-                                    color: localAppTheme['anchorColors']['primaryColor'], 
-                                    context: context,
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 10.0),
-                              Row(
-                                children: [
-                                  Icon( 
-                                    Icons.flag,
-                                    color: localAppTheme['anchorColors']['primaryColor'],
-                                    size: 20,
-                                  ),
-                                  SizedBox(width: 20.0),
-                                  body(
-                                    header: event['type']?.toString() ?? 'No Type Provided',
-                                    color: localAppTheme['anchorColors']['primaryColor'], 
-                                    context: context,
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 10.0),
-                              Row(
-                                children: [
-                                  Icon( 
-                                    Icons.straighten,
-                                    color: localAppTheme['anchorColors']['primaryColor'],
-                                    size: 20,
-                                  ),
-                                  SizedBox(width: 20.0),
-                                  body(
-                                    header: '${event['distance'].toString()} km',
-                                    color: localAppTheme['anchorColors']['primaryColor'], 
-                                    context: context,
-                                  ),
-                                ],
-                              ),
                             ],
                           ),
                         );
