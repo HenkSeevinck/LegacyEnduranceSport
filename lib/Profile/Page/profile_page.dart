@@ -3,8 +3,8 @@ import 'package:legacyendurancesport/General/Providers/internal_app_providers.da
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
-import 'package:legacyendurancesport/Home/Providers/clubsprovided.dart';
-import 'package:legacyendurancesport/SignInSignUp/Providers/appuser_provider.dart';
+import 'package:legacyendurancesport/General/Providers/clubs_provided.dart';
+import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:provider/provider.dart';
 
 class UserProfile extends StatefulWidget {
@@ -77,7 +77,7 @@ class _UserProfileState extends State<UserProfile> {
   Future<void> _showClubSelectionPopupDialog(BuildContext context) async {
     final localAppTheme = ResponsiveTheme(context).theme;
     final clubsProvider = Provider.of<ClubsProvider>(context, listen: false);
-    final clubs = clubsProvider.Clubs;
+    final clubs = clubsProvider.clubs;
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
     final userProfile = appUserProvider.userProfileToShow;
 

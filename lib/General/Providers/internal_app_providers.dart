@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:legacyendurancesport/Events/Page/events_page.dart';
+import 'package:legacyendurancesport/Goals/Page/goals_page.dart';
 import 'package:legacyendurancesport/MyAthletes/Page/my_athletes_page.dart';
 import 'package:legacyendurancesport/Profile/Page/profile_page.dart';
 
@@ -10,8 +12,8 @@ class InternalStatusProvider with ChangeNotifier {
 
   List<Map<String, dynamic>> homePageOptions = [
     {'selection': 'myProfile', 'pageName': 'MY PROFILE', 'icon': Icons.person, 'navigateTo': UserProfile(isCoachView: false), 'coachOnly': false},
-    {'selection': 'myGoals', 'pageName': 'MY GOALS', 'icon': Icons.flag, 'navigateTo': SizedBox(), 'coachOnly': false},
-    {'selection': 'events', 'pageName': 'EVENTS', 'icon': Icons.event, 'navigateTo': SizedBox(), 'coachOnly': false},
+    {'selection': 'myGoals', 'pageName': 'MY GOALS', 'icon': Icons.flag, 'navigateTo': GoalsPage(), 'coachOnly': false},
+    {'selection': 'events', 'pageName': 'EVENTS', 'icon': Icons.event, 'navigateTo': EventPage(), 'coachOnly': false},
     {'selection': 'athletes', 'pageName': 'MY ATHLETES', 'icon': Icons.people, 'navigateTo': MyAthletesPage(), 'coachOnly': true},
   ];
 

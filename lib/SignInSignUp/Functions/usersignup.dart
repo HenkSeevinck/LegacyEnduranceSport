@@ -3,8 +3,8 @@ import 'package:legacyendurancesport/General/Providers/internal_app_providers.da
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
-import 'package:legacyendurancesport/SignInSignUp/Providers/appuser_provider.dart';
-import 'package:legacyendurancesport/SignInSignUp/Providers/firebase_auth_service.dart';
+import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
+import 'package:legacyendurancesport/General/Providers/firebase_auth_service.dart';
 import 'package:legacyendurancesport/SignInSignUp/Functions/validators.dart';
 import 'package:provider/provider.dart';
 

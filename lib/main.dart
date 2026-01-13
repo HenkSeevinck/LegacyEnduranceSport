@@ -2,12 +2,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:legacyendurancesport/Home/Providers/athletekeyrequests.dart';
-import 'package:legacyendurancesport/Home/Providers/clubsprovided.dart';
-import 'package:legacyendurancesport/Home/Providers/workoutsprovider.dart';
+import 'package:legacyendurancesport/General/Providers/clubs_provided.dart';
+import 'package:legacyendurancesport/General/Providers/events_provider.dart';
+import 'package:legacyendurancesport/General/Providers/workoutsprovider.dart';
 import 'package:legacyendurancesport/Landing/Page/landing_page.dart';
-import 'package:legacyendurancesport/SignInSignUp/Providers/appuser_provider.dart';
-import 'package:legacyendurancesport/SignInSignUp/Providers/firebase_auth_service.dart';
+import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
+import 'package:legacyendurancesport/General/Providers/firebase_auth_service.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
@@ -33,9 +33,9 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => InternalStatusProvider()),
         ChangeNotifierProvider(create: (_) => FirebaseAuthService()),
         ChangeNotifierProvider(create: (_) => AppUserProvider()),
-        ChangeNotifierProvider(create: (_) => AthleteKeyProvider()),
         ChangeNotifierProvider(create: (_) => WorkoutProvider()),
         ChangeNotifierProvider(create:  (_) => ClubsProvider()),
+        ChangeNotifierProvider(create:  (_) => EventsProvider()),
       ],
       child: MyApp(),
     ),
@@ -88,7 +88,7 @@ class MyApp extends StatelessWidget {
     _detectAndSetPlatform(context);
     return MaterialApp(
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primaryColor: Colors.black,
       ),
       navigatorKey: navigatorKey,
       title: 'Legacy Endurance Sport',

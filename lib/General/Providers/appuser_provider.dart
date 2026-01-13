@@ -39,7 +39,7 @@ class AppUserProvider with ChangeNotifier {
   }
 
   //--------------------------------------------------------------
-  // Method to get the user record from Firestore
+  // Method to get the logged-in user's record from Firestore
   Future<Map<String, dynamic>?> getUserRecord(String uid) async {
     final doc = await _firestore.collection('AppUsers').doc(uid).get();
     if (doc.exists) {
@@ -50,8 +50,6 @@ class AppUserProvider with ChangeNotifier {
         await _isUserCoach(uid).then((isCoach) {
           _appUser['isCoach'] = isCoach;
         });
-        
-        //_appUserDeepStore = jsonDecode(jsonEncode(_appUser));
 
         notifyListeners();
       }
@@ -61,7 +59,7 @@ class AppUserProvider with ChangeNotifier {
   }
 
   //--------------------------------------------------------------
-  // Method to get the user record from Firestore
+  // Method to get another user's profile which may be different from the logged-in user
   Future<Map<String, dynamic>?> getUserProfileToShow (String uid) async {
     final doc = await _firestore.collection('AppUsers').doc(uid).get();
     if (doc.exists) {
@@ -106,8 +104,6 @@ class AppUserProvider with ChangeNotifier {
   //--------------------------------------------------------------
   // Method to reset user data to deep store state
   Future<void> refreshDeepStore() async {
-    // Use a deep-copy to avoid assigning the same Map instance
-    // so subsequent local edits don't modify the deep store.
     _userProfileToShow = jsonDecode(jsonEncode(_appUserDeepStore));
     notifyListeners();
   }

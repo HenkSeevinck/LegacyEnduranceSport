@@ -102,18 +102,23 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
                         child: Container(
                           height: effectiveHeight,
                           decoration: BoxDecoration(
-                            color: isSelected ? Theme.of(context).colorScheme.primary.withOpacity(0.12) : Colors.transparent,
+                            color: isSelected ? localAppTheme['anchorColors']['primaryColor'].withOpacity(0.1) : Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).dividerColor,
+                              color: localAppTheme['anchorColors']['primaryColor'],
                             ),
                           ),
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Text(DateFormat.E().format(d), style: Theme.of(context).textTheme.bodySmall),
-                              const SizedBox(height: 6),
-                              Text(DateFormat.d().format(d), style: Theme.of(context).textTheme.titleMedium),
+                              //Text(DateFormat.E().format(d), style: Theme.of(context).textTheme.bodySmall),
+                              //const SizedBox(height: 6),
+                              //Text(DateFormat.d().format(d), style: Theme.of(context).textTheme.titleMedium),
+                              body(
+                                header: DateFormat.d().format(d), 
+                                color: localAppTheme['anchorColors']['primaryColor'], 
+                                context: context,
+                              ),
                             ],
                           ),
                         ),

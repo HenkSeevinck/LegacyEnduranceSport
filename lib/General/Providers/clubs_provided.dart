@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 class ClubsProvider with ChangeNotifier {
   final CollectionReference _clubsCollection = FirebaseFirestore.instance.collection('Clubs');
 
-  List<Map<String, dynamic>>? _Clubs;
-  List<Map<String, dynamic>>? get Clubs => _Clubs;
+  List<Map<String, dynamic>>? _clubs;
+  List<Map<String, dynamic>>? get clubs => _clubs;
 
   //---------------------------------------------------------------
   // Fetch all clubs from Firestore
@@ -13,7 +13,7 @@ class ClubsProvider with ChangeNotifier {
     try {
       final QuerySnapshot snapshot = await _clubsCollection.get();
 
-      _Clubs = snapshot.docs.map((doc) {
+      _clubs = snapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
         data['clubID'] = doc.id; // Add the document ID
         return data;

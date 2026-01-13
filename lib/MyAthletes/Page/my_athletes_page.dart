@@ -4,7 +4,7 @@ import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:legacyendurancesport/Profile/Page/profile_page.dart';
-import 'package:legacyendurancesport/SignInSignUp/Providers/appuser_provider.dart';
+import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:provider/provider.dart';
 
 class MyAthletesPage extends StatefulWidget {
@@ -207,8 +207,6 @@ class _MyAthletesPageState extends State<MyAthletesPage> {
                         return Container(
                           decoration: BoxDecoration(
                             border: Border(
-                              // Draw a top border for every tile (this creates the separators),
-                              // and draw a bottom border only on the last tile to close the list.
                               top: BorderSide(
                                 color: localAppTheme['anchorColors']['primaryColor'],
                                 width: 1.0,
@@ -218,7 +216,6 @@ class _MyAthletesPageState extends State<MyAthletesPage> {
                                 width: index == (itemCount - 1) ? 1.0 : 0.0,
                               ),
                             ),
-                            //borderRadius: BorderRadius.circular(8.0),
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: 10.0),
                           child: Column(
@@ -236,7 +233,7 @@ class _MyAthletesPageState extends State<MyAthletesPage> {
                                     backgroundColor: null,
                                     iconColor: localAppTheme['anchorColors']['primaryColor'],
                                     icon: Icons.delete,
-                                    size: 30,
+                                    size: 20,
                                     toolTip: 'REMOVE ATHLETE',
                                     onPressed: () async{  
                                       try {

@@ -3,8 +3,8 @@ import 'package:legacyendurancesport/General/Providers/internal_app_providers.da
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/Functions/weekdays_table.dart';
-import 'package:legacyendurancesport/Home/Providers/clubsprovided.dart';
-import 'package:legacyendurancesport/SignInSignUp/Providers/appuser_provider.dart';
+import 'package:legacyendurancesport/General/Providers/clubs_provided.dart';
+import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -25,10 +25,8 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     final clubsProvider = Provider.of<ClubsProvider>(context, listen: false);
-    
-    _fetchDataFuture = _fetchData(
-      clubsProvider
-    );
+
+    _fetchDataFuture = _fetchData(clubsProvider);
   }
 
   //----------------------------------------------------
@@ -47,17 +45,11 @@ class _HomePageState extends State<HomePage> {
     final appUser = appUserProvider.appUser;
     final isCoach = appUser['isCoach'] ?? false;
 
-     return Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: SafeArea(
           top: true,
-          child: Center(
-            child: Image.asset('images/Legacy-Endurance-Logo.png', 
-              height: 70, 
-              width: 70, 
-              fit: BoxFit.cover,
-            ),
-          ),
+          child: Center(child: Image.asset('images/Legacy-Endurance-Logo.png', height: 70, width: 70, fit: BoxFit.cover)),
         ),
       ),
       body: Padding(
@@ -65,25 +57,16 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             ExpansionTile(
-              collapsedShape: Border(
-                top: BorderSide(
-                  color: localAppTheme['anchorColors']['primaryColor'],
-                  width: 1.0,
-                ),
-              ),
+              collapsedShape: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
               showTrailingIcon: false,
-              title:  WeekDaysTable(),
-              children: [
-              body(header: 'Select an option to navigate to that page.', color: localAppTheme['anchorColors']['primaryColor'], context: context),
-              ]
+              title: WeekDaysTable(),
+              children: [body(header: 'Select an option to navigate to that page.', color: localAppTheme['anchorColors']['primaryColor'], context: context)],
             ),
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   //final itemCount = homePageOptions.length;
-                  final itemCount = isCoach
-                    ? homePageOptions.length
-                    : homePageOptions.where((option) => option['coachOnly'] == false).length;
+                  final itemCount = isCoach ? homePageOptions.length : homePageOptions.where((option) => option['coachOnly'] == false).length;
                   final availableHeight = constraints.maxHeight;
                   final availableWidth = constraints.maxWidth;
                   final itemHeight = itemCount > 0 ? availableHeight / itemCount : availableHeight;
@@ -91,61 +74,41 @@ class _HomePageState extends State<HomePage> {
                   return GridView.builder(
                     physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 1,
-                      childAspectRatio: availableWidth / itemHeight,
-                    ),
-                    itemCount: isCoach
-                      ? homePageOptions.length
-                      : homePageOptions.where((option) => option['coachOnly'] == false).length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1, childAspectRatio: availableWidth / itemHeight),
+                    itemCount: isCoach ? homePageOptions.length : homePageOptions.where((option) => option['coachOnly'] == false).length,
                     itemBuilder: (BuildContext context, int index) {
                       return InkWell(
                         onTap: () {
                           internalStatusProvider.setUserUIDToShow(appUser['uid']);
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => homePageOptions[index]['navigateTo'],
-                              ),
-                            );
+                          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => homePageOptions[index]['navigateTo']));
                         },
                         child: Container(
                           decoration: BoxDecoration(
                             border: Border(
-                              // Draw a top border for every tile (this creates the separators),
-                              // and draw a bottom border only on the last tile to close the list.
-                              top: BorderSide(
-                                color: localAppTheme['anchorColors']['primaryColor'],
-                                width: 1.0,
-                              ),
-                              bottom: BorderSide(
-                                color: localAppTheme['anchorColors']['primaryColor'],
-                                width: index == (itemCount - 1) ? 1.0 : 0.0,
-                              ),
+                              top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                              bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: index == (itemCount - 1) ? 1.0 : 0.0),
                             ),
-                            //borderRadius: BorderRadius.circular(8.0),
                           ),
-                          child: Stack(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Center(
-                                  child: Icon(  
-                                    homePageOptions[index]['icon'],
-                                    color: localAppTheme['anchorColors']['primaryColor'],
-                                    size: double.parse((itemHeight*0.4).toStringAsFixed(0)),
-                                  ),
+                                child: Icon(
+                                  homePageOptions[index]['icon'],
+                                  color: localAppTheme['anchorColors']['primaryColor'],
+                                  size: double.parse((itemHeight * 0.4).toStringAsFixed(0)),
                                 ),
-                              Positioned(
-                                bottom: 10,
-                                left: 0,
-                                right: 0,
-                                child: Center(
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-                        
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.5),
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      border: Border.all(color: localAppTheme['anchorColors']['primaryColor']),
-                                    ),
+                              ),
+                              Center(
+                                child: Container(
+                                  width: 150,
+                                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                                  decoration: BoxDecoration(
+                                    color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    border: Border.all(color: localAppTheme['anchorColors']['primaryColor']),
+                                  ),
+                                  child: Center(
                                     child: header2(
                                       header: homePageOptions[index]['pageName'],
                                       color: localAppTheme['anchorColors']['primaryColor'],
@@ -188,7 +151,7 @@ class _HomePageState extends State<HomePage> {
     return FutureBuilder<void>(
       future: _fetchDataFuture,
       builder: (context, snapshot) {
-          final localAppTheme = ResponsiveTheme(context).theme;
+        final localAppTheme = ResponsiveTheme(context).theme;
 
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());

@@ -6,14 +6,14 @@ import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:provider/provider.dart';
 
-class UpdateMe extends StatefulWidget {
-  const UpdateMe({super.key});
+class GoalsPage extends StatefulWidget {
+  const GoalsPage({super.key});
 
   @override
-  State<UpdateMe> createState() => _UpdateMeState();
+  State<GoalsPage> createState() => _GoalsPageState();
 }
 
-class _UpdateMeState extends State<UpdateMe> {
+class _GoalsPageState extends State<GoalsPage> {
   Future<void>? _fetchDataFuture;
 
   //----------------------------------------------------
@@ -33,7 +33,7 @@ class _UpdateMeState extends State<UpdateMe> {
 
   //----------------------------------------------------
   // Mobile Layout
-  Widget _buildMobileUpdateMe() {
+  Widget _buildMobileGoalsPage() {
     final localAppTheme = ResponsiveTheme(context).theme;
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
@@ -88,13 +88,13 @@ class _UpdateMeState extends State<UpdateMe> {
 
   //----------------------------------------------------
   // Desktop Layout
-  Widget _buildDesktopUpdateMe() {
+  Widget _buildDesktopGoalsPage() {
     return Scaffold(body: const Center(child: Text('Landing Page - Desktop Layout Coming Soon')));
   }
 
   //----------------------------------------------------
   // Fallback Layout
-  Widget _buildFallbackUpdateMe() {
+  Widget _buildFallbackGoalsPage() {
     return Scaffold(body: const Center(child: Text('Landing Page - Fallback Layout Coming Soon')));
   }
 
@@ -118,11 +118,11 @@ class _UpdateMeState extends State<UpdateMe> {
           final platform = internalStatusProvider.platform;
 
           if (platform == 'MobileWeb' || platform == 'Mobile') {
-            return _buildMobileUpdateMe();
+            return _buildMobileGoalsPage();
           } else if (platform == 'ComputerWeb' || platform == 'Computer') {
-            return _buildDesktopUpdateMe();
+            return _buildDesktopGoalsPage();
           } else {
-            return _buildFallbackUpdateMe();
+            return _buildFallbackGoalsPage();
           }
         }
       },
