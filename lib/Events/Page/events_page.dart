@@ -33,20 +33,34 @@ class _EventPageState extends State<EventPage> {
     await eventsProvider.fetchAllEvents();
   }
 
+  // Parse various stored date representations into a DateTime
+  DateTime? _parseToDate(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is Timestamp) return value.toDate();
+    if (value is String) return DateTime.tryParse(value);
+    return null;
+  }
+
   //----------------------------------------------------
   // Mobile Layout
   Widget _buildMobileEventPage() {
     final localAppTheme = ResponsiveTheme(context).theme;
     final eventsProvider = Provider.of<EventsProvider>(context, listen: true);
     final events = eventsProvider.events?.where((event) {
-      final eventDate = event['eventDate'];
-      if (eventDate is Timestamp) {
-        return eventDate.toDate().isAfter(DateTime.now());
-      } else if (eventDate is DateTime) {
-        return eventDate.isAfter(DateTime.now());
-      }
-      return false;
+      final eventDate = _parseToDate(event['eventDate']);
+      return eventDate != null && eventDate.isAfter(DateTime.now());
     }).toList();
+
+    // Sort earliest -> latest
+    events?.sort((a, b) {
+      final da = _parseToDate(a['eventDate']);
+      final db = _parseToDate(b['eventDate']);
+      if (da == null && db == null) return 0;
+      if (da == null) return 1; // put nulls last
+      if (db == null) return -1;
+      return da.compareTo(db);
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -80,22 +94,18 @@ class _EventPageState extends State<EventPage> {
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Container(
-            padding: const EdgeInsets.all(10.0),
-            width: double.infinity,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              border: Border.all(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                header1(
-                  header: 'Upcoming Events:', 
-                  context: context, 
-                  color: localAppTheme['anchorColors']['primaryColor'],
-                ),
-                SizedBox(height: 20.0),
+          padding: const EdgeInsets.all(10.0),
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            border: Border.all(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              header1(header: 'Upcoming Events:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+              SizedBox(height: 20.0),
               events != null && events.isNotEmpty
                   ? Column(
                       children: List<Widget>.generate(events.length, (index) {
@@ -115,14 +125,8 @@ class _EventPageState extends State<EventPage> {
                         return Container(
                           decoration: BoxDecoration(
                             border: Border(
-                              top: BorderSide(
-                                color: localAppTheme['anchorColors']['primaryColor'],
-                                width: 1.0,
-                              ),
-                              bottom: BorderSide(
-                                color: localAppTheme['anchorColors']['primaryColor'],
-                                width: index == (itemCount - 1) ? 1.0 : 0.0,
-                              ),
+                              top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                              bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: index == (itemCount - 1) ? 1.0 : 0.0),
                             ),
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -132,10 +136,10 @@ class _EventPageState extends State<EventPage> {
                               SizedBox(
                                 width: double.infinity,
                                 child: header2(
-                                  header: event['name'] ?? 'Unnamed Event', 
-                                  color: localAppTheme['anchorColors']['primaryColor'], 
+                                  header: event['name'] ?? 'Unnamed Event',
+                                  color: localAppTheme['anchorColors']['primaryColor'],
                                   context: context,
-                                  ),
+                                ),
                               ),
                               SizedBox(height: 10.0),
                               Row(
@@ -146,47 +150,27 @@ class _EventPageState extends State<EventPage> {
                                     children: [
                                       Row(
                                         children: [
-                                          Icon( 
-                                            Icons.event,
-                                            color: localAppTheme['anchorColors']['primaryColor'],
-                                            size: 20,
-                                          ),
+                                          Icon(Icons.event, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
                                           SizedBox(width: 20.0),
-                                          body(
-                                            header: eventDateStr,
-                                            color: localAppTheme['anchorColors']['primaryColor'], 
-                                            context: context,
-                                          ),
+                                          body(header: eventDateStr, color: localAppTheme['anchorColors']['primaryColor'], context: context),
                                         ],
                                       ),
                                       SizedBox(height: 10.0),
                                       Row(
                                         children: [
-                                          Icon( 
-                                            Icons.terrain,
-                                            color: localAppTheme['anchorColors']['primaryColor'],
-                                            size: 20,
-                                          ),
+                                          Icon(Icons.terrain, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
                                           SizedBox(width: 20.0),
-                                          body(
-                                            header: event['terrain'],
-                                            color: localAppTheme['anchorColors']['primaryColor'], 
-                                            context: context,
-                                          ),
+                                          body(header: event['terrain'], color: localAppTheme['anchorColors']['primaryColor'], context: context),
                                         ],
                                       ),
                                       SizedBox(height: 10.0),
                                       Row(
                                         children: [
-                                          Icon( 
-                                            Icons.flag_outlined,
-                                            color: localAppTheme['anchorColors']['primaryColor'],
-                                            size: 20,
-                                          ),
+                                          Icon(Icons.flag_outlined, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
                                           SizedBox(width: 20.0),
                                           body(
                                             header: event['type']?.toString() ?? 'No Type Provided',
-                                            color: localAppTheme['anchorColors']['primaryColor'], 
+                                            color: localAppTheme['anchorColors']['primaryColor'],
                                             context: context,
                                           ),
                                         ],
@@ -194,61 +178,51 @@ class _EventPageState extends State<EventPage> {
                                       SizedBox(height: 10.0),
                                       Row(
                                         children: [
-                                          Icon( 
-                                            Icons.straighten,
-                                            color: localAppTheme['anchorColors']['primaryColor'],
-                                            size: 20,
-                                          ),
+                                          Icon(Icons.straighten, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
                                           SizedBox(width: 20.0),
                                           body(
                                             header: '${event['distance'].toString()} km',
-                                            color: localAppTheme['anchorColors']['primaryColor'], 
+                                            color: localAppTheme['anchorColors']['primaryColor'],
                                             context: context,
                                           ),
                                         ],
                                       ),
                                     ],
                                   ),
-                                  SizedBox(width: 20.0),
-                                  Expanded(
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        border: Border(
-                                          left: BorderSide(
-                                            color: localAppTheme['anchorColors']['primaryColor'],
-                                            width: 1.0,
-                                          ),
+                                  Container(
+                                    width: 75,
+                                    padding: const EdgeInsets.only(left: 10.0),
+                                    decoration: BoxDecoration(
+                                      border: Border(left: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        iconButton(
+                                          label: null,
+                                          backgroundColor: null,
+                                          iconColor: localAppTheme['anchorColors']['primaryColor'],
+                                          icon: Icons.rsvp_outlined,
+                                          size: 30,
+                                          toolTip: 'RSVP',
+                                          context: context,
+                                          onPressed: () {
+                                            // RSVP action
+                                          },
                                         ),
-                                      ),
-                                      child: Column(
-                                          children: [
-                                            iconButton(
-                                              label: null, 
-                                              backgroundColor: null, 
-                                              iconColor: localAppTheme['anchorColors']['primaryColor'], 
-                                              icon: Icons.rsvp_outlined, 
-                                              size: 30, 
-                                              toolTip: 'RSVP', 
-                                              context: context, 
-                                              onPressed: () {
-                                                // RSVP action
-                                              },
-                                            ),
-                                            SizedBox(height: 10.0),
-                                            iconButton(
-                                              label: null, 
-                                              backgroundColor: null, 
-                                              iconColor: localAppTheme['anchorColors']['primaryColor'], 
-                                              icon: Icons.group_outlined, 
-                                              size: 30, 
-                                              toolTip: 'See Attendees', 
-                                              context: context, 
-                                              onPressed: () {
-                                                // RSVP action
-                                              },
-                                            ),
-                                          ],
+                                        SizedBox(height: 10.0),
+                                        iconButton(
+                                          label: null,
+                                          backgroundColor: null,
+                                          iconColor: localAppTheme['anchorColors']['primaryColor'],
+                                          icon: Icons.group_outlined,
+                                          size: 30,
+                                          toolTip: 'See Attendees',
+                                          context: context,
+                                          onPressed: () {
+                                            // RSVP action
+                                          },
                                         ),
+                                      ],
                                     ),
                                   ),
                                 ],
@@ -260,9 +234,9 @@ class _EventPageState extends State<EventPage> {
                       }),
                     )
                   : Container(),
-              ],
-            ),
+            ],
           ),
+        ),
       ),
     );
   }

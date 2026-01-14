@@ -20,11 +20,28 @@ class AppUserProvider with ChangeNotifier {
   List<Map<String, dynamic>> get allUsers => _allUsers;
 
   //--------------------------------------------------------------
+  // Helper to convert Firestore types (e.g. Timestamp) into JSON-encodable
+  // values so jsonEncode/jsonDecode won't throw. Keeps strings for dates.
+  dynamic _safeForJson(dynamic value) {
+    if (value is Timestamp) return value.toDate().toIso8601String();
+    if (value is Map) {
+      final Map<String, dynamic> out = {};
+      value.forEach((k, v) {
+        out[k.toString()] = _safeForJson(v);
+      });
+      return out;
+    }
+    if (value is List) {
+      return value.map((e) => _safeForJson(e)).toList();
+    }
+    return value;
+  }
+
   // Method to create a new user record in Firestore
   Future<void> createUserRecord(User user) async {
     await _firestore.collection('AppUsers').doc(user.uid).set({'uid': user.uid, 'email': user.email});
     _appUser = {'uid': user.uid, 'email': user.email};
-    _appUserDeepStore = jsonDecode(jsonEncode(_appUser));
+    _appUserDeepStore = _safeForJson(_appUser) as Map<String, dynamic>;
     notifyListeners();
   }
 
@@ -34,7 +51,7 @@ class AppUserProvider with ChangeNotifier {
     await _firestore.collection('AppUsers').doc(data['uid']).update(data);
     _appUser = {..._appUser, ...data};
     // Only update deep store after a successful submit to Firestore.
-    _appUserDeepStore = jsonDecode(jsonEncode(_appUser));
+    _appUserDeepStore = _safeForJson(_appUser) as Map<String, dynamic>;
     notifyListeners();
   }
 
@@ -67,7 +84,7 @@ class AppUserProvider with ChangeNotifier {
       if (data != null) {
        
         _userProfileToShow = {'uid': uid, ...data};
-        _appUserDeepStore = jsonDecode(jsonEncode(_userProfileToShow));
+        _appUserDeepStore = _safeForJson(_userProfileToShow) as Map<String, dynamic>;
 
         notifyListeners();
       }

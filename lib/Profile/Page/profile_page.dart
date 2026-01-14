@@ -224,7 +224,17 @@ class _UserProfileState extends State<UserProfile> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  header1(header: 'Profile:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                  !widget.isCoachView
+                    ? header1(
+                        header: 'My Profile:', 
+                        context: context, color: 
+                        localAppTheme['anchorColors']['primaryColor'],
+                      )
+                    : header1(
+                        header: '${userProfileToShow['name'] ?? 'XXX'}\'s Profile:', 
+                        context: context, 
+                        color: localAppTheme['anchorColors']['primaryColor'],
+                      ),
                   SizedBox(height: 20.0),
                   FormInputField(
                     label: 'First Name:',
@@ -528,6 +538,7 @@ class _UserProfileState extends State<UserProfile> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
+          print('snapshot error: ${snapshot.error}');
           return Center(
             child: body(header: 'Error: ${snapshot.error}', color: localAppTheme['anchorColors']['primaryColor'], context: context),
           );

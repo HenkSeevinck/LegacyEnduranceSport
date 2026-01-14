@@ -153,6 +153,7 @@ class FormInputField extends StatefulWidget {
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
   final bool? readOnly;
+  final Color? backgroundColor;
 
   const FormInputField({
     super.key,
@@ -169,6 +170,7 @@ class FormInputField extends StatefulWidget {
     this.enabled,
     this.validator,
     this.onChanged,
+    this.backgroundColor,
   });
 
   @override
@@ -211,7 +213,7 @@ class _FormInputFieldState extends State<FormInputField> {
         readOnly: widget.readOnly ?? false,
         decoration: InputDecoration(
           filled: true,
-          fillColor: localAppTheme['anchorColors']['secondaryColor'],
+          fillColor: widget.backgroundColor ?? localAppTheme['anchorColors']['secondaryColor'],
           suffixIcon: widget.isPassword ? IconButton(icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off), onPressed: _toggleVisibility) : (widget.suffixIcon != null ? Icon(widget.suffixIcon) : null),
           suffixIconColor: localAppTheme['anchorColors']['primaryColor'],
           prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
@@ -290,15 +292,21 @@ Widget elevatedButton({required String label, required VoidCallback? onPressed, 
 
 //------------------------------------------------------------------------
 //Text Button
-Widget textButton({required String label, required VoidCallback? onPressed, required Color? labelColor, required IconData? leadingIcon, required IconData? trailingIcon, required BuildContext context}) {
+Widget textButton({
+  required String label, 
+  required VoidCallback? onPressed, 
+  required Color? labelColor, 
+  required IconData? leadingIcon, 
+  required IconData? trailingIcon, 
+  required BuildContext context}) {
   final localAppTheme = ResponsiveTheme(context).theme;
   return TextButton(
     style: ButtonStyle(
       foregroundColor: WidgetStateProperty.all(labelColor),
       shape: WidgetStateProperty.all(
         RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: BorderSide(color: labelColor!, width: 3),
+          borderRadius: BorderRadius.circular(3),
+          side: BorderSide(color: labelColor!, width: 1),
         ),
       ),
     ),
@@ -750,7 +758,8 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
               FormInputField(
                 label: widget.labelText, 
                 errorMessage: '', 
-                isMultiline: false, 
+                isMultiline: false,
+                backgroundColor: widget.backgroundColor,
                 isPassword: false, 
                 prefixIcon: null, 
                 suffixIcon: null, 
@@ -788,11 +797,11 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
                         errorText: field.errorText,
                       ),
                       isEmpty: field.value == null,
-                      child: DropdownButtonHideUnderline(
+                        child: DropdownButtonHideUnderline(
                         child: DropdownButton<Map<String, dynamic>>(
                           isExpanded: true,
                           hint: body(header: widget.hint, color: widget.dropdownTextColor, context: context),
-                          value: field.value,
+                          value: selectedItem,
                           items: filteredItems.map((item) {
                             return DropdownMenuItem<Map<String, dynamic>>(
                               value: item,
@@ -813,6 +822,8 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
                         ),
                       ),
                     );
+                    // Keep FormField state in sync with our selectedItem when
+                    // initialValue changes from the parent.
                   },
                 ),
               ),

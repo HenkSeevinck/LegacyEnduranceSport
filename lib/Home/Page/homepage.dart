@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:legacyendurancesport/General/Providers/events_provider.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
@@ -25,14 +26,16 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     final clubsProvider = Provider.of<ClubsProvider>(context, listen: false);
+    final eventsProvider = Provider.of<EventsProvider>(context, listen: false);
 
-    _fetchDataFuture = _fetchData(clubsProvider);
+    _fetchDataFuture = _fetchData(clubsProvider, eventsProvider);
   }
 
   //----------------------------------------------------
   // Fetch data function
-  Future<void> _fetchData(ClubsProvider clubsProvider) async {
+  Future<void> _fetchData(ClubsProvider clubsProvider, EventsProvider eventsProvider) async {
     await clubsProvider.fetchAllClubs();
+    await eventsProvider.fetchAllEvents();
   }
 
   //----------------------------------------------------

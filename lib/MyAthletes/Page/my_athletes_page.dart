@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
+import 'package:legacyendurancesport/Goals/Page/goals_page.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:legacyendurancesport/Profile/Page/profile_page.dart';
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
@@ -283,10 +284,19 @@ class _MyAthletesPageState extends State<MyAthletesPage> {
                                     label: 'GOALS', 
                                     backgroundColor: null, 
                                     iconColor: localAppTheme['anchorColors']['primaryColor'], 
-                                    icon: Icons.flag, 
+                                    icon: Icons.flag_outlined, 
                                     size: 30, 
                                     toolTip: 'VIEW GOALS', 
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      internalStatusProvider.setUserUIDToShow(athlete['uid']);
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => GoalsPage(
+                                            isCoachView: true,
+                                          ),
+                                        ),
+                                      );
+                                    },
                                     context: context, 
                                   ),
                                   iconButton(
@@ -326,6 +336,8 @@ class _MyAthletesPageState extends State<MyAthletesPage> {
     return Scaffold(body: const Center(child: Text('Landing Page - Fallback Layout Coming Soon')));
   }
 
+  //----------------------------------------------------
+  // Build Method
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<void>(

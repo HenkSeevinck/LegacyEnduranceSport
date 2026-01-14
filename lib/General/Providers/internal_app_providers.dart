@@ -20,7 +20,7 @@ class InternalStatusProvider with ChangeNotifier {
 
   List<Map<String, dynamic>> homePageOptions = [
     {'selection': 'myProfile', 'pageName': 'MY PROFILE', 'icon': Icons.person, 'navigateTo': UserProfile(isCoachView: false), 'coachOnly': false},
-    {'selection': 'myGoals', 'pageName': 'MY GOALS', 'icon': Icons.flag, 'navigateTo': GoalsPage(), 'coachOnly': false},
+    {'selection': 'myGoals', 'pageName': 'MY GOALS', 'icon': Icons.flag_outlined, 'navigateTo': GoalsPage(isCoachView: false), 'coachOnly': false},
     {'selection': 'events', 'pageName': 'EVENTS', 'icon': Icons.event, 'navigateTo': EventPage(), 'coachOnly': false},
     {'selection': 'athletes', 'pageName': 'MY ATHLETES', 'icon': Icons.people, 'navigateTo': MyAthletesPage(), 'coachOnly': true},
   ];
