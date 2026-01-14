@@ -485,7 +485,16 @@ class _GoalsPageState extends State<GoalsPage> {
                   toolTip: 'BACK',
                   context: context,
                   onPressed: () {
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
+                    if (widget.isCoachView) {
+                      Navigator.of(context).pop();
+                      return;
+                    } else {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => HomePage()
+                        ),
+                      );
+                    }
                   },
                 ),
               ),

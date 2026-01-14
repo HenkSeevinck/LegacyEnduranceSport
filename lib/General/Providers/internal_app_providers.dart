@@ -23,6 +23,7 @@ class InternalStatusProvider with ChangeNotifier {
     {'selection': 'myGoals', 'pageName': 'MY GOALS', 'icon': Icons.flag_outlined, 'navigateTo': GoalsPage(isCoachView: false), 'coachOnly': false},
     {'selection': 'events', 'pageName': 'EVENTS', 'icon': Icons.event, 'navigateTo': EventPage(), 'coachOnly': false},
     {'selection': 'athletes', 'pageName': 'MY ATHLETES', 'icon': Icons.people, 'navigateTo': MyAthletesPage(), 'coachOnly': true},
+    {'selection': 'workouts', 'pageName': 'MY WORKOUTS', 'icon': Icons.fitness_center, 'navigateTo': MyAthletesPage(), 'coachOnly': true},
   ];
 
   List<Map<String, dynamic>> longRangePlanBlocks = [

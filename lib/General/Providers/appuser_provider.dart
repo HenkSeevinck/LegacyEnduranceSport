@@ -67,6 +67,12 @@ class AppUserProvider with ChangeNotifier {
         await _isUserCoach(uid).then((isCoach) {
           _appUser['isCoach'] = isCoach;
         });
+        await _isUserAdmin(uid).then((isAdmin) {
+          _appUser['isAdmin'] = isAdmin;
+        });
+        await _isUserModerator(uid).then((isModerator) {
+          _appUser['isModerator'] = isModerator;
+        });
 
         notifyListeners();
       }
@@ -142,6 +148,46 @@ class AppUserProvider with ChangeNotifier {
       return false;
     } catch (e) {
       Exception('Error checking admin status: $e'); // Log the error
+      rethrow;
+    }
+  }
+
+  //--------------------------------------------------------------
+  // Check if user is admininator
+  Future<bool> _isUserAdmin(String userID) async {
+    try {
+      final query = await FirebaseFirestore.instance.collection('Administrators').where('uid', isEqualTo: userID).limit(1).get();
+      if (query.docs.isNotEmpty) {
+        final Map<String, dynamic> data = query.docs.first.data();
+        if (data.isNotEmpty) {
+          _appUser['isAdmin'] = true;
+          notifyListeners();
+          return true;
+        }
+      }
+      return false;
+    } catch (e) {
+      Exception('Error checking admin status: $e'); // Log the error
+      rethrow;
+    }
+  }
+
+  //--------------------------------------------------------------
+  // Check if user is moderator
+  Future<bool> _isUserModerator(String userID) async {
+    try {
+      final query = await FirebaseFirestore.instance.collection('Moderators').where('uid', isEqualTo: userID).limit(1).get();
+      if (query.docs.isNotEmpty) {
+        final Map<String, dynamic> data = query.docs.first.data();
+        if (data.isNotEmpty) {
+          _appUser['isModerator'] = true;
+          notifyListeners();
+          return true;
+        }
+      }
+      return false;
+    } catch (e) {
+      Exception('Error checking moderator status: $e'); // Log the error
       rethrow;
     }
   }

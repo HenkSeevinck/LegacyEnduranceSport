@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/General/Providers/events_provider.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
@@ -47,6 +48,10 @@ class _EventPageState extends State<EventPage> {
   Widget _buildMobileEventPage() {
     final localAppTheme = ResponsiveTheme(context).theme;
     final eventsProvider = Provider.of<EventsProvider>(context, listen: true);
+    final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
+    final eventTypes = internalStatusProvider.eventTypes;
+    final appUser = appUserProvider.appUser;
     final events = eventsProvider.events?.where((event) {
       final eventDate = _parseToDate(event['eventDate']);
       return eventDate != null && eventDate.isAfter(DateTime.now());
@@ -111,6 +116,7 @@ class _EventPageState extends State<EventPage> {
                       children: List<Widget>.generate(events.length, (index) {
                         final itemCount = events.length;
                         final event = events[index];
+                        final hasRSVPed = event['attendees'] != null && (event['attendees'] as List).contains(appUser['uid']);
                         String eventDateStr = 'No Date Provided';
                         final rawDate = event['eventDate'];
                         if (rawDate != null) {
@@ -169,7 +175,7 @@ class _EventPageState extends State<EventPage> {
                                           Icon(Icons.flag_outlined, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
                                           SizedBox(width: 20.0),
                                           body(
-                                            header: event['type']?.toString() ?? 'No Type Provided',
+                                            header: eventTypes.firstWhere((type) => type['id'] == event['type'])['eventType'] ?? 'Unknown',
                                             color: localAppTheme['anchorColors']['primaryColor'],
                                             context: context,
                                           ),
@@ -200,13 +206,25 @@ class _EventPageState extends State<EventPage> {
                                         iconButton(
                                           label: null,
                                           backgroundColor: null,
-                                          iconColor: localAppTheme['anchorColors']['primaryColor'],
+                                          iconColor: hasRSVPed ? Colors.green : localAppTheme['anchorColors']['primaryColor'],
                                           icon: Icons.rsvp_outlined,
                                           size: 30,
                                           toolTip: 'RSVP',
                                           context: context,
                                           onPressed: () {
-                                            // RSVP action
+                                            try{
+                                            if (!hasRSVPed) {
+                                              eventsProvider.updateEvent(event['eventID'], {
+                                                'attendees': FieldValue.arrayUnion(appUser['uid'] != null ? [appUser['uid']] : []),
+                                              });
+                                            } else {
+                                              eventsProvider.updateEvent(event['eventID'], {
+                                                'attendees': FieldValue.arrayRemove(appUser['uid'] != null ? [appUser['uid']] : []),
+                                              });
+                                            }
+                                            } catch (e) {
+                                              showGeneralPopupDialog(context, 'Error', 'An error occurred while updating your RSVP. Please try again later.');
+                                            }
                                           },
                                         ),
                                         SizedBox(height: 10.0),
@@ -219,7 +237,7 @@ class _EventPageState extends State<EventPage> {
                                           toolTip: 'See Attendees',
                                           context: context,
                                           onPressed: () {
-                                            // RSVP action
+                                            
                                           },
                                         ),
                                       ],

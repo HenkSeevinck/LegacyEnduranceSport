@@ -129,6 +129,45 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
             ),
+            appUser['isAdmin'] || appUser['isModerator']
+                ? Column(
+                  children: [
+                    SizedBox(height: 10.0),
+                    Row(
+                      children: [
+                        Visibility(
+                          visible: appUser['isAdmin'] ?? false,
+                          child: Expanded(
+                            child: elevatedButton(
+                              label: 'Activate Admin', 
+                              onPressed: (){}, 
+                              backgroundColor: localAppTheme['anchorColors']['primaryColor'], 
+                              labelColor: localAppTheme['anchorColors']['secondaryColor'], 
+                              leadingIcon: null, 
+                              trailingIcon: null, 
+                              context: context,
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: appUser['isModerator'] ?? false,
+                          child: Expanded(
+                            child: elevatedButton(
+                              label: 'Activate Moderator', 
+                              onPressed: (){}, 
+                              backgroundColor: localAppTheme['anchorColors']['primaryColor'], 
+                              labelColor: localAppTheme['anchorColors']['secondaryColor'], 
+                              leadingIcon: null, 
+                              trailingIcon: null, 
+                              context: context,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                )
+                : const SizedBox.shrink(),
           ],
         ),
       ),

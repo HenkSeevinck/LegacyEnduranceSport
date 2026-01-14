@@ -23,4 +23,30 @@ class EventsProvider with ChangeNotifier {
       rethrow; // Re-throw the error for further handling if needed
     }
   }
+  
+  //---------------------------------------------------------------
+  // Update an event in Firestore
+  Future<void> updateEvent(String eventID, Map<String, dynamic> updatedData) async {
+    try {
+      // Apply update on server
+      await _eventsCollection.doc(eventID).update(updatedData);
+      final doc = await _eventsCollection.doc(eventID).get();
+      if (doc.exists) {
+        final serverData = doc.data() as Map<String, dynamic>;
+        serverData['eventID'] = doc.id;
+        if (_events != null) {
+          final index = _events!.indexWhere((event) => event['eventID'] == eventID);
+          if (index != -1) {
+            _events![index] = serverData;
+          } else {
+            _events!.add(serverData);
+          }
+          notifyListeners();
+        }
+      }
+    } catch (e) {
+      Exception('Error updating Event: $e');
+      rethrow; // Re-throw the error for further handling if needed
+    }
+  }
 }
