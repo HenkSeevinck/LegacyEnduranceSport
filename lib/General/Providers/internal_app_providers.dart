@@ -3,6 +3,7 @@ import 'package:legacyendurancesport/Events/Page/events_page.dart';
 import 'package:legacyendurancesport/Goals/Page/goals_page.dart';
 import 'package:legacyendurancesport/MyAthletes/Page/my_athletes_page.dart';
 import 'package:legacyendurancesport/Profile/Page/profile_page.dart';
+import 'package:legacyendurancesport/Workouts/Page/workouts_page.dart';
 
 //Form Status Provider
 class InternalStatusProvider with ChangeNotifier {
@@ -23,7 +24,7 @@ class InternalStatusProvider with ChangeNotifier {
     {'selection': 'myGoals', 'pageName': 'MY GOALS', 'icon': Icons.flag_outlined, 'navigateTo': GoalsPage(isCoachView: false), 'coachOnly': false},
     {'selection': 'events', 'pageName': 'EVENTS', 'icon': Icons.event, 'navigateTo': EventPage(), 'coachOnly': false},
     {'selection': 'athletes', 'pageName': 'MY ATHLETES', 'icon': Icons.people, 'navigateTo': MyAthletesPage(), 'coachOnly': true},
-    {'selection': 'workouts', 'pageName': 'MY WORKOUTS', 'icon': Icons.fitness_center, 'navigateTo': MyAthletesPage(), 'coachOnly': true},
+    {'selection': 'workouts', 'pageName': 'MY WORKOUTS', 'icon': Icons.fitness_center, 'navigateTo': Workouts(), 'coachOnly': true},
   ];
 
   List<Map<String, dynamic>> longRangePlanBlocks = [
@@ -53,9 +54,10 @@ class InternalStatusProvider with ChangeNotifier {
   ];
 
   List<Map<String, dynamic>> workoutTypes = [
-    {'workoutTypeID': 1, 'workoutType': 'run', 'icon': Icons.directions_run, 'color': Colors.blue},
-    {'workoutTypeID': 2, 'workoutType': 'cycle', 'icon': Icons.directions_bike, 'color': Colors.green},
-    {'workoutTypeID': 3, 'workoutType': 'swim', 'icon': Icons.pool, 'color': Colors.teal},
+    {'workoutTypeID': 1, 'workoutType': 'Run', 'icon': Icons.directions_run, 'color': Colors.blue},
+    {'workoutTypeID': 2, 'workoutType': 'Cycle', 'icon': Icons.directions_bike, 'color': Colors.green},
+    {'workoutTypeID': 3, 'workoutType': 'Swim', 'icon': Icons.pool, 'color': Colors.teal},
+    {'workoutTypeID': 4, 'workoutType': 'Workout', 'icon': Icons.fitness_center, 'color': Colors.orange},
   ];
 
   List<Map<String, dynamic>> durationTypes = [

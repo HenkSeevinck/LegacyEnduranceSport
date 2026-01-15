@@ -197,13 +197,33 @@ class _FormInputFieldState extends State<FormInputField> {
   Widget build(BuildContext context) {
     final localAppTheme = ResponsiveTheme(context).theme;
 
-    return SizedBox(
-      height: localAppTheme['formInputFieldHeight'],
-      child: TextFormField(
+    final decoration = InputDecoration(
+      filled: true,
+      fillColor: widget.backgroundColor ?? localAppTheme['anchorColors']['secondaryColor'],
+      suffixIcon: widget.isPassword
+          ? IconButton(icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off), onPressed: _toggleVisibility)
+          : (widget.suffixIcon != null ? Icon(widget.suffixIcon) : null),
+      suffixIconColor: localAppTheme['anchorColors']['primaryColor'],
+      prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
+      prefixIconColor: localAppTheme['anchorColors']['primaryColor'],
+      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 2)),
+      border: OutlineInputBorder(borderSide: BorderSide(color: localAppTheme['anchorColors']['primaryColor'])),
+      hintText: !widget.showLabel ? widget.label : null,
+      hintStyle: localAppTheme['font'](textStyle: TextStyle(color: localAppTheme['anchorColors']['primaryColor'])),
+      labelText: widget.showLabel ? widget.label : null,
+      contentPadding: const EdgeInsets.only(bottom: 10, left: 10),
+      labelStyle: localAppTheme['font'](
+        textStyle: TextStyle(fontSize: localAppTheme['bodySize'], color: localAppTheme['anchorColors']['primaryColor']),
+      ),
+    );
+
+    // For multiline inputs allow the TextFormField to size itself (no fixed height).
+    if (widget.isMultiline) {
+      return TextFormField(
         style: localAppTheme['font'](
           textStyle: TextStyle(
-            color: localAppTheme['anchorColors']['primaryColor'], 
-            fontSize: localAppTheme['bodySize']
+            color: localAppTheme['anchorColors']['primaryColor'],
+            fontSize: localAppTheme['bodySize'],
           ),
         ),
         autocorrect: true,
@@ -211,25 +231,34 @@ class _FormInputFieldState extends State<FormInputField> {
         controller: widget.controller,
         obscureText: widget.isPassword ? _obscureText : false,
         readOnly: widget.readOnly ?? false,
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: widget.backgroundColor ?? localAppTheme['anchorColors']['secondaryColor'],
-          suffixIcon: widget.isPassword ? IconButton(icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off), onPressed: _toggleVisibility) : (widget.suffixIcon != null ? Icon(widget.suffixIcon) : null),
-          suffixIconColor: localAppTheme['anchorColors']['primaryColor'],
-          prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
-          prefixIconColor: localAppTheme['anchorColors']['primaryColor'],
-          focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 2)),
-          border: OutlineInputBorder(borderSide: BorderSide(color: localAppTheme['anchorColors']['primaryColor'])),
-          hintText: !widget.showLabel ? widget.label : null,
-          hintStyle: localAppTheme['font'](textStyle: TextStyle(color: localAppTheme['anchorColors']['primaryColor'])),
-          labelText: widget.showLabel ? widget.label : null,
-          contentPadding: EdgeInsets.only(bottom: 10, left: 10),
-          labelStyle: localAppTheme['font'](
-            textStyle: TextStyle(fontSize: localAppTheme['bodySize'], color: localAppTheme['anchorColors']['primaryColor']),
+        decoration: decoration,
+        maxLines: null,
+        minLines: 3,
+        validator: widget.validator,
+        initialValue: widget.controller == null ? widget.initialValue : null,
+        enabled: widget.enabled,
+        onChanged: widget.onChanged,
+      );
+    }
+
+    // Single-line inputs keep the fixed height for consistent layout.
+    return SizedBox(
+      height: localAppTheme['formInputFieldHeight'],
+      child: TextFormField(
+        style: localAppTheme['font'](
+          textStyle: TextStyle(
+            color: localAppTheme['anchorColors']['primaryColor'],
+            fontSize: localAppTheme['bodySize'],
           ),
         ),
-        maxLines: widget.isMultiline ? null : 1,
-        minLines: widget.isMultiline ? 3 : 1,
+        autocorrect: true,
+        enableSuggestions: true,
+        controller: widget.controller,
+        obscureText: widget.isPassword ? _obscureText : false,
+        readOnly: widget.readOnly ?? false,
+        decoration: decoration,
+        maxLines: 1,
+        minLines: 1,
         validator: widget.validator,
         initialValue: widget.controller == null ? widget.initialValue : null,
         enabled: widget.enabled,

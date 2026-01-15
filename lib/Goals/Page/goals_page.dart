@@ -85,7 +85,6 @@ class _GoalsPageState extends State<GoalsPage> {
       dateController.text = '';
     }
 
-    print('Updating controllers with goal: $goal');
     titleController.text = (goal['title'] ?? '').toString();
     distanceController.text = (goal['distance'] ?? '').toString();
     durationController.text = (goal['duration'] ?? '').toString();
