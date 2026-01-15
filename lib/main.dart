@@ -2,9 +2,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:legacyendurancesport/General/Providers/ai_provider.dart';
 import 'package:legacyendurancesport/General/Providers/clubs_provided.dart';
 import 'package:legacyendurancesport/General/Providers/events_provider.dart';
-import 'package:legacyendurancesport/General/Providers/workoutsprovider.dart';
+import 'package:legacyendurancesport/General/Providers/workouts_provider.dart';
 import 'package:legacyendurancesport/Landing/Page/landing_page.dart';
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/General/Providers/firebase_auth_service.dart';
@@ -33,9 +34,10 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => InternalStatusProvider()),
         ChangeNotifierProvider(create: (_) => FirebaseAuthService()),
         ChangeNotifierProvider(create: (_) => AppUserProvider()),
-        ChangeNotifierProvider(create: (_) => WorkoutProvider()),
         ChangeNotifierProvider(create:  (_) => ClubsProvider()),
         ChangeNotifierProvider(create:  (_) => EventsProvider()),
+        ChangeNotifierProvider(create:  (_) => WorkoutsProvider()),
+        ChangeNotifierProvider(create:  (_) => AiProvider()),
       ],
       child: MyApp(),
     ),

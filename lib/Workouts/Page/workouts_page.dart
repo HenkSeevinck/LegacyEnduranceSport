@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:legacyendurancesport/General/Providers/ai_provider.dart';
+import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
+import 'package:legacyendurancesport/General/Providers/workouts_provider.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
-//import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:provider/provider.dart';
 
@@ -25,13 +27,16 @@ class _WorkoutsState extends State<Workouts> {
   @override
   void initState() {
     super.initState();
-    _fetchDataFuture = _fetchData();
+    final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
+    final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
+    _fetchDataFuture = _fetchData(workoutsProvider, appUserProvider);
   }
 
   //----------------------------------------------------
   // Fetch data function
-  Future<void> _fetchData() async {
-    //Add fetch functions from Providers you want to fetch data from here
+  Future<void> _fetchData(WorkoutsProvider workoutsProvider, AppUserProvider appUserProvider) async {
+    final appUser = appUserProvider.appUser;
+    await workoutsProvider.fetchWorkoutsForCoach(appUser['uid']);
   }
 
   //----------------------------------------------------
@@ -69,6 +74,10 @@ class _WorkoutsState extends State<Workouts> {
   _showCreateWorkoutPopupDialog(BuildContext context, Map<String, dynamic>? workout, int? index) async {
     final localAppTheme = ResponsiveTheme(context).theme;
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
+    final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
+    final appUser = appUserProvider.appUser;
+    final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
+    final aiProvider = Provider.of<AiProvider>(context, listen: false);
     final focusBlocks = internalStatusProvider.focusBlocks;
     final workoutTypes = internalStatusProvider.workoutTypes;
     final formKey = GlobalKey<FormState>();
@@ -88,28 +97,13 @@ class _WorkoutsState extends State<Workouts> {
           content: SingleChildScrollView(
             child: StatefulBuilder(
               builder: (BuildContext context, void Function(void Function()) setStateDialog) {
+                // assign the builder's setState to the outer reference
+                //setStateDialogRef = setStateDialog;
                 return Form(
                   key: formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      FormInputField(
-                        label: 'Workout Name:',
-                        errorMessage: 'Please enter a workout name',
-                        isMultiline: false,
-                        isPassword: false,
-                        prefixIcon: null,
-                        suffixIcon: null,
-                        showLabel: true,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a workout name';
-                          }
-                          return null;
-                        },
-                        controller: workoutNameController,
-                      ),
-                      SizedBox(height: 10.0),
                       SearchableDropdown(
                         labelText: 'Search Workout Type',
                         hint: 'Workout Type:',
@@ -122,12 +116,18 @@ class _WorkoutsState extends State<Workouts> {
                         displayField: 'workoutType',
                         onChanged: (value) {
                           setStateDialog(() {
-                            draftWorkout['type'] = value;
+                            draftWorkout['type'] = value?['workoutTypeID'];
                           });
                         },
                         isEnabled: true,
                         initialValue: draftWorkout['type'],
                         backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please select a workout type';
+                          }
+                          return null;
+                        },
                       ),
                       SizedBox(height: 10.0),
                       SearchableDropdown(
@@ -142,12 +142,18 @@ class _WorkoutsState extends State<Workouts> {
                         displayField: 'blockType',
                         onChanged: (value) {
                           setStateDialog(() {
-                            draftWorkout['block'] = value;
+                            draftWorkout['block'] = value?['blockTypeID'];
                           });
                         },
                         isEnabled: true,
                         initialValue: draftWorkout['block'],
                         backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please select a focus block';
+                          }
+                          return null;
+                        },
                       ),
                       SizedBox(height: 10.0),
                       Center(
@@ -193,6 +199,11 @@ class _WorkoutsState extends State<Workouts> {
                                 return null;
                               },
                               controller: durationController,
+                              onChanged: (value) {
+                                setStateDialog(() {
+                                  draftWorkout['duration'] = value;
+                                });
+                              },
                             ),
                           ],
                         ),
@@ -217,29 +228,70 @@ class _WorkoutsState extends State<Workouts> {
                                 return null;
                               },
                               controller: distanceController,
+                              onChanged: (value) {
+                                setStateDialog(() {
+                                  draftWorkout['distance'] = value;
+                                });
+                              },
                             ),
                           ],
                         ),
                       ),
                       SizedBox(height: 10.0),
-                      FormInputField(
-                        label: 'Description:',
-                        errorMessage: 'Please enter a description',
-                        isMultiline: true,
-                        isPassword: false,
-                        prefixIcon: null,
-                        suffixIcon: null,
-                        showLabel: true,
-                        onChanged: (value) {
-                          setStateDialog(() {});
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a description';
-                          }
-                          return null;
-                        },
-                        controller: descriptionController,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: FormInputField(
+                              label: 'Description:',
+                              errorMessage: 'Please enter a description',
+                              isMultiline: true,
+                              isPassword: false,
+                              prefixIcon: null,
+                              suffixIcon: null,
+                              showLabel: true,
+                              onChanged: (value) {
+                                setStateDialog(() {
+                                  draftWorkout['description'] = value;
+                                });
+                              },
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter a description';
+                                }
+                                return null;
+                              },
+                              controller: descriptionController,
+                            ),
+                          ),
+                          iconButton(
+                            label: null, 
+                            backgroundColor: null, 
+                            iconColor: localAppTheme['anchorColors']['primaryColor'], 
+                            icon: Icons.smart_toy, 
+                            size: 30, 
+                            toolTip: 'Generate Description with AI', 
+                            context: context, 
+                            onPressed: () async {
+                              try {
+                                final suggestion = await aiProvider.getWorkoutDescriptionSuggestion(
+                                  descriptionController.text,
+                                  draftWorkout,
+                                  workoutTypes.firstWhere((type) => type['workoutTypeID'] == draftWorkout['type'])['workoutType'] ?? '',
+                                  focusBlocks.firstWhere((type) => type['blockTypeID'] == draftWorkout['block'])['blockType'] ?? '',
+                                );
+                                setStateDialog(() {
+                                  descriptionController.text = suggestion;
+                                  draftWorkout['description'] = suggestion;
+                                });
+                              } catch (e) {
+                                setStateDialog(() {
+                                  descriptionController.text = 'Error generating suggestion';
+                                  draftWorkout['description'] = descriptionController.text;
+                                });
+                              }
+                            }
+                          )
+                        ],
                       ),
                     ],
                   ),
@@ -269,8 +321,37 @@ class _WorkoutsState extends State<Workouts> {
                   child: elevatedButton(
                     label: 'SUBMIT',
                     onPressed: () async {
-                      workout = null;
-                      Navigator.of(context).pop();
+                      if (formKey.currentState!.validate()) {
+                        try {
+                          var blockType = focusBlocks.firstWhere((type) => type['blockTypeID'] == draftWorkout['block']);
+                          var workoutType = workoutTypes.firstWhere((type) => type['workoutTypeID'] == draftWorkout['type']);
+
+                          draftWorkout['coachUID'] = appUser['uid'];
+                          final displayValue = (draftWorkout['duration'] != null && draftWorkout['duration'] != '' && draftWorkout['duration'] != 'hh:mm:ss')
+                            ? draftWorkout['duration']
+                            : ((draftWorkout['distance'] != null && draftWorkout['distance'] != '' && draftWorkout['distance'] != '00.00') ? '${draftWorkout['distance']} km' : '');
+                          draftWorkout['name'] = "${blockType['blockType'].toString().toUpperCase()} - ${workoutType['workoutType'].toString().toUpperCase()}${displayValue.isNotEmpty ? " - $displayValue" : ''}";
+                          
+                          if (workout == null) {
+                            // Create new workout
+                            await workoutsProvider.createWorkoutRecord(draftWorkout);
+                            setState(() {});
+                            workout = null;
+                            Navigator.of(context).pop();
+                            showGeneralPopupDialog(context, 'Success', 'Workout created successfully!');
+                            setState(() {});
+                          } else {
+                            // Update existing workout
+                            await workoutsProvider.updateWorkoutRecord(draftWorkout);
+                            workout = null;
+                            Navigator.of(context).pop();
+                            showGeneralPopupDialog(context, 'Success', 'Workout updated successfully!');
+                          }
+                        } catch (e) {
+                          Navigator.of(context).pop();
+                          showGeneralPopupDialog(context, 'Error', 'An error occurred while creating the workout: $e');
+                        }
+                      }
                     },
                     backgroundColor: localAppTheme['anchorColors']['primaryColor'],
                     labelColor: localAppTheme['anchorColors']['secondaryColor'],
@@ -291,9 +372,11 @@ class _WorkoutsState extends State<Workouts> {
   // Mobile Layout
   Widget _buildMobileWorkouts() {
     final localAppTheme = ResponsiveTheme(context).theme;
-    //final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
-    //final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
-    //final appUser = appUserProvider.appUser;
+    final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: true);
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
+    final focusBlocks = internalStatusProvider.focusBlocks;
+    final workoutTypes = internalStatusProvider.workoutTypes;
+    final allWorkouts = workoutsProvider.allWorkouts;
 
     return Scaffold(
       appBar: AppBar(
@@ -360,6 +443,177 @@ class _WorkoutsState extends State<Workouts> {
                       ],
                     ),
                   ),
+                  SizedBox(height: 20.0),
+                  allWorkouts.isNotEmpty
+                      ? Column(
+                          children: List<Widget>.generate(allWorkouts.length, (index) {
+                            final workout = allWorkouts[index];
+
+                            return ExpansionTile(
+                              collapsedShape: Border(
+                                top: BorderSide(
+                                  color: localAppTheme['anchorColors']['primaryColor'], 
+                                  width: index == 0 ? 1.0 : 0.0
+                                  ),
+                                bottom: BorderSide(
+                                  color: localAppTheme['anchorColors']['primaryColor'], 
+                                  width: 1.0
+                                  ),
+                              ),
+                              showTrailingIcon: false,
+                              title: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                                child: Column(
+                                  children: [
+                                    SizedBox(height: 10.0),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: header2(
+                                        header: workout['name'] ?? 'Unnamed Workout',
+                                        color: localAppTheme['anchorColors']['primaryColor'],
+                                        context: context,
+                                      ),
+                                    ),
+                                    SizedBox(height: 10.0),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  workoutTypes.firstWhere((type) => type['type'] == workout['workoutTypeID'])['icon'] ?? Icons.fitness_center,
+                                                  color: localAppTheme['anchorColors']['primaryColor'],
+                                                  size: 20,
+                                                ),
+                                                SizedBox(width: 20.0),
+                                                body(
+                                                  header: workoutTypes.firstWhere((type) => type['type'] == workout['workoutTypeID'])['workoutType'] ?? 'Unknown',
+                                                  color: localAppTheme['anchorColors']['primaryColor'],
+                                                  context: context,
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(height: 10.0),
+                                            Row(
+                                              children: [
+                                                Icon(Icons.fitness_center, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
+                                                SizedBox(width: 20.0),
+                                                body(
+                                                  header: focusBlocks.firstWhere((type) => type['blockTypeID'] == workout['block'])['blockType'] ?? 'Unknown',
+                                                  color: localAppTheme['anchorColors']['primaryColor'],
+                                                  context: context,
+                                                ),
+                                              ],
+                                            ),
+                                            Visibility(
+                                              visible: workout['distance'] != '00.00',
+                                              child: Column(
+                                                children: [
+                                                  SizedBox(height: 10.0),
+                                                  Row(
+                                                    children: [
+                                                      Icon(Icons.straighten, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
+                                                      SizedBox(width: 20.0),
+                                                      body(
+                                                        header: '${workout['distance'].toString()} km',
+                                                        color: localAppTheme['anchorColors']['primaryColor'],
+                                                        context: context,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Visibility(
+                                              visible: workout['duration'] != 'hh:mm:ss',
+                                              child: Column(
+                                                children: [
+                                                  SizedBox(height: 10.0),
+                                                  Row(
+                                                    children: [
+                                                      Icon(Icons.timer, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
+                                                      SizedBox(width: 20.0),
+                                                      body(
+                                                        header: workout['duration'].toString(),
+                                                        color: localAppTheme['anchorColors']['primaryColor'],
+                                                        context: context,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Container(
+                                          width: 75,
+                                          height: 75,
+                                          padding: const EdgeInsets.only(left: 10.0),
+                                          decoration: BoxDecoration(
+                                            border: Border(left: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
+                                          ),
+                                          child: iconButton(
+                                                label: null,
+                                                backgroundColor: null,
+                                                iconColor: localAppTheme['anchorColors']['primaryColor'],
+                                                icon: Icons.group_outlined,
+                                                size: 30,
+                                                toolTip: 'Assign Athletes',
+                                                context: context,
+                                                onPressed: () {},
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 10.0),
+                                  ],
+                                ),
+                              ),
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(10.0),
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      header3(header: 'Description:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                                      SizedBox(height: 5.0),
+                                      body(
+                                        header: workout['description'] ?? 'No description provided.',
+                                        color: localAppTheme['anchorColors']['primaryColor'],
+                                        context: context,
+                                      ),
+                                      SizedBox(height: 10.0),
+                                      Center(
+                                        child: elevatedButton(
+                                          label: 'EDIT WORKOUT',
+                                          onPressed: () {
+                                            _showCreateWorkoutPopupDialog(context, workout, index);
+                                          },
+                                          backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                                          labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                                          leadingIcon: null,
+                                          trailingIcon: null,
+                                          context: context,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+
+                            );
+                          }),
+                        )
+                      : Container(),
                 ],
               ),
             ),
