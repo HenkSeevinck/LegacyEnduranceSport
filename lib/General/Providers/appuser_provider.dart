@@ -19,6 +19,9 @@ class AppUserProvider with ChangeNotifier {
   List<Map<String, dynamic>> _allUsers = [];
   List<Map<String, dynamic>> get allUsers => _allUsers;
 
+  List<Map<String, dynamic>> _athletesByCoach = [];
+  List<Map<String, dynamic>> get athletesByCoach => _athletesByCoach;
+
   //--------------------------------------------------------------
   // Helper to convert Firestore types (e.g. Timestamp) into JSON-encodable
   // values so jsonEncode/jsonDecode won't throw. Keeps strings for dates.
@@ -205,6 +208,50 @@ class AppUserProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       Exception('Error adding athlete to coach: $e'); // Log the error
+      rethrow;
+    }
+  }
+
+  //--------------------------------------------------------------
+  // Get coach's athlete list
+  Future<List<Map<String, dynamic>>> getCoachAthletes(String coachUserID) async {
+    try {
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('Coaches')
+          .where('userID', isEqualTo: coachUserID)
+          .get();
+
+      final List<Map<String, dynamic>> aggregatedAthletes = [];
+
+      for (final coachDoc in querySnapshot.docs) {
+        final data = coachDoc.data() as Map<String, dynamic>?;
+        if (data == null) continue;
+
+        final rawAthletes = data['athletes'] ?? [];
+        final List<Map<String, dynamic>> athleteList = List<Map<String, dynamic>>.from(
+          (rawAthletes as List).map((e) => Map<String, dynamic>.from(e as Map)),
+        );
+
+        for (var athlete in athleteList) {
+          try {
+            final athleteDoc = await _firestore.collection('AppUsers').doc(athlete['uid']).get();
+            if (athleteDoc.exists) {
+              final athleteData = athleteDoc.data();
+              if (athleteData != null) athlete.addAll(athleteData);
+            }
+          } catch (e) {
+            Exception('Error fetching athlete data for UID: ${athlete['uid']}');
+            rethrow;
+          }
+          aggregatedAthletes.add(athlete);
+        }
+      }
+
+      _athletesByCoach = aggregatedAthletes;
+      notifyListeners();
+      return aggregatedAthletes;
+    } catch (e) {
+      Exception('Error retrieving coach athletes: $e');
       rethrow;
     }
   }

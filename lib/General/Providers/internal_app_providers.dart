@@ -54,10 +54,10 @@ class InternalStatusProvider with ChangeNotifier {
   ];
 
   List<Map<String, dynamic>> workoutTypes = [
-    {'workoutTypeID': 1, 'workoutType': 'Run', 'icon': Icons.directions_run, 'color': Colors.blue},
-    {'workoutTypeID': 2, 'workoutType': 'Cycle', 'icon': Icons.directions_bike, 'color': Colors.green},
-    {'workoutTypeID': 3, 'workoutType': 'Swim', 'icon': Icons.pool, 'color': Colors.teal},
-    {'workoutTypeID': 4, 'workoutType': 'Workout', 'icon': Icons.fitness_center, 'color': Colors.orange},
+    {'workoutTypeID': 1, 'workoutType': 'RUN', 'icon': Icons.directions_run, 'color': Colors.blue},
+    {'workoutTypeID': 2, 'workoutType': 'CYCLE', 'icon': Icons.directions_bike, 'color': Colors.green},
+    {'workoutTypeID': 3, 'workoutType': 'SWIM', 'icon': Icons.pool, 'color': Colors.teal},
+    {'workoutTypeID': 4, 'workoutType': 'WORKOUT', 'icon': Icons.fitness_center, 'color': Colors.orange},
   ];
 
   List<Map<String, dynamic>> durationTypes = [

@@ -803,7 +803,8 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
           children: [
             Expanded(
               child: SizedBox(
-                height: MediaQuery.of(context).size.height * 0.0175 * 3, // Testing
+                //height: MediaQuery.of(context).size.height * 0.0175 * 3, // Testing
+                height: 50,
                 child: FormField<Map<String, dynamic>>(
                   validator: widget.validator,
                   initialValue: selectedItem,

@@ -19,11 +19,7 @@ import 'package:provider/provider.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // <-- Add this
-  // Prevent google_fonts from trying to read AssetManifest.json at runtime
-  // (some build setups use AssetManifest.bin.json which older google_fonts
-  // versions may not recognize). Disable runtime fetching so the app uses
-  // platform fonts instead of attempting to load remote/bundled assets.
+  WidgetsFlutterBinding.ensureInitialized();
   GoogleFonts.config.allowRuntimeFetching = false;
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 

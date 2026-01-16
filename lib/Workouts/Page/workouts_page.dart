@@ -21,6 +21,7 @@ class _WorkoutsState extends State<Workouts> {
   TextEditingController durationController = TextEditingController();
   TextEditingController distanceController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
+  TextEditingController workoutDateController = TextEditingController();
 
   //----------------------------------------------------
   // initState load data when form is built
@@ -37,6 +38,7 @@ class _WorkoutsState extends State<Workouts> {
   Future<void> _fetchData(WorkoutsProvider workoutsProvider, AppUserProvider appUserProvider) async {
     final appUser = appUserProvider.appUser;
     await workoutsProvider.fetchWorkoutsForCoach(appUser['uid']);
+    await appUserProvider.getCoachAthletes(appUser['uid']);
   }
 
   //----------------------------------------------------
@@ -67,8 +69,9 @@ class _WorkoutsState extends State<Workouts> {
     durationController.text = (workout['duration'] ?? '').toString();
     distanceController.text = (workout['distance'] ?? '').toString();
     descriptionController.text = (workout['description'] ?? '').toString();
+    workoutDateController.text = ''.toString();
   }
-
+    
   //----------------------------------------------------
   // Add Workout Context Menus and Dialogs Here
   _showCreateWorkoutPopupDialog(BuildContext context, Map<String, dynamic>? workout, int? index) async {
@@ -93,7 +96,11 @@ class _WorkoutsState extends State<Workouts> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(workout == null ? 'New Workout:' : 'Edit Workout:', style: TextStyle(color: localAppTheme['anchorColors']['primaryColor'])),
+          title: header1(
+            header: workout == null ? 'New Workout:' : 'Edit Workout:', 
+            context: context, 
+            color: localAppTheme['anchorColors']['primaryColor'],
+          ),
           content: SingleChildScrollView(
             child: StatefulBuilder(
               builder: (BuildContext context, void Function(void Function()) setStateDialog) {
@@ -238,6 +245,12 @@ class _WorkoutsState extends State<Workouts> {
                         ),
                       ),
                       SizedBox(height: 10.0),
+                      body(
+                        header: 'Provide a brief overview of the phases of the workout:\n\nPhases:\nWarmup\nCooldown\nEndurance\nSteady State\nTempo\nInterval\nTaper\n\nExample:\nWarmup: 10 min\nEndurance: 20 min\nCooldown: 10 min', 
+                        color: localAppTheme['anchorColors']['primaryColor'], 
+                        context: context
+                      ),
+                      SizedBox(height: 10.0),
                       Row(
                         children: [
                           Expanded(
@@ -352,6 +365,170 @@ class _WorkoutsState extends State<Workouts> {
                           showGeneralPopupDialog(context, 'Error', 'An error occurred while creating the workout: $e');
                         }
                       }
+                    },
+                    backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                    labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                    leadingIcon: null,
+                    trailingIcon: null,
+                    context: context,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  //----------------------------------------------------
+  // Show athelete assignment dialog
+  _showAssignAthletesPopupDialog(BuildContext context, Map<String, dynamic> workout) async {
+    final localAppTheme = ResponsiveTheme(context).theme;
+    final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
+    final formKey = GlobalKey<FormState>();
+    final athletesByCoach = appUserProvider.athletesByCoach;
+    List<Map<String, dynamic>>? assignedAthletes;
+    Map<String, dynamic> todaysWorkout = {};
+
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: header1(
+            header: 'Assign Workout:', 
+            context: context, 
+            color: localAppTheme['anchorColors']['primaryColor'],
+            ),
+          content: SingleChildScrollView(
+            child: StatefulBuilder(
+              builder: (BuildContext context, void Function(void Function()) setStateDialog) {
+                // assign the builder's setState to the outer reference
+                //setStateDialogRef = setStateDialog;
+                return Form(
+                  key: formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      DatePicker(
+                        buttonLabelColor: localAppTheme['anchorColors']['primaryColor'], 
+                        label: 'Select Date:', 
+                        buttonVisibility: true,
+                        enabled: true,
+                        initialDate: DateTime.now(), 
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Please select a date';
+                          }
+                          return null;
+                        }, 
+                        controller: workoutDateController,
+                      ),
+                      SizedBox(height: 10.0),
+                      Column(
+                        children: List<Widget>.generate(athletesByCoach.length, (index) {
+                          final athlete = athletesByCoach[index];
+                          return ExpansionTile(
+                            collapsedShape: Border(
+                                top: BorderSide(
+                                  color: localAppTheme['anchorColors']['primaryColor'], 
+                                  width: index == 0 ? 1.0 : 0.0
+                                  ),
+                                bottom: BorderSide(
+                                  color: localAppTheme['anchorColors']['primaryColor'], 
+                                  width: 1.0
+                                  ),
+                              ),
+                            //showTrailingIcon: false,
+                            title: body(
+                                header: '${athlete['name']} ${athlete['surname']}',
+                                color: localAppTheme['anchorColors']['primaryColor'],
+                                context: context,
+                              ),
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.only(top: 10.0),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    todaysWorkout.isEmpty 
+                                    ? SizedBox(
+                                      width: (MediaQuery.of(context).size.width - 200)* 0.8,
+                                      child: Center(
+                                          child: body(
+                                            header: 'No workout assigned to this athlete yet.', 
+                                            color: localAppTheme['anchorColors']['primaryColor'], 
+                                            context: context
+                                          ),
+                                      ),
+                                    )
+                                    : SizedBox(), // Placeholder for future workout display
+                                    SizedBox(height: 10.0),
+                                    CheckboxListTile(
+                                    checkColor: localAppTheme['anchorColors']['secondaryColor'],
+                                    activeColor: localAppTheme['anchorColors']['primaryColor'],
+                                    title: body(
+                                      header: 'Assign Workout',
+                                      color: localAppTheme['anchorColors']['primaryColor'],
+                                      context: context,
+                                    ),
+                                                                
+                                    value: assignedAthletes != null && assignedAthletes!.any((athleteMap) => athleteMap['uid'] == athlete['uid']),
+                                    onChanged: (bool? value) {
+                                      setStateDialog(() {
+                                        if (value == true) {
+                                          assignedAthletes ??= [];
+                                          assignedAthletes?.add(athlete);
+                                        } else {
+                                          assignedAthletes?.removeWhere((athleteMap) => athleteMap['uid'] == athlete['uid']);
+                                        }
+                                      });
+                                    },
+                                                                ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                            onExpansionChanged: (value) {
+                              setStateDialog(() {});
+                            },
+                          );
+                        }),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          actions: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: elevatedButton(
+                    label: 'CANCEL',
+                    onPressed: () {
+                      assignedAthletes = [];
+                      Navigator.of(context).pop();
+                    },
+                    backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                    labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                    leadingIcon: null,
+                    trailingIcon: null,
+                    context: context,
+                  ),
+                ),
+                Expanded(
+                  child: elevatedButton(
+                    label: 'SUBMIT',
+                    onPressed: () async {
+                      assignedAthletes = [];
+                      Navigator.of(context).pop();
                     },
                     backgroundColor: localAppTheme['anchorColors']['primaryColor'],
                     labelColor: localAppTheme['anchorColors']['secondaryColor'],
@@ -563,7 +740,9 @@ class _WorkoutsState extends State<Workouts> {
                                                 size: 30,
                                                 toolTip: 'Assign Athletes',
                                                 context: context,
-                                                onPressed: () {},
+                                                onPressed: () {
+                                                  _showAssignAthletesPopupDialog(context, workout);
+                                                },
                                               ),
                                         ),
                                       ],
