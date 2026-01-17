@@ -6,6 +6,9 @@ class WorkoutsProvider with ChangeNotifier {
 
   final List<Map<String, dynamic>> _allWorkouts = [];
   List<Map<String, dynamic>> get allWorkouts => _allWorkouts;
+
+  List<Map<String, dynamic>> _workoutsBetweenDates = [];
+  List<Map<String, dynamic>> get workoutsBetweenDates => _workoutsBetweenDates;
   
   //--------------------------------------------------------------
   // Method to create a new workout record in Firestore
@@ -94,5 +97,53 @@ class WorkoutsProvider with ChangeNotifier {
       Exception('Error retrieving loaded workout: $e');
       rethrow;
     }
+  }
+
+  //--------------------------------------------------------------
+  // Method to create a new loaded workout record in Firestore
+  Future<void> createLoadedWorkoutRecord(Map<String, dynamic> workout) async {
+    DocumentReference docRef = await _firestore.collection('LoadedWorkouts').add(workout);
+    workout['loadedWorkoutUID'] = docRef.id;
+    notifyListeners();
+  }
+
+  //--------------------------------------------------------------
+  // Method to update an existing loaded workout record in Firestore
+  Future<void> updateLoadedWorkoutRecord(String loadedWorkoutUID, Map<String, dynamic> workout) async {
+    await _firestore.collection('LoadedWorkouts').doc(loadedWorkoutUID).set(workout);
+    notifyListeners();
+  }
+
+  //--------------------------------------------------------------
+  // Medhod to loop through a list of workouts and load or update them
+  Future<void> loadOrUpdateWorkouts(List<Map<String, dynamic>> assignedAthletes) async {
+    for (var workout in assignedAthletes) {
+      if (workout['assinedWorkoutUID'] != null) {
+        await updateLoadedWorkoutRecord(workout['assinedWorkoutUID'], workout['workoutToLoad']);
+      } else {
+        await createLoadedWorkoutRecord(workout['workoutToLoad']);
+      }
+    }
+  }
+
+  //--------------------------------------------------------------
+  // Method to get loaded workouts for a specific athlete between dates
+  Future<void> fetchLoadedWorkoutsBetweenDates(String athleteUID, DateTime startDate, DateTime endDate) async {
+    final startTs = Timestamp.fromDate(startDate);
+    final endTs = Timestamp.fromDate(endDate.add(const Duration(days: 1)));
+
+    QuerySnapshot querySnapshot = await _firestore
+        .collection('LoadedWorkouts')
+        .where('athleteUID', isEqualTo: athleteUID)
+        .where('workoutDate', isGreaterThanOrEqualTo: startTs)
+        .where('workoutDate', isLessThan: endTs)
+        .get();
+
+    _workoutsBetweenDates = querySnapshot.docs.map((doc) {
+      final data = doc.data() as Map<String, dynamic>;
+      data['eventID'] = doc.id; // Add the document ID
+      return data;
+    }).toList();
+    notifyListeners();
   }
 }

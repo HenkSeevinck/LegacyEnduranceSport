@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/General/Providers/ai_provider.dart';
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
@@ -108,6 +109,7 @@ class _WorkoutsState extends State<Workouts> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
           title: header1(header: workout == null ? 'New Workout:' : 'Edit Workout:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
           content: SingleChildScrollView(
             child: SizedBox(
@@ -440,6 +442,7 @@ class _WorkoutsState extends State<Workouts> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
           title: header1(header: 'Assign Workout:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
           content: SingleChildScrollView(
             child: SizedBox(
@@ -489,7 +492,7 @@ class _WorkoutsState extends State<Workouts> {
                               ),
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.only(top: 10.0),
+                                  //padding: const EdgeInsets.only(top: 10.0),
                                   decoration: BoxDecoration(
                                     border: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
                                   ),
@@ -500,10 +503,13 @@ class _WorkoutsState extends State<Workouts> {
                                           : todaysWorkoutLocal.isEmpty
                                           ? SizedBox(
                                               width: (MediaQuery.of(context).size.width - 200) * 0.8,
-                                              child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                              height: 80,
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                mainAxisAlignment: MainAxisAlignment.center,
                                                 children: [
                                                   Icon(Icons.fitness_center, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
+                                                  SizedBox(height: 10.0),
                                                   body(header: 'No workout assigned', color: localAppTheme['anchorColors']['primaryColor'], context: context),
                                                 ],
                                               ),
@@ -515,6 +521,7 @@ class _WorkoutsState extends State<Workouts> {
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
+                                                  SizedBox(height: 10.0),
                                                   SizedBox(
                                                     width: double.infinity,
                                                     child: header3(
@@ -538,18 +545,33 @@ class _WorkoutsState extends State<Workouts> {
                                         checkColor: localAppTheme['anchorColors']['secondaryColor'],
                                         activeColor: localAppTheme['anchorColors']['primaryColor'],
                                         title: body(
-                                          header: 'Assign ${workout['name']} to ${athlete['name']} ${athlete['surname']}', 
-                                          color: localAppTheme['anchorColors']['secondaryColor'], 
+                                          header: 'Assign ${workout['name']} to ${athlete['name']} ${athlete['surname']}',
+                                          color: localAppTheme['anchorColors']['secondaryColor'],
                                           context: context,
                                         ),
-                                        value: assignedAthletes != null && assignedAthletes!.any((athleteMap) => athleteMap['uid'] == athlete['uid']),
+                                        value:
+                                            assignedAthletes != null &&
+                                            assignedAthletes!.any((athleteMap) => athleteMap['workoutToLoad']['athleteUID'] == athlete['uid']),
                                         onChanged: (bool? value) {
+                                          Map<String, dynamic> workoutLocal = {'workoutUID': workout['id']};
+                                          Timestamp workoutDate = Timestamp.fromDate(DateTime.parse(workoutDateController.text));
+                                          Map<String, dynamic> workoutToLoad = {
+                                            'athleteUID': athlete['uid'],
+                                            'coachUID': appUser['uid'],
+                                            'workoutDate': workoutDate,
+                                            'workout': workoutLocal,
+                                          };
                                           setStateDialog(() {
                                             if (value == true) {
                                               assignedAthletes ??= [];
-                                              assignedAthletes?.add(athlete);
+                                              assignedAthletes?.add({
+                                                'assinedWorkoutUID': todaysWorkoutLocal.isEmpty
+                                                    ? null
+                                                    : todaysWorkoutLocal['loadedWorkoutUID'], //TODO: If not '' replace existing recored in firebase.
+                                                'workoutToLoad': workoutToLoad,
+                                              });
                                             } else {
-                                              assignedAthletes?.removeWhere((athleteMap) => athleteMap['uid'] == athlete['uid']);
+                                              assignedAthletes?.removeWhere((athleteMap) => athleteMap['workoutToLoad']['athleteUID'] == athlete['uid']);
                                             }
                                           });
                                         },
@@ -610,8 +632,16 @@ class _WorkoutsState extends State<Workouts> {
                   child: elevatedButton(
                     label: 'SUBMIT',
                     onPressed: () async {
-                      assignedAthletes = [];
-                      Navigator.of(context).pop();
+                      try {
+                        await workoutsProvider.loadOrUpdateWorkouts(assignedAthletes ?? []);
+                        assignedAthletes = [];
+                        Navigator.of(context).pop();
+                        showGeneralPopupDialog(context, 'Success', 'Workout assigned successfully!');
+                      } catch (e) {
+                        Navigator.of(context).pop();
+                        showGeneralPopupDialog(context, 'Error', 'An error occurred while assigning the workout: $e');
+                        return;
+                      }
                     },
                     backgroundColor: localAppTheme['anchorColors']['primaryColor'],
                     labelColor: localAppTheme['anchorColors']['secondaryColor'],

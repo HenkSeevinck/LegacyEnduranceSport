@@ -54,22 +54,25 @@ class _MyAthletesPageState extends State<MyAthletesPage> {
           backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
           title: header1(header: 'Select Athlete:', color: localAppTheme['anchorColors']['primaryColor'], context: context),
           content: SingleChildScrollView(
-            child: SearchableDropdown(
-              labelText: 'Search Athletes:',
-              hint: 'Select Athlete',
-              dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
-              searchBoxVisable: true,
-              dropDownList: allUsers,
-              header: '',
-              iconColor: localAppTheme['anchorColors']['primaryColor'],
-              idField: 'uid',
-              displayField: 'email',
-              onChanged: (value) {
-                setState(() {
-                  selectedAthlete = value;
-                });
-              },
-              isEnabled: true,
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.95,
+              child: SearchableDropdown(
+                labelText: 'Search Athletes:',
+                hint: 'Select Athlete',
+                dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
+                searchBoxVisable: true,
+                dropDownList: allUsers,
+                header: '',
+                iconColor: localAppTheme['anchorColors']['primaryColor'],
+                idField: 'uid',
+                displayField: 'email',
+                onChanged: (value) {
+                  setState(() {
+                    selectedAthlete = value;
+                  });
+                },
+                isEnabled: true,
+              ),
             ),
           ),
           actions: <Widget>[

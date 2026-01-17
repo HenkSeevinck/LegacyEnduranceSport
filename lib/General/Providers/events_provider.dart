@@ -6,6 +6,9 @@ class EventsProvider with ChangeNotifier {
 
   List<Map<String, dynamic>>? _events;
   List<Map<String, dynamic>>? get events => _events;
+
+  List<Map<String, dynamic>>? _eventsBetweenDates;
+  List<Map<String, dynamic>>? get eventsBetweenDates => _eventsBetweenDates;
   //---------------------------------------------------------------
   // Fetch all events from Firestore
   Future<void> fetchAllEvents() async {
@@ -23,7 +26,7 @@ class EventsProvider with ChangeNotifier {
       rethrow; // Re-throw the error for further handling if needed
     }
   }
-  
+
   //---------------------------------------------------------------
   // Update an event in Firestore
   Future<void> updateEvent(String eventID, Map<String, dynamic> updatedData) async {
@@ -46,6 +49,27 @@ class EventsProvider with ChangeNotifier {
       }
     } catch (e) {
       Exception('Error updating Event: $e');
+      rethrow; // Re-throw the error for further handling if needed
+    }
+  }
+
+  //---------------------------------------------------------------
+  // Fetch events for betwee two dates
+  Future<void> fetchEventsBetweenDates(DateTime startDate, DateTime endDate) async {
+    try {
+      final QuerySnapshot snapshot = await _eventsCollection
+          .where('eventDate', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where('eventDate', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
+          .get();
+
+      _eventsBetweenDates = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['eventID'] = doc.id; // Add the document ID
+        return data;
+      }).toList();
+      notifyListeners();
+    } catch (e) {
+      Exception('Error fetching Events between dates: $e');
       rethrow; // Re-throw the error for further handling if needed
     }
   }

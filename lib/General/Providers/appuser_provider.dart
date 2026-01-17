@@ -22,6 +22,9 @@ class AppUserProvider with ChangeNotifier {
   List<Map<String, dynamic>> _athletesByCoach = [];
   List<Map<String, dynamic>> get athletesByCoach => _athletesByCoach;
 
+  List<Map<String, dynamic>> _goalsBetweenDates = [];
+  List<Map<String, dynamic>> get goalsBetweenDates => _goalsBetweenDates;
+
   //--------------------------------------------------------------
   // Helper to convert Firestore types (e.g. Timestamp) into JSON-encodable
   // values so jsonEncode/jsonDecode won't throw. Keeps strings for dates.
@@ -277,4 +280,42 @@ class AppUserProvider with ChangeNotifier {
     }
   }
 
+  //--------------------------------------------------------------
+  // Method to get user goals between dates
+  Future<void> fetchUserGoalsBetweenDates(DateTime startDate, DateTime endDate) async {
+    try {
+      // Helper to parse stored date types (Timestamp, DateTime, ISO string, or map)
+      DateTime? parseDate(dynamic v) {
+        if (v == null) return null;
+        if (v is DateTime) return v;
+        if (v is Timestamp) return v.toDate();
+        if (v is Map) {
+          final seconds = v['seconds'] ?? v['_seconds'];
+          final nanoseconds = v['nanoseconds'] ?? v['_nanoseconds'] ?? 0;
+          if (seconds is int) {
+            final ms = seconds * 1000 + (nanoseconds ~/ 1000000);
+            return DateTime.fromMillisecondsSinceEpoch(ms.toInt());
+          }
+        }
+        if (v is String) return DateTime.tryParse(v);
+        return null;
+      }
+
+      final startOnly = DateTime(startDate.year, startDate.month, startDate.day);
+      final endOnly = DateTime(endDate.year, endDate.month, endDate.day);
+
+      final rawGoals = _appUser['goals'] ?? [];
+      final List<Map<String, dynamic>> goalsList = List<Map<String, dynamic>>.from(rawGoals);
+      _goalsBetweenDates = goalsList.where((goal) {
+        final parsed = parseDate(goal['date']);
+        if (parsed == null) return false;
+        final goalDateOnly = DateTime(parsed.year, parsed.month, parsed.day);
+        return !goalDateOnly.isBefore(startOnly) && !goalDateOnly.isAfter(endOnly);
+      }).toList();
+      notifyListeners();
+    } catch (e) {
+      Exception('Error retrieving user goals: $e');
+      rethrow;
+    }
+  }
 }

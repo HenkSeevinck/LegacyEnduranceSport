@@ -149,195 +149,198 @@ class _GoalsPageState extends State<GoalsPage> {
           backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
           title: header1(header: 'Create a Goal:', color: localAppTheme['anchorColors']['primaryColor'], context: context),
           content: SingleChildScrollView(
-            child: StatefulBuilder(
-              builder: (BuildContext context, void Function(void Function()) setStateDialog) {
-                return Form(
-                  key: formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Visibility(
-                        visible: goal == null,
-                        child: elevatedButton(
-                          label: 'Use an event',
-                          onPressed: () {
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.95,
+              child: StatefulBuilder(
+                builder: (BuildContext context, void Function(void Function()) setStateDialog) {
+                  return Form(
+                    key: formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Visibility(
+                          visible: goal == null,
+                          child: elevatedButton(
+                            label: 'Use an event',
+                            onPressed: () {
+                              setStateDialog(() {
+                                showEventDropdown = !showEventDropdown;
+                              });
+                            },
+                            backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                            labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                            leadingIcon: null,
+                            trailingIcon: null,
+                            context: context,
+                          ),
+                        ),
+                        Visibility(
+                          visible: showEventDropdown,
+                          child: Column(
+                            children: [
+                              SizedBox(height: 10.0),
+                              Container(
+                                padding: EdgeInsets.all(10.0),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.1),
+                                ),
+                                child: SearchableDropdown(
+                                  labelText: 'Search Events:',
+                                  hint: 'Select Event',
+                                  dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
+                                  searchBoxVisable: true,
+                                  backgroundColor: Colors.transparent,
+                                  dropDownList: events,
+                                  header: '',
+                                  iconColor: localAppTheme['anchorColors']['primaryColor'],
+                                  idField: 'eventID',
+                                  displayField: 'name',
+                                  onChanged: (value) {
+                                    // Not working yet will need to incorporate text editing controllers :-(
+                                    setStateDialog(() {
+                                      _updateTextControllers(
+                                        draftGoal = {
+                                          'title': value?['name'],
+                                          'date': value?['eventDate'],
+                                          'type': value?['type'],
+                                          'distance': value?['distance'],
+                                          'duration': 'hh:mm:ss',
+                                        },
+                                      );
+                                      showEventDropdown = !showEventDropdown;
+                                    });
+                                  },
+                                  isEnabled: true,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 10.0),
+                        FormInputField(
+                          label: 'Title:',
+                          errorMessage: 'Please enter a valid goal title.',
+                          isMultiline: false,
+                          isPassword: false,
+                          prefixIcon: null,
+                          suffixIcon: null,
+                          showLabel: true,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a valid goal title.';
+                            }
+                            return null;
+                          },
+                          //initialValue: draftGoal['title'],
+                          onChanged: (value) {
+                            draftGoal['title'] = value;
+                          },
+                          controller: titleController,
+                        ),
+                        SizedBox(height: 10.0),
+                        DatePicker(
+                          buttonLabelColor: localAppTheme['anchorColors']['primaryColor'],
+                          label: 'Date:',
+                          buttonVisibility: true,
+                          enabled: true,
+                          initialDate: (() {
+                            final dateVal = draftGoal['date'];
+                            if (dateVal == null) return null;
+                            if (dateVal is Timestamp) return dateVal.toDate();
+                            if (dateVal is DateTime) return dateVal;
+                            return null;
+                          })(),
+                          validator: (date) {
+                            if (date == null) {
+                              return 'Please select a valid date.';
+                            }
+                            return null;
+                          },
+                          controller: dateController,
+                          onChanged: (value) {
+                            draftGoal['date'] = value;
+                            dateController.text = DateFormat.yMd().format(value);
+                          },
+                        ),
+                        SizedBox(height: 10.0),
+                        SearchableDropdown(
+                          labelText: 'Type:',
+                          hint: 'Event Type',
+                          dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
+                          searchBoxVisable: false,
+                          dropDownList: eventTypes,
+                          header: '',
+                          iconColor: localAppTheme['anchorColors']['primaryColor'],
+                          idField: 'id',
+                          displayField: 'eventType',
+                          onChanged: (value) {
                             setStateDialog(() {
-                              showEventDropdown = !showEventDropdown;
+                              draftGoal['type'] = value?['id'];
                             });
                           },
-                          backgroundColor: localAppTheme['anchorColors']['primaryColor'],
-                          labelColor: localAppTheme['anchorColors']['secondaryColor'],
-                          leadingIcon: null,
-                          trailingIcon: null,
-                          context: context,
+                          isEnabled: true,
+                          initialValue: draftGoal['type'],
+                          validator: (value) {
+                            if ((value == null || value.isEmpty) && draftGoal['type'] == null) {
+                              return 'Please select a valid event type.';
+                            }
+                            return null;
+                          },
                         ),
-                      ),
-                      Visibility(
-                        visible: showEventDropdown,
-                        child: Column(
-                          children: [
-                            SizedBox(height: 10.0),
-                            Container(
-                              padding: EdgeInsets.all(10.0),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                                borderRadius: BorderRadius.circular(8.0),
-                                color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.1),
-                              ),
-                              child: SearchableDropdown(
-                                labelText: 'Search Events:',
-                                hint: 'Select Event',
-                                dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
-                                searchBoxVisable: true,
-                                backgroundColor: Colors.transparent,
-                                dropDownList: events,
-                                header: '',
-                                iconColor: localAppTheme['anchorColors']['primaryColor'],
-                                idField: 'eventID',
-                                displayField: 'name',
-                                onChanged: (value) {
-                                  // Not working yet will need to incorporate text editing controllers :-(
-                                  setStateDialog(() {
-                                    _updateTextControllers(
-                                      draftGoal = {
-                                        'title': value?['name'],
-                                        'date': value?['eventDate'],
-                                        'type': value?['type'],
-                                        'distance': value?['distance'],
-                                        'duration': 'hh:mm:ss',
-                                      },
-                                    );
-                                    showEventDropdown = !showEventDropdown;
-                                  });
-                                },
-                                isEnabled: true,
-                              ),
-                            ),
-                          ],
+                        SizedBox(height: 10.0),
+                        FormInputField(
+                          label: 'Distance:',
+                          errorMessage: 'Please enter a valid goal distance (integer).',
+                          isMultiline: false,
+                          isPassword: false,
+                          prefixIcon: null,
+                          suffixIcon: null,
+                          showLabel: true,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a valid goal distance.';
+                            }
+                            if (int.tryParse(value) == null) {
+                              return 'Please enter a valid integer distance.';
+                            }
+                            return null;
+                          },
+                          onChanged: (value) {
+                            draftGoal['distance'] = int.tryParse(value) ?? 0;
+                          },
+                          controller: distanceController,
                         ),
-                      ),
-                      SizedBox(height: 10.0),
-                      FormInputField(
-                        label: 'Title:',
-                        errorMessage: 'Please enter a valid goal title.',
-                        isMultiline: false,
-                        isPassword: false,
-                        prefixIcon: null,
-                        suffixIcon: null,
-                        showLabel: true,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a valid goal title.';
-                          }
-                          return null;
-                        },
-                        //initialValue: draftGoal['title'],
-                        onChanged: (value) {
-                          draftGoal['title'] = value;
-                        },
-                        controller: titleController,
-                      ),
-                      SizedBox(height: 10.0),
-                      DatePicker(
-                        buttonLabelColor: localAppTheme['anchorColors']['primaryColor'],
-                        label: 'Date:',
-                        buttonVisibility: true,
-                        enabled: true,
-                        initialDate: (() {
-                          final dateVal = draftGoal['date'];
-                          if (dateVal == null) return null;
-                          if (dateVal is Timestamp) return dateVal.toDate();
-                          if (dateVal is DateTime) return dateVal;
-                          return null;
-                        })(),
-                        validator: (date) {
-                          if (date == null) {
-                            return 'Please select a valid date.';
-                          }
-                          return null;
-                        },
-                        controller: dateController,
-                        onChanged: (value) {
-                          draftGoal['date'] = value;
-                          dateController.text = DateFormat.yMd().format(value);
-                        },
-                      ),
-                      SizedBox(height: 10.0),
-                      SearchableDropdown(
-                        labelText: 'Type:',
-                        hint: 'Event Type',
-                        dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
-                        searchBoxVisable: false,
-                        dropDownList: eventTypes,
-                        header: '',
-                        iconColor: localAppTheme['anchorColors']['primaryColor'],
-                        idField: 'id',
-                        displayField: 'eventType',
-                        onChanged: (value) {
-                          setStateDialog(() {
-                            draftGoal['type'] = value?['id'];
-                          });
-                        },
-                        isEnabled: true,
-                        initialValue: draftGoal['type'],
-                        validator: (value) {
-                          if ((value == null || value.isEmpty) && draftGoal['type'] == null) {
-                            return 'Please select a valid event type.';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 10.0),
-                      FormInputField(
-                        label: 'Distance:',
-                        errorMessage: 'Please enter a valid goal distance (integer).',
-                        isMultiline: false,
-                        isPassword: false,
-                        prefixIcon: null,
-                        suffixIcon: null,
-                        showLabel: true,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a valid goal distance.';
-                          }
-                          if (int.tryParse(value) == null) {
-                            return 'Please enter a valid integer distance.';
-                          }
-                          return null;
-                        },
-                        onChanged: (value) {
-                          draftGoal['distance'] = int.tryParse(value) ?? 0;
-                        },
-                        controller: distanceController,
-                      ),
-                      SizedBox(height: 10.0),
-                      FormInputField(
-                        label: 'Duration:',
-                        errorMessage: 'Please enter a valid goal duration.',
-                        isMultiline: false,
-                        isPassword: false,
-                        prefixIcon: null,
-                        suffixIcon: null,
-                        showLabel: true,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a valid goal duration (hh:mm:ss).';
-                          }
-                          final pattern = RegExp(r'^\d{2}:[0-5]\d:[0-5]\d$');
-                          if (!pattern.hasMatch(value)) {
-                            return 'Please enter duration in hh:mm:ss format (e.g. 01:30:00).';
-                          }
-                          return null;
-                        },
-                        onChanged: (value) {
-                          draftGoal['duration'] = value;
-                        },
-                        controller: durationController,
-                      ),
-                    ],
-                  ),
-                );
-              },
+                        SizedBox(height: 10.0),
+                        FormInputField(
+                          label: 'Duration:',
+                          errorMessage: 'Please enter a valid goal duration.',
+                          isMultiline: false,
+                          isPassword: false,
+                          prefixIcon: null,
+                          suffixIcon: null,
+                          showLabel: true,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a valid goal duration (hh:mm:ss).';
+                            }
+                            final pattern = RegExp(r'^\d{2}:[0-5]\d:[0-5]\d$');
+                            if (!pattern.hasMatch(value)) {
+                              return 'Please enter duration in hh:mm:ss format (e.g. 01:30:00).';
+                            }
+                            return null;
+                          },
+                          onChanged: (value) {
+                            draftGoal['duration'] = value;
+                          },
+                          controller: durationController,
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
           ),
           actions: <Widget>[
