@@ -126,12 +126,21 @@ Widget header3({required String header, required BuildContext context, required 
 
 //------------------------------------------------------------------------
 //Body
-Widget body({required String header, required Color? color, required BuildContext context}) {
+Widget body({
+  required String header, 
+  required Color? color, 
+  required BuildContext context,
+  TextAlign? textAlign,
+  }) {
   final localAppTheme = ResponsiveTheme(context).theme;
   return Text(
     header,
+    textAlign: textAlign ?? TextAlign.start,
     style: localAppTheme['font'](
-      textStyle: TextStyle(fontSize: localAppTheme['bodySize'], color: color, fontWeight: FontWeight.normal),
+      textStyle: TextStyle(
+        fontSize: localAppTheme['bodySize'], 
+        color: color, fontWeight: FontWeight.normal
+        ),
     ),
   );
 }

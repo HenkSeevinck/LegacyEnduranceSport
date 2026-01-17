@@ -276,4 +276,5 @@ class AppUserProvider with ChangeNotifier {
       rethrow;
     }
   }
+
 }
