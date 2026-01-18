@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:legacyendurancesport/DayOverview/Function/complete_workout_popup.dart';
 import 'package:legacyendurancesport/General/Providers/events_provider.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Providers/workouts_provider.dart';
@@ -105,23 +106,7 @@ class _DailyOverviewState extends State<DailyOverview> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                header1(
-                  header: 'Daily Overview - ${widget.selectedDate.toIso8601String().split('T').first}',
-                  context: context,
-                  color: localAppTheme['anchorColors']['primaryColor'],
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.1),
-                    border: Border(
-                      bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                      top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                    ),
-                  ),
-                  child: header2(header: 'Today\'s Workouts:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                ),
+                header1(header: 'Today\'s Workouts:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
                 const SizedBox(height: 10),
                 todaysWorkouts.isEmpty
                     ? Center(
@@ -150,7 +135,7 @@ class _DailyOverviewState extends State<DailyOverview> {
                                           SizedBox(height: 10.0),
                                           SizedBox(
                                             width: double.infinity,
-                                            child: header3(
+                                            child: header2(
                                               header: workout['workout']['name'] ?? 'Unnamed Workout',
                                               color: localAppTheme['anchorColors']['primaryColor'],
                                               context: context,
@@ -158,97 +143,188 @@ class _DailyOverviewState extends State<DailyOverview> {
                                           ),
                                           SizedBox(height: 10.0),
                                           Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Icon(
-                                                workoutTypes.firstWhere((type) => type['type'] == workout['workout']['workoutTypeID'])['icon'] ??
-                                                    Icons.fitness_center,
-                                                color: localAppTheme['anchorColors']['primaryColor'],
-                                                size: 20,
-                                              ),
-                                              SizedBox(width: 20.0),
-                                              body(
-                                                header:
-                                                    workoutTypes.firstWhere((type) => type['type'] == workout['workout']['workoutTypeID'])['workoutType'] ??
-                                                    'Unknown',
-                                                color: localAppTheme['anchorColors']['primaryColor'],
-                                                context: context,
-                                              ),
-                                            ],
-                                          ),
-                                          SizedBox(height: 10.0),
-                                          Row(
-                                            children: [
-                                              Icon(Icons.fitness_center, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
-                                              SizedBox(width: 20.0),
-                                              body(
-                                                header:
-                                                    focusBlocks.firstWhere((type) => type['blockTypeID'] == workout['workout']['block'])['blockType'] ??
-                                                    'Unknown',
-                                                color: localAppTheme['anchorColors']['primaryColor'],
-                                                context: context,
-                                              ),
-                                            ],
-                                          ),
-                                          Visibility(
-                                            visible: workout['workout']['distance'] != '00.00',
-                                            child: Column(
-                                              children: [
-                                                SizedBox(height: 10.0),
-                                                Row(
+                                              Expanded(
+                                              flex: 1,
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    Icon(Icons.straighten, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
-                                                    SizedBox(width: 20.0),
-                                                    body(
-                                                      header: '${workout['workout']['distance'].toString()} km',
-                                                      color: localAppTheme['anchorColors']['primaryColor'],
-                                                      context: context,
+                                                    header3(
+                                                      header: 'PLANNED:', 
+                                                      context: context, 
+                                                      color: localAppTheme['anchorColors']['primaryColor']
+                                                    ),
+                                                    SizedBox(height: 10.0),
+                                                    Row(
+                                                      children: [
+                                                        Icon(
+                                                          workoutTypes.firstWhere((type) => type['type'] == workout['workout']['workoutTypeID'])['icon'] ??
+                                                              Icons.fitness_center,
+                                                          color: localAppTheme['anchorColors']['primaryColor'],
+                                                          size: 20,
+                                                        ),
+                                                        SizedBox(width: 20.0),
+                                                        body(
+                                                          header:
+                                                              workoutTypes.firstWhere((type) => type['type'] == workout['workout']['workoutTypeID'])['workoutType'] ??
+                                                              'Unknown',
+                                                          color: localAppTheme['anchorColors']['primaryColor'],
+                                                          context: context,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    SizedBox(height: 10.0),
+                                                    Row(
+                                                      children: [
+                                                        Icon(Icons.fitness_center, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
+                                                        SizedBox(width: 20.0),
+                                                        body(
+                                                          header:
+                                                              focusBlocks.firstWhere((type) => type['blockTypeID'] == workout['workout']['block'])['blockType'] ??
+                                                              'Unknown',
+                                                          color: localAppTheme['anchorColors']['primaryColor'],
+                                                          context: context,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Visibility(
+                                                      visible: workout['workout']['distance'] != '00.00',
+                                                      child: Column(
+                                                        children: [
+                                                          SizedBox(height: 10.0),
+                                                          Row(
+                                                            children: [
+                                                              Icon(Icons.straighten, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
+                                                              SizedBox(width: 20.0),
+                                                              body(
+                                                                header: '${workout['workout']['distance'].toString()} km',
+                                                                color: localAppTheme['anchorColors']['primaryColor'],
+                                                                context: context,
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    Visibility(
+                                                      visible: workout['workout']['duration'] != 'hh:mm:ss',
+                                                      child: Column(
+                                                        children: [
+                                                          SizedBox(height: 10.0),
+                                                          Row(
+                                                            children: [
+                                                              Icon(Icons.timer, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
+                                                              SizedBox(width: 20.0),
+                                                              body(
+                                                                header: workout['workout']['duration'].toString(),
+                                                                color: localAppTheme['anchorColors']['primaryColor'],
+                                                                context: context,
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
-                                              ],
-                                            ),
-                                          ),
-                                          Visibility(
-                                            visible: workout['workout']['duration'] != 'hh:mm:ss',
-                                            child: Column(
-                                              children: [
-                                                SizedBox(height: 10.0),
-                                                Row(
+                                              ),
+                                              Expanded(
+                                                flex: 1,
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    Icon(Icons.timer, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
-                                                    SizedBox(width: 20.0),
-                                                    body(
-                                                      header: workout['workout']['duration'].toString(),
-                                                      color: localAppTheme['anchorColors']['primaryColor'],
-                                                      context: context,
+                                                    header3(
+                                                      header: 'COMPLETED:', 
+                                                      context: context, 
+                                                      color: localAppTheme['anchorColors']['primaryColor']
+                                                    ),
+                                                    SizedBox(height: 10.0),
+                                                    Row(
+                                                      children: [
+                                                        Icon( 
+                                                          Icons.timer,
+                                                          color: localAppTheme['anchorColors']['primaryColor'],
+                                                          size: 20,
+                                                        ),
+                                                        SizedBox(width: 20.0),
+                                                        body(
+                                                          header: '-',  
+                                                          color: localAppTheme['anchorColors']['primaryColor'],
+                                                          context: context,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    SizedBox(height: 10.0),
+                                                    Row(
+                                                      children: [
+                                                        Icon( 
+                                                          Icons.straighten,
+                                                          color: localAppTheme['anchorColors']['primaryColor'],
+                                                          size: 20,
+                                                        ),
+                                                        SizedBox(width: 20.0),
+                                                        body(
+                                                          header: '-',  
+                                                          color: localAppTheme['anchorColors']['primaryColor'],
+                                                          context: context,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Visibility(
+                                                      visible: workout['workout']['duration'] != 'hh:mm:ss',
+                                                      child: Column(
+                                                        children: [
+                                                          SizedBox(height: 10.0),
+                                                          Row(
+                                                            children: [
+                                                              Icon(Icons.timer, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
+                                                              SizedBox(width: 20.0),
+                                                              body(
+                                                                header: workout['workout']['duration'].toString(),
+                                                                color: localAppTheme['anchorColors']['primaryColor'],
+                                                                context: context,
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
-                                              ],
-                                            ),
+                                              )
+                                            ],
                                           ),
                                         ],
                                       ),
                                     ),
                                     Container(
                                       padding: EdgeInsets.only(left: 15.0),
-                                      height: 100,
+                                      height: 150,
                                       width: 60,
                                       decoration: BoxDecoration(
                                         border: Border(left: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
                                       ),
                                       child: iconButton(
-                                        label: null,
-                                        backgroundColor: null,
-                                        iconColor: localAppTheme['anchorColors']['primaryColor'],
-                                        icon: Icons.check_circle,
-                                        size: 30,
-                                        toolTip: 'Complete Workout',
-                                        context: context,
-                                        onPressed: () {
-                                          // Complete Workout Action
-                                        },
-                                      ),
+                                          label: null,
+                                          backgroundColor: null,
+                                          iconColor: localAppTheme['anchorColors']['primaryColor'],
+                                          icon: Icons.check_circle,
+                                          size: 30,
+                                          toolTip: 'Complete Workout',
+                                          context: context,
+                                          onPressed: () {
+                                            Map<String, dynamic> workoutData = {};
+                                            workoutData['duration'] = workout['workout']['duration'];
+                                            workoutData['distance'] = workout['workout']['distance'];
+                                            workoutData['type'] = workout['workout']['type'];
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) => CompleteWorkoutPopup(workoutData: workoutData),
+                                            );
+                                          },
+                                        ),
                                     ),
                                   ],
                                 ),
@@ -295,17 +371,7 @@ class _DailyOverviewState extends State<DailyOverview> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.1),
-                    border: Border(
-                      bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                      top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                    ),
-                  ),
-                  child: header2(header: 'Today\'s Goals:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                ),
+                header1(header: 'Today\'s Goals:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
                 const SizedBox(height: 10),
                 todaysGoals.isEmpty
                     ? Center(
@@ -328,7 +394,7 @@ class _DailyOverviewState extends State<DailyOverview> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    header3(header: goal['title'] ?? 'Unnamed Goal', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                                    header2(header: goal['title'] ?? 'Unnamed Goal', context: context, color: localAppTheme['anchorColors']['primaryColor']),
                                     SizedBox(height: 10.0),
                                     Row(
                                       children: [
@@ -372,34 +438,8 @@ class _DailyOverviewState extends State<DailyOverview> {
                           );
                         }),
                       ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  height: 50,
-                  width: double.infinity,
-                  child: elevatedButton(
-                    label: 'Add a New Goal',
-                    onPressed: () {
-                      // Log a New Workout Action
-                    },
-                    backgroundColor: localAppTheme['anchorColors']['primaryColor'],
-                    labelColor: localAppTheme['anchorColors']['secondaryColor'],
-                    leadingIcon: null,
-                    trailingIcon: null,
-                    context: context,
-                  ),
-                ),
                 const SizedBox(height: 20),
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.1),
-                    border: Border(
-                      bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                      top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                    ),
-                  ),
-                  child: header2(header: 'Today\'s Events:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                ),
+                header1(header: 'Today\'s Events:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
                 const SizedBox(height: 10),
                 todaysEvents!.isEmpty
                     ? Center(
@@ -423,7 +463,7 @@ class _DailyOverviewState extends State<DailyOverview> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    header3(header: event['name'] ?? 'Unnamed Event', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                                    header2(header: event['name'] ?? 'Unnamed Event', context: context, color: localAppTheme['anchorColors']['primaryColor']),
                                     SizedBox(height: 10.0),
                                     Row(
                                       children: [
