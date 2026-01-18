@@ -9,6 +9,9 @@ class WorkoutsProvider with ChangeNotifier {
 
   List<Map<String, dynamic>> _workoutsBetweenDates = [];
   List<Map<String, dynamic>> get workoutsBetweenDates => _workoutsBetweenDates;
+
+  List<Map<String, dynamic>> _todaysWorkouts = [];
+  List<Map<String, dynamic>> get todaysWorkouts => _todaysWorkouts;
   
   //--------------------------------------------------------------
   // Method to create a new workout record in Firestore
@@ -145,5 +148,48 @@ class WorkoutsProvider with ChangeNotifier {
       return data;
     }).toList();
     notifyListeners();
+  }
+
+  //---------------------------------------------------------------
+  // Filter _workoutsBetweenDates to get today's workouts for _todaysWorkouts
+  Future<void> filterTodaysWorkouts(DateTime selectedDate) async {
+    final List<Map<String, dynamic>> todays = [];
+    for (var workout in _workoutsBetweenDates) {
+      final workoutDate = workout['workoutDate'];
+      if (workoutDate is Timestamp) {
+        final date = workoutDate.toDate();
+        if (workout['workout'] is Map &&
+            workout['workout']['workoutUID'] != null &&
+            date.year == selectedDate.year &&
+            date.month == selectedDate.month &&
+            date.day == selectedDate.day) {
+          final Map<String, dynamic>? fetchedWorkout =
+              await fetchWorkoutByID(workout['workout']['workoutUID']);
+          if (fetchedWorkout != null) {
+            workout['workout'] = fetchedWorkout;
+          }
+          todays.add(workout);
+        }
+      }
+    }
+    _todaysWorkouts = todays;
+    notifyListeners();
+  }
+
+  //---------------------------------------------------------------
+  // fetch workout by workout ID
+  Future<Map<String, dynamic>?> fetchWorkoutByID(String workoutID) async {
+    try {
+      DocumentSnapshot doc = await _firestore.collection('Workouts').doc(workoutID).get();
+      if (doc.exists) {
+        Map<String, dynamic> workoutData = doc.data() as Map<String, dynamic>;
+        workoutData['id'] = doc.id;
+        return workoutData;
+      }
+      return null;
+    } catch (e) {
+      Exception('Error fetching workout by ID: $e');
+      rethrow;
+    }
   }
 }

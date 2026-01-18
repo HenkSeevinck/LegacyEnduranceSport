@@ -25,6 +25,9 @@ class AppUserProvider with ChangeNotifier {
   List<Map<String, dynamic>> _goalsBetweenDates = [];
   List<Map<String, dynamic>> get goalsBetweenDates => _goalsBetweenDates;
 
+  List<Map<String, dynamic>> _todaysGoals = [];
+  List<Map<String, dynamic>> get todaysGoals => _todaysGoals;
+
   //--------------------------------------------------------------
   // Helper to convert Firestore types (e.g. Timestamp) into JSON-encodable
   // values so jsonEncode/jsonDecode won't throw. Keeps strings for dates.
@@ -317,5 +320,26 @@ class AppUserProvider with ChangeNotifier {
       Exception('Error retrieving user goals: $e');
       rethrow;
     }
+  }
+
+  //--------------------------------------------------------------
+  // Filter _goalsBetweenDates today's goals for _todaysGoals
+  Future<void> filterTodaysGoals(DateTime selectedDate) async {
+    _todaysGoals = _goalsBetweenDates.where((goal) {
+      final goalDateRaw = goal['date'];
+      DateTime? goalDate;
+      if (goalDateRaw is Timestamp) {
+        goalDate = goalDateRaw.toDate();
+      } else if (goalDateRaw is DateTime) {
+        goalDate = goalDateRaw;
+      } else if (goalDateRaw is String) {
+        goalDate = DateTime.tryParse(goalDateRaw);
+      }
+      if (goalDate == null) return false;
+      return goalDate.year == selectedDate.year &&
+          goalDate.month == selectedDate.month &&
+          goalDate.day == selectedDate.day;
+    }).toList();
+    notifyListeners();
   }
 }

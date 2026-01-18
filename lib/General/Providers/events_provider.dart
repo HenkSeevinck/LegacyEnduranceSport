@@ -9,6 +9,9 @@ class EventsProvider with ChangeNotifier {
 
   List<Map<String, dynamic>>? _eventsBetweenDates;
   List<Map<String, dynamic>>? get eventsBetweenDates => _eventsBetweenDates;
+
+  List<Map<String, dynamic>>? _todaysEvents;
+  List<Map<String, dynamic>>? get todaysEvents => _todaysEvents;
   //---------------------------------------------------------------
   // Fetch all events from Firestore
   Future<void> fetchAllEvents() async {
@@ -72,5 +75,21 @@ class EventsProvider with ChangeNotifier {
       Exception('Error fetching Events between dates: $e');
       rethrow; // Re-throw the error for further handling if needed
     }
+  }
+
+  //---------------------------------------------------------------
+  // Filter _eventsBetweenDates today's events for _todaysEvents
+  Future<void> filterTodaysEvents(DateTime selectedDate) async {
+    if (_eventsBetweenDates == null) return;
+
+    _todaysEvents = _eventsBetweenDates!.where((event) {
+      final eventDateTimestamp = event['eventDate'] as Timestamp?;
+      if (eventDateTimestamp == null) return false;
+      final eventDate = eventDateTimestamp.toDate();
+      return eventDate.year == selectedDate.year &&
+          eventDate.month == selectedDate.month &&
+          eventDate.day == selectedDate.day;
+    }).toList();
+    notifyListeners();
   }
 }

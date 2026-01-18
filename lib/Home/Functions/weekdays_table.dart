@@ -105,7 +105,7 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
     widget.onDaySelected?.call(d);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => DailyOverview(),
+        builder: (context) => DailyOverview(selectedDate: d),
       ),
     );
   }
