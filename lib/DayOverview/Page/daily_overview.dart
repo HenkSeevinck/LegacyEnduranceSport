@@ -72,7 +72,6 @@ class _DailyOverviewState extends State<DailyOverview> {
   Future<void> _logAnotherWorkout() async {
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
     final appUser = appUserProvider.appUser;
-    final selectedDate = widget.selectedDate;
 
     // Create empty workout data for new entry
     Map<String, dynamic> emptyWorkoutData = {};
@@ -95,7 +94,6 @@ class _DailyOverviewState extends State<DailyOverview> {
         workoutData: emptyWorkoutData, 
         workoutStatus: 'new', 
         loadedWorkout: emptyLoadedWorkout, 
-        selectedDate: selectedDate
       ),
     );
   }

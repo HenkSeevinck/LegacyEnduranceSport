@@ -166,7 +166,7 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
                 builder: (context, constraints) {
                   final tileWidth = (constraints.maxWidth) / 7;
                   final tileHeight = tileWidth * 1.0;
-                  final effectiveHeight = (tileHeight < widget.minTileHeight ? widget.minTileHeight : tileHeight) + 25;
+                  final effectiveHeight = (tileHeight < widget.minTileHeight ? widget.minTileHeight : tileHeight) + 55;
 
                   return SizedBox(
                     height: effectiveHeight,
@@ -187,9 +187,15 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
                           final eventDate = event['eventDate']?.toDate();
                           return eventDate != null && _isSameDay(eventDate, d);
                         });
-                        bool hasWorkout = workoutsBetweenDates.any((workout) {
+                        
+                        bool hasSchedulledWorkout = workoutsBetweenDates.any((workout) {
                           final workoutDate = workout['workoutDate']?.toDate();
-                          return workoutDate != null && _isSameDay(workoutDate, d);
+                          return workoutDate != null && workout['workout'] != null && _isSameDay(workoutDate, d);
+                        });
+
+                        bool hasUnSchedulledWorkout = workoutsBetweenDates.any((workout) {
+                          final workoutDate = workout['workoutDate']?.toDate();
+                          return workoutDate != null && workout['workout'] == null && _isSameDay(workoutDate, d);
                         });
 
                         bool hasGoal = goalsBetweenDates.any((goal) {
@@ -218,6 +224,11 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
                                       body(
+                                        header: DateFormat.E().format(d).substring(0, 1),
+                                        color: isSelected ? secondary : (isToday ? primary : localAppTheme['anchorColors']['primaryColor']),
+                                        context: context,
+                                      ),
+                                      body(
                                         header: DateFormat.d().format(d),
                                         color: isSelected ? secondary : (isToday ? primary : localAppTheme['anchorColors']['primaryColor']),
                                         context: context,
@@ -231,22 +242,48 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
                                           width: double.infinity,
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(4),
-                                            color: localAppTheme['anchorColors']['primaryColor']
+                                            color: localAppTheme['utilityColorPair1']['color1'],
                                           ),
-                                          child: Icon(Icons.event, size: 15, color: localAppTheme['anchorColors']['secondaryColor'])),
+                                          child: Icon(
+                                            Icons.event, 
+                                            size: 15, 
+                                            color: localAppTheme['utilityColorPair1']['color2'],
+                                          ),
+                                        ),
                                       ),
                                       Visibility(
-                                        visible: hasWorkout,
+                                        visible: hasSchedulledWorkout,
                                         child: Container(
                                           margin: EdgeInsets.only(top: 1, bottom: 1),
                                           padding: EdgeInsets.all(1),
                                           width: double.infinity,
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(4),
-                                            color: localAppTheme['anchorColors']['primaryColor']
+                                            color: localAppTheme['utilityColorPair3']['color1'],
                                           ),
-                                          child: Icon(Icons.fitness_center, size: 15, color: localAppTheme['anchorColors']['secondaryColor'])
+                                          child: Icon(
+                                            Icons.fitness_center, 
+                                            size: 15, 
+                                            color: localAppTheme['utilityColorPair3']['color2'],
                                           ),
+                                        ),
+                                      ),
+                                      Visibility(
+                                        visible: hasUnSchedulledWorkout,
+                                        child: Container(
+                                          margin: EdgeInsets.only(top: 1, bottom: 1),
+                                          padding: EdgeInsets.all(1),
+                                          width: double.infinity,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(4),
+                                            color: localAppTheme['utilityColorPair2']['color1'],
+                                          ),
+                                          child: Icon(
+                                            Icons.fitness_center_outlined, 
+                                            size: 15, 
+                                            color: localAppTheme['utilityColorPair2']['color2'],
+                                          ),
+                                        ),
                                       ),
                                       Visibility(
                                         visible: hasGoal,
@@ -256,9 +293,13 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
                                           width: double.infinity,
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(4),
-                                            color: localAppTheme['anchorColors']['primaryColor']
+                                            color: localAppTheme['utilityColorPair4']['color1'],
                                           ),
-                                          child: Icon(Icons.flag_outlined, size: 15, color: localAppTheme['anchorColors']['secondaryColor']),
+                                          child: Icon(
+                                            Icons.flag_outlined, 
+                                            size: 15, 
+                                            color: localAppTheme['utilityColorPair4']['color2']
+                                          ),
                                         ),
                                       ),
                                     ],

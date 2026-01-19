@@ -107,6 +107,7 @@ class WorkoutsProvider with ChangeNotifier {
   Future<void> createLoadedWorkoutRecord(Map<String, dynamic> workout) async {
     DocumentReference docRef = await _firestore.collection('LoadedWorkouts').add(workout);
     workout['loadedWorkoutUID'] = docRef.id;
+    _todaysWorkouts.add(workout);
     notifyListeners();
   }
 

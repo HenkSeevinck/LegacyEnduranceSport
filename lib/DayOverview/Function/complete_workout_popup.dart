@@ -10,7 +10,6 @@ class CompleteWorkoutPopup extends StatefulWidget {
   Map<String, dynamic>? workoutData;
   String workoutStatus; // 'completed' or 'new'
   Map<String, dynamic>? loadedWorkout;
-  DateTime? selectedDate;
 
 
   CompleteWorkoutPopup({
@@ -18,7 +17,6 @@ class CompleteWorkoutPopup extends StatefulWidget {
     required this.workoutData, 
     required this.workoutStatus, 
     required this.loadedWorkout,
-    this.selectedDate
     });
 
   @override
@@ -75,12 +73,10 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
     final workoutData = widget.workoutData;
     final completedworkoutData = workoutData!['completedworkoutData'];
-    final selectedDate = widget.selectedDate;
 
     loadedWorkout!['completedworkoutData'] = completedworkoutData;
     try {
       await workoutsProvider.createLoadedWorkoutRecord(loadedWorkout);
-      await workoutsProvider.filterTodaysWorkouts(selectedDate!);
       setState(() {});
       Navigator.of(context).pop();
     } catch (e) {
@@ -194,7 +190,7 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            body(header: 'Perceived Effort:\n1: Easy\n10: Very Hard', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                            body(header: 'Perceived Effort:\n1: Very Easy\n10: Very Hard', color: localAppTheme['anchorColors']['primaryColor'], context: context),
                             Slider(
                               value: (completedworkoutData['perceivedEffort'] ?? 0).toDouble(),
                               onChanged: !inputData
@@ -204,7 +200,7 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
                                       });
                                     }
                                   : null,
-                              min: 0,
+                              min: 1,
                               max: 10,
                               divisions: 10,
                               label: (completedworkoutData['perceivedEffort'] ?? 0).toString(),
@@ -213,7 +209,7 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
                             ),
                             SizedBox(height: 10),
                             body(
-                              header: 'How did you feel:\n1: Very Good\n10: Very Weak',
+                              header: 'How did you feel:\n1: Very Weak\n10: Very Strong',
                               color: localAppTheme['anchorColors']['primaryColor'],
                               context: context,
                             ),
@@ -226,7 +222,7 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
                                       });
                                     }
                                   : null,
-                              min: 0,
+                              min: 1,
                               max: 10,
                               divisions: 10,
                               label: (completedworkoutData['feeling'] ?? 0).toString(),
