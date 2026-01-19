@@ -52,12 +52,16 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
     await appUserProvider.fetchUserGoalsBetweenDates(_weekStart, _weekStart.add(const Duration(days: 6)));
   }
 
+  //----------------------------------------------------
+  // Get start of week (Monday)
   DateTime _startOfWeek(DateTime d) {
     // treat Monday as start of week
     final weekday = d.weekday; // Mon = 1
     return DateTime(d.year, d.month, d.day).subtract(Duration(days: weekday - 1));
   }
 
+  //----------------------------------------------------
+  // Move to previous week
   void _prevWeek() async {
     final eventsProvider = Provider.of<EventsProvider>(context, listen: false);
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
@@ -78,6 +82,8 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
     );
   }
 
+  //----------------------------------------------------
+  // Move to next week
   void _nextWeek() async {
     final eventsProvider = Provider.of<EventsProvider>(context, listen: false);
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
@@ -98,6 +104,8 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
     );
   }
 
+  //----------------------------------------------------
+  // Select a date
   Future<void> _selectDate(DateTime d) async {
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
     final eventsProvider = Provider.of<EventsProvider>(context, listen: false);
@@ -118,6 +126,12 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
     );
   }
 
+  //----------------------------------------------------
+  // Check if two dates are the same day
+  bool _isSameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
+
+  //----------------------------------------------------
+  // Build Widget
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<void>(
@@ -265,5 +279,4 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
       },
     );
   }
-  bool _isSameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
 }

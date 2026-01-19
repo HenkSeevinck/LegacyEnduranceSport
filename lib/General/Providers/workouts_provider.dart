@@ -118,6 +118,15 @@ class WorkoutsProvider with ChangeNotifier {
   }
 
   //--------------------------------------------------------------
+  // Method to add completed workout data to an existing loaded workout record
+  Future<void> addCompletedWorkoutData(String loadedWorkoutUID, Map<String, dynamic> completedworkoutData) async {
+    await _firestore.collection('LoadedWorkouts').doc(loadedWorkoutUID).update({
+      'completedworkoutData': completedworkoutData,
+    });
+    notifyListeners();
+  }
+
+  //--------------------------------------------------------------
   // Medhod to loop through a list of workouts and load or update them
   Future<void> loadOrUpdateWorkouts(List<Map<String, dynamic>> assignedAthletes) async {
     for (var workout in assignedAthletes) {
@@ -144,7 +153,7 @@ class WorkoutsProvider with ChangeNotifier {
 
     _workoutsBetweenDates = querySnapshot.docs.map((doc) {
       final data = doc.data() as Map<String, dynamic>;
-      data['eventID'] = doc.id; // Add the document ID
+      data['loadedWorkoutUID'] = doc.id; // Add the document ID
       return data;
     }).toList();
     notifyListeners();
@@ -158,15 +167,13 @@ class WorkoutsProvider with ChangeNotifier {
       final workoutDate = workout['workoutDate'];
       if (workoutDate is Timestamp) {
         final date = workoutDate.toDate();
-        if (workout['workout'] is Map &&
-            workout['workout']['workoutUID'] != null &&
-            date.year == selectedDate.year &&
-            date.month == selectedDate.month &&
-            date.day == selectedDate.day) {
-          final Map<String, dynamic>? fetchedWorkout =
-              await fetchWorkoutByID(workout['workout']['workoutUID']);
-          if (fetchedWorkout != null) {
-            workout['workout'] = fetchedWorkout;
+        if (
+        date.year == selectedDate.year && date.month == selectedDate.month && date.day == selectedDate.day) {
+          if (workout['workout'] is Map && workout['workout']['workoutUID'] != null) {
+            final Map<String, dynamic>? fetchedWorkout = await fetchWorkoutByID(workout['workout']['workoutUID']);
+            if (fetchedWorkout != null) {
+              workout['workout'] = fetchedWorkout;
+            }
           }
           todays.add(workout);
         }
