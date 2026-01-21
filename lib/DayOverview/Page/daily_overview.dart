@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/DayOverview/Function/complete_workout_popup.dart';
 import 'package:legacyendurancesport/General/Providers/events_provider.dart';
+import 'package:legacyendurancesport/General/Providers/image_verification_provider.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Providers/workouts_provider.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
@@ -24,6 +25,8 @@ class DailyOverview extends StatefulWidget {
 class _DailyOverviewState extends State<DailyOverview> {
   Future<void>? _fetchDataFuture;
 
+  //----------------------------------------------------
+  // Open URL function
   Future<void> _openUrl(String rawUrl) async {
     try {
       final urlString = (rawUrl.isEmpty) ? 'https://www.google.com' : rawUrl;
@@ -106,6 +109,7 @@ class _DailyOverviewState extends State<DailyOverview> {
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
     final eventsProvider = Provider.of<EventsProvider>(context, listen: true);
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: true);
+    final imageVerificationProvider = Provider.of<ImageVerificationProvider>(context, listen: true);
     final todaysGoals = appUserProvider.todaysGoals;
     final todaysEvents = eventsProvider.todaysEvents;
     final todaysWorkouts = workoutsProvider.todaysWorkouts;
@@ -433,6 +437,7 @@ class _DailyOverviewState extends State<DailyOverview> {
                     label: 'Log another Workout',
                     onPressed: () {
                       _logAnotherWorkout();
+                      imageVerificationProvider.clearWorkoutResult();
                     },
                     backgroundColor: localAppTheme['anchorColors']['primaryColor'],
                     labelColor: localAppTheme['anchorColors']['secondaryColor'],

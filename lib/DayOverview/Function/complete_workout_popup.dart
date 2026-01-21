@@ -1,4 +1,7 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:legacyendurancesport/General/Providers/image_verification_provider.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Providers/workouts_provider.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
@@ -28,6 +31,9 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
   bool inputData = true;
   TextEditingController durationController = TextEditingController();
   TextEditingController distanceController = TextEditingController();
+  Uint8List? imageData;
+  bool _pickerOpen = false;
+  bool isVerifyingImage = false;
 
   //--------------------------------------------------------------
   // Dispose
@@ -45,6 +51,16 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
     super.initState();
     durationController.text = widget.workoutData?['completedworkoutData']?['duration'] ?? '';
     distanceController.text = widget.workoutData?['completedworkoutData']?['distance'] ?? '';
+  }
+
+  //--------------------------------------------------------------
+  // Reset Text Controllers
+  Future<void> _resetTextControllers() async {
+    final imageVerificationProvider = Provider.of<ImageVerificationProvider>(context, listen: false);
+    final workoutResult = imageVerificationProvider.workoutResult;
+
+    durationController.text = workoutResult['duration'] ?? '';
+    distanceController.text = workoutResult['distance'] ?? '';
   }
 
   //--------------------------------------------------------------
@@ -85,19 +101,225 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
   }
 
   //--------------------------------------------------------------
-  // Build Method
-  @override
-  Widget build(BuildContext context) {
+  // Manual Entry Widget Build
+  Widget _buildManualEntryWidget() {
     final localAppTheme = ResponsiveTheme(context).theme;
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
+    final imageVerificationProvider = Provider.of<ImageVerificationProvider>(context, listen: true);
+    final workoutResult = imageVerificationProvider.workoutResult;
     final workoutTypes = internalStatusProvider.workoutTypes;
     final workoutData = widget.workoutData;
     final workoutStatus = widget.workoutStatus;
     final completedworkoutData = workoutData!['completedworkoutData'];
+    
+    if(workoutResult.isNotEmpty) {
+      _resetTextControllers();
+      setState(() {
+        isVerifyingImage = false;
+      });
+    }
 
-    //print(workoutData);
-    //print(workoutStatus);
-    //print(loadedWorkout);
+    return isVerifyingImage 
+    ? Center(child: CircularProgressIndicator(),)
+    : Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Visibility(
+          visible: workoutStatus == 'completed',
+          child: FormInputField(
+            label: 'Workout Type:',
+            errorMessage: 'Please enter workout type',
+            isMultiline: false,
+            isPassword: false,
+            prefixIcon: null,
+            suffixIcon: null,
+            showLabel: true,
+            enabled: false,
+            initialValue: completedworkoutData['type'] != null
+                ? workoutTypes.where((type) => type['workoutTypeID'] == completedworkoutData['type']).first['workoutType']
+                : '',
+          ),
+        ),
+        Visibility(
+          visible: workoutStatus == 'new',
+          child: SearchableDropdown(
+            labelText: '',
+            hint: '',
+            dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
+            searchBoxVisable: false,
+            dropDownList: workoutTypes,
+            header: 'Workout Type:',
+            iconColor: localAppTheme['anchorColors']['primaryColor'],
+            idField: 'workoutTypeID',
+            displayField: 'workoutType',
+            onChanged: (value) {
+              setState(() {
+                completedworkoutData['type'] = value?['workoutTypeID'];
+              });
+            },
+            isEnabled: inputData,
+          ),
+        ),
+        SizedBox(height: 10),
+        FormInputField(
+          label: 'Duration:',
+          errorMessage: 'Please enter duration',
+          isMultiline: false,
+          isPassword: false,
+          prefixIcon: null,
+          suffixIcon: null,
+          showLabel: true,
+          enabled: inputData,
+          onChanged: (value) {
+            completedworkoutData['duration'] = value;
+          },
+          controller: durationController,
+        ),
+        SizedBox(height: 10),
+        FormInputField(
+          label: 'Distance:',
+          errorMessage: 'Please enter distance',
+          isMultiline: false,
+          isPassword: false,
+          prefixIcon: null,
+          suffixIcon: null,
+          showLabel: true,
+          enabled: inputData,
+          onChanged: (value) {
+            completedworkoutData['distance'] = value;
+          },
+          controller: distanceController,
+        ),
+        SizedBox(height: 10),
+        Visibility(
+          visible: uploadType != null && inputData != true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              body(header: 'Perceived Effort:\n1: Very Easy\n10: Very Hard', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+              Slider(
+                value: (completedworkoutData['perceivedEffort'] ?? 0).toDouble(),
+                onChanged: !inputData
+                    ? (double value) {
+                        setState(() {
+                          completedworkoutData['perceivedEffort'] = value;
+                        });
+                      }
+                    : null,
+                min: 0,
+                max: 10,
+                divisions: 10,
+                label: (completedworkoutData['perceivedEffort'] ?? 0).toString(),
+                activeColor: localAppTheme['anchorColors']['primaryColor'],
+                thumbColor: localAppTheme['anchorColors']['primaryColor'],
+              ),
+              SizedBox(height: 10),
+              body(header: 'How did you feel:\n1: Very Weak\n10: Very Strong', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+              Slider(
+                value: (completedworkoutData['feeling'] ?? 0).toDouble(),
+                onChanged: !inputData
+                    ? (double value) {
+                        setState(() {
+                          completedworkoutData['feeling'] = value;
+                        });
+                      }
+                    : null,
+                min: 0,
+                max: 10,
+                divisions: 10,
+                label: (completedworkoutData['feeling'] ?? 0).toString(),
+                activeColor: localAppTheme['anchorColors']['primaryColor'],
+                thumbColor: localAppTheme['anchorColors']['primaryColor'],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+    }
+
+  //-------------------------------------------------------------
+  // Helper that opens the mobile browser camera via a hidden file input
+  Future<void> _openCameraAndStore() async {
+    if (_pickerOpen) return;
+    _pickerOpen = true;
+
+    try {
+      final ImagePicker picker = ImagePicker();
+      // Setting source to camera triggers the 'capture' attribute on web
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 10,
+        preferredCameraDevice: CameraDevice.rear,
+      );
+
+      if (image != null) {
+        final bytes = await image.readAsBytes();
+        final provider = Provider.of<ImageVerificationProvider>(context, listen: false);
+        
+        setState(() {
+          isVerifyingImage = true;
+        });
+
+        await provider.verifyImage(bytes);
+        
+        if (mounted) {
+          setState(() {
+            imageData = bytes;
+          });
+        }
+      }
+    } catch (e) {
+      showGeneralPopupDialog(context, 'Error', 'Error accessing camera: $e');
+    } finally {
+      _pickerOpen = false;
+    }
+  }
+
+  //-------------------------------------------------------------
+  // Helper that opens the file picker for the user to select an image
+  Future<void> _openFilePickerAndStore() async {
+    if (_pickerOpen) return;
+    _pickerOpen = true;
+
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 10,
+      );
+
+      if (image != null) {
+        final bytes = await image.readAsBytes();
+        final provider = Provider.of<ImageVerificationProvider>(context, listen: false);
+        
+        setState(() {
+          isVerifyingImage = true;
+        });
+
+        await provider.verifyImage(bytes);
+        
+        if (mounted) {
+          setState(() {
+            imageData = bytes;
+          });
+        }
+      }
+    } catch (e) {
+      showGeneralPopupDialog(context, 'Error', 'Error accessing file picker: $e');
+    } finally {
+      _pickerOpen = false;
+    }
+  }
+
+  //--------------------------------------------------------------
+  // Build Method
+  @override
+  Widget build(BuildContext context) {
+    final localAppTheme = ResponsiveTheme(context).theme;
+    final workoutStatus = widget.workoutStatus;
+    final imageVerificationProvider = Provider.of<ImageVerificationProvider>(context, listen: true);
+    final workoutResult = imageVerificationProvider.workoutResult;
 
     return AlertDialog(
       backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
@@ -115,129 +337,11 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
             uploadType == null
                 ? body(header: 'Select how you want to complete the workout:', context: context, color: localAppTheme['anchorColors']['primaryColor'])
                 : uploadType == 'manual'
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Visibility(
-                        visible: workoutStatus == 'completed',
-                        child: FormInputField(
-                          label: 'Workout Type:',
-                          errorMessage: 'Please enter workout type',
-                          isMultiline: false,
-                          isPassword: false,
-                          prefixIcon: null,
-                          suffixIcon: null,
-                          showLabel: true,
-                          enabled: false,
-                          initialValue: completedworkoutData['type'] != null
-                              ? workoutTypes.where((type) => type['workoutTypeID'] == completedworkoutData['type']).first['workoutType']
-                              : '',
-                        ),
-                      ),
-                      Visibility(
-                        visible: workoutStatus == 'new',
-                        child: SearchableDropdown(
-                          labelText: '',
-                          hint: '',
-                          dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
-                          searchBoxVisable: false,
-                          dropDownList: workoutTypes,
-                          header: 'Workout Type:',
-                          iconColor: localAppTheme['anchorColors']['primaryColor'],
-                          idField: 'workoutTypeID',
-                          displayField: 'workoutType',
-                          onChanged: (value) {
-                            setState(() {
-                              completedworkoutData['type'] = value?['workoutTypeID'];
-                            });
-                          },
-                          isEnabled: inputData,
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      FormInputField(
-                        label: 'Duration:',
-                        errorMessage: 'Please enter duration',
-                        isMultiline: false,
-                        isPassword: false,
-                        prefixIcon: null,
-                        suffixIcon: null,
-                        showLabel: true,
-                        enabled: inputData,
-                        onChanged: (value) {
-                          completedworkoutData['duration'] = value;
-                        },
-                        controller: durationController,
-                      ),
-                      SizedBox(height: 10),
-                      FormInputField(
-                        label: 'Distance:',
-                        errorMessage: 'Please enter distance',
-                        isMultiline: false,
-                        isPassword: false,
-                        prefixIcon: null,
-                        suffixIcon: null,
-                        showLabel: true,
-                        enabled: inputData,
-                        onChanged: (value) {
-                          completedworkoutData['distance'] = value;
-                        },
-                        controller: distanceController,
-                      ),
-                      SizedBox(height: 10),
-                      Visibility(
-                        visible: uploadType != null && inputData != true,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            body(header: 'Perceived Effort:\n1: Very Easy\n10: Very Hard', color: localAppTheme['anchorColors']['primaryColor'], context: context),
-                            Slider(
-                              value: (completedworkoutData['perceivedEffort'] ?? 0).toDouble(),
-                              onChanged: !inputData
-                                  ? (double value) {
-                                      setState(() {
-                                        completedworkoutData['perceivedEffort'] = value;
-                                      });
-                                    }
-                                  : null,
-                              min: 1,
-                              max: 10,
-                              divisions: 10,
-                              label: (completedworkoutData['perceivedEffort'] ?? 0).toString(),
-                              activeColor: localAppTheme['anchorColors']['primaryColor'],
-                              thumbColor: localAppTheme['anchorColors']['primaryColor'],
-                            ),
-                            SizedBox(height: 10),
-                            body(
-                              header: 'How did you feel:\n1: Very Weak\n10: Very Strong',
-                              color: localAppTheme['anchorColors']['primaryColor'],
-                              context: context,
-                            ),
-                            Slider(
-                              value: (completedworkoutData['feeling'] ?? 0).toDouble(),
-                              onChanged: !inputData
-                                  ? (double value) {
-                                      setState(() {
-                                        completedworkoutData['feeling'] = value;
-                                      });
-                                    }
-                                  : null,
-                              min: 1,
-                              max: 10,
-                              divisions: 10,
-                              label: (completedworkoutData['feeling'] ?? 0).toString(),
-                              activeColor: localAppTheme['anchorColors']['primaryColor'],
-                              thumbColor: localAppTheme['anchorColors']['primaryColor'],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  )
+                ? _buildManualEntryWidget()
                 : uploadType == 'camera'
-                ? body(header: 'Camera Selected', context: context, color: localAppTheme['anchorColors']['primaryColor'])
-                : uploadType == 'upload'
-                ? body(header: 'Upload Selected', context: context, color: localAppTheme['anchorColors']['primaryColor'])
+                ? _buildManualEntryWidget()
+                : uploadType == 'filePicker'
+                ? _buildManualEntryWidget()
                 : SizedBox(),
           ],
         ),
@@ -266,28 +370,26 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
                 label: null,
                 backgroundColor: null,
                 iconColor: localAppTheme['anchorColors']['primaryColor'],
-                icon: Icons.upload,
+                icon: Icons.camera_alt,
                 size: 30,
-                toolTip: 'Upload image',
+                toolTip: 'Take Photo',
                 context: context,
                 onPressed: () {
-                  setState(() {
-                    uploadType = 'upload';
-                  });
+                  setState(() { uploadType = 'camera'; });
+                  _openCameraAndStore();
                 },
               ),
               iconButton(
                 label: null,
                 backgroundColor: null,
                 iconColor: localAppTheme['anchorColors']['primaryColor'],
-                icon: Icons.camera,
+                icon: Icons.image,
                 size: 30,
-                toolTip: 'Take photo',
+                toolTip: 'Upload image',
                 context: context,
                 onPressed: () {
-                  setState(() {
-                    uploadType = 'camera';
-                  });
+                  setState(() { uploadType = 'filePicker'; });
+                  _openFilePickerAndStore();
                 },
               ),
               iconButton(
@@ -323,19 +425,22 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
                   context: context,
                 ),
               ),
-              Expanded(
-                child: elevatedButton(
-                  label: 'SUBMIT',
-                  onPressed: () {
-                    setState(() {
-                      inputData = false;
-                    });
-                  },
-                  backgroundColor: localAppTheme['anchorColors']['primaryColor'],
-                  labelColor: localAppTheme['anchorColors']['secondaryColor'],
-                  leadingIcon: null,
-                  trailingIcon: null,
-                  context: context,
+              Visibility(
+                visible: workoutResult.isNotEmpty,
+                child: Expanded(
+                  child: elevatedButton(
+                    label: 'SUBMIT',
+                    onPressed: () {
+                      setState(() {
+                        inputData = false;
+                      });
+                    },
+                    backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                    labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                    leadingIcon: null,
+                    trailingIcon: null,
+                    context: context,
+                  ),
                 ),
               ),
             ],

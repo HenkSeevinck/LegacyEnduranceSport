@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:legacyendurancesport/General/Providers/ai_provider.dart';
 import 'package:legacyendurancesport/General/Providers/clubs_provided.dart';
 import 'package:legacyendurancesport/General/Providers/events_provider.dart';
+import 'package:legacyendurancesport/General/Providers/image_verification_provider.dart';
 import 'package:legacyendurancesport/General/Providers/workouts_provider.dart';
 import 'package:legacyendurancesport/Landing/Page/landing_page.dart';
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
@@ -34,6 +35,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create:  (_) => EventsProvider()),
         ChangeNotifierProvider(create:  (_) => WorkoutsProvider()),
         ChangeNotifierProvider(create:  (_) => AiProvider()),
+        ChangeNotifierProvider(create:  (_) => ImageVerificationProvider()),
       ],
       child: MyApp(),
     ),
