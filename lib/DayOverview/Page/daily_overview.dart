@@ -8,6 +8,7 @@ import 'package:legacyendurancesport/General/Providers/workouts_provider.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
+import 'package:legacyendurancesport/Goals/Functions/add_goal_popup.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -50,6 +51,19 @@ class _DailyOverviewState extends State<DailyOverview> {
   // Fetch data function
   Future<void> _fetchData() async {
     // Fetch necessary data from providers
+  }
+
+  //----------------------------------------------------
+  // Athlete Selection Popup Dialog
+  Future<void> _showCreateGoalPopupDialog(BuildContext context, Map<String, dynamic>? goal, int? index) async {
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // User must tap button to dismiss
+      builder: (BuildContext context) {
+        return AddGoalPopup(context: context, goal: goal, index: index);
+      },
+    );
   }
 
   //----------------------------------------------------
@@ -160,11 +174,11 @@ class _DailyOverviewState extends State<DailyOverview> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                header1(header: 'Today\'s Workouts:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                header1(header: 'Day\'s Workouts:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
                 const SizedBox(height: 10),
                 todaysWorkouts.isEmpty
                     ? Center(
-                        child: body(header: 'No Workouts Assigned for Today.', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                        child: body(header: 'No Workouts Assigned.', context: context, color: localAppTheme['anchorColors']['primaryColor']),
                       )
                     : Column(
                         children: List<Widget>.generate(todaysWorkouts.length, (index) {
@@ -447,11 +461,11 @@ class _DailyOverviewState extends State<DailyOverview> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                header1(header: 'Today\'s Goals:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                header1(header: 'Day\'s Goals:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
                 const SizedBox(height: 10),
                 todaysGoals.isEmpty
                     ? Center(
-                        child: body(header: 'No Goals Assigned for Today.', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                        child: body(header: 'No Goals Assigned.', context: context, color: localAppTheme['anchorColors']['primaryColor']),
                       )
                     : Column(
                         children: List<Widget>.generate(todaysGoals.length, (index) {
@@ -514,12 +528,24 @@ class _DailyOverviewState extends State<DailyOverview> {
                           );
                         }),
                       ),
+                const SizedBox(height: 10),
+                elevatedButton(
+                  label: 'Add New Goal',
+                  onPressed: () {
+                    _showCreateGoalPopupDialog(context, null, null);
+                  },
+                  backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                  labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                  leadingIcon: null,
+                  trailingIcon: null,
+                  context: context,
+                ),
                 const SizedBox(height: 20),
-                header1(header: 'Today\'s Events:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                header1(header: 'Day\'s Events:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
                 const SizedBox(height: 10),
                 todaysEvents!.isEmpty
                     ? Center(
-                        child: body(header: 'No Events Assigned for Today.', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                        child: body(header: 'No Events Assigned.', context: context, color: localAppTheme['anchorColors']['primaryColor']),
                       )
                     : Column(
                         children: List<Widget>.generate(todaysEvents.length, (index) {

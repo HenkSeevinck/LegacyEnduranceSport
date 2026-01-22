@@ -3,6 +3,7 @@ import 'package:legacyendurancesport/Events/Page/events_page.dart';
 import 'package:legacyendurancesport/Goals/Page/goals_page.dart';
 import 'package:legacyendurancesport/MyAthletes/Page/my_athletes_page.dart';
 import 'package:legacyendurancesport/Profile/Page/profile_page.dart';
+import 'package:legacyendurancesport/Statistics/Page/statistics_page.dart';
 import 'package:legacyendurancesport/Workouts/Page/workouts_page.dart';
 
 //Form Status Provider
@@ -23,6 +24,7 @@ class InternalStatusProvider with ChangeNotifier {
     {'selection': 'myProfile', 'pageName': 'MY PROFILE', 'icon': Icons.person, 'navigateTo': UserProfile(isCoachView: false), 'coachOnly': false},
     {'selection': 'myGoals', 'pageName': 'MY GOALS', 'icon': Icons.flag_outlined, 'navigateTo': GoalsPage(isCoachView: false), 'coachOnly': false},
     {'selection': 'events', 'pageName': 'EVENTS', 'icon': Icons.event, 'navigateTo': EventPage(), 'coachOnly': false},
+    {'selection': 'events', 'pageName': 'STATISTICS', 'icon': Icons.bar_chart, 'navigateTo': StatisticsPage(), 'coachOnly': false},
     {'selection': 'athletes', 'pageName': 'MY ATHLETES', 'icon': Icons.people, 'navigateTo': MyAthletesPage(), 'coachOnly': true},
     {'selection': 'workouts', 'pageName': 'MY WORKOUTS', 'icon': Icons.fitness_center, 'navigateTo': Workouts(), 'coachOnly': true},
   ];
@@ -58,6 +60,7 @@ class InternalStatusProvider with ChangeNotifier {
     {'workoutTypeID': 2, 'workoutType': 'CYCLE', 'icon': Icons.directions_bike, 'color': Colors.green},
     {'workoutTypeID': 3, 'workoutType': 'SWIM', 'icon': Icons.pool, 'color': Colors.teal},
     {'workoutTypeID': 4, 'workoutType': 'WORKOUT', 'icon': Icons.fitness_center, 'color': Colors.orange},
+    {'workoutTypeID': 5, 'workoutType': 'WALK', 'icon': Icons.directions_walk, 'color': Colors.orange},
   ];
 
   List<Map<String, dynamic>> durationTypes = [

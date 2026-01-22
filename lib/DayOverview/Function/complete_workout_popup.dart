@@ -34,6 +34,7 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
   Uint8List? imageData;
   bool _pickerOpen = false;
   bool isVerifyingImage = false;
+  Map<String, dynamic> completedworkoutData = {};
 
   //--------------------------------------------------------------
   // Dispose
@@ -49,8 +50,10 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
   @override
   void initState() {
     super.initState();
-    durationController.text = widget.workoutData?['completedworkoutData']?['duration'] ?? '';
-    distanceController.text = widget.workoutData?['completedworkoutData']?['distance'] ?? '';
+    completedworkoutData = widget.workoutData?['completedworkoutData'] ?? {};
+
+    durationController.text = completedworkoutData['duration'] ?? '';
+    distanceController.text = completedworkoutData['distance'] ?? '';
   }
 
   //--------------------------------------------------------------
@@ -59,8 +62,10 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
     final imageVerificationProvider = Provider.of<ImageVerificationProvider>(context, listen: false);
     final workoutResult = imageVerificationProvider.workoutResult;
 
-    durationController.text = workoutResult['duration'] ?? '';
-    distanceController.text = workoutResult['distance'] ?? '';
+    completedworkoutData = workoutResult;
+
+    durationController.text = completedworkoutData['duration'] ?? '';
+    distanceController.text = completedworkoutData['distance'] ?? '';
   }
 
   //--------------------------------------------------------------
@@ -68,8 +73,8 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
   Future<void> _completeWorkout() async {
     final loadedWorkout = widget.loadedWorkout;
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
-    final workoutData = widget.workoutData;
-    final completedworkoutData = workoutData!['completedworkoutData'];
+    //final workoutData = widget.workoutData;
+    //final completedworkoutData = workoutData!['completedworkoutData'];
 
     loadedWorkout!['completedworkoutData'] = completedworkoutData;
     try {
@@ -87,8 +92,8 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
   Future<void> _createNewWorkout() async {
     final loadedWorkout = widget.loadedWorkout;
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
-    final workoutData = widget.workoutData;
-    final completedworkoutData = workoutData!['completedworkoutData'];
+    //final workoutData = widget.workoutData;
+    //final completedworkoutData = workoutData!['completedworkoutData'];
 
     loadedWorkout!['completedworkoutData'] = completedworkoutData;
     try {
@@ -108,9 +113,9 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
     final imageVerificationProvider = Provider.of<ImageVerificationProvider>(context, listen: true);
     final workoutResult = imageVerificationProvider.workoutResult;
     final workoutTypes = internalStatusProvider.workoutTypes;
-    final workoutData = widget.workoutData;
+    // final workoutData = widget.workoutData;
     final workoutStatus = widget.workoutStatus;
-    final completedworkoutData = workoutData!['completedworkoutData'];
+    // final completedworkoutData = workoutData!['completedworkoutData'];
     
     if(workoutResult.isNotEmpty) {
       _resetTextControllers();
@@ -426,7 +431,7 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
                 ),
               ),
               Visibility(
-                visible: workoutResult.isNotEmpty,
+                visible: workoutResult.isNotEmpty || uploadType == 'manual',
                 child: Expanded(
                   child: elevatedButton(
                     label: 'SUBMIT',

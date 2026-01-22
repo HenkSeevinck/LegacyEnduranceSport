@@ -59,11 +59,17 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.all(10.0),
         child: Column(
           children: [
-            ExpansionTile(
-              collapsedShape: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
-              showTrailingIcon: false,
-              title: WeekDaysTable(),
-              children: [body(header: 'Select an option to navigate to that page.', color: localAppTheme['anchorColors']['primaryColor'], context: context)],
+            Container(
+              padding: EdgeInsets.only(
+                bottom: 10.0,
+              ),
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                  bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                ),
+              ),
+              child: WeekDaysTable(),
             ),
             Expanded(
               child: LayoutBuilder(
@@ -74,57 +80,139 @@ class _HomePageState extends State<HomePage> {
                   final availableWidth = constraints.maxWidth;
                   final itemHeight = itemCount > 0 ? availableHeight / itemCount : availableHeight;
 
-                  return GridView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1, childAspectRatio: availableWidth / itemHeight),
-                    itemCount: isCoach ? homePageOptions.length : homePageOptions.where((option) => option['coachOnly'] == false).length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return InkWell(
-                        onTap: () {
-                          internalStatusProvider.setUserUIDToShow(appUser['uid']);
-                          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => homePageOptions[index]['navigateTo']));
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border(
-                              top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                              bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: index == (itemCount - 1) ? 1.0 : 0.0),
-                            ),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Center(
-                                child: Icon(
-                                  homePageOptions[index]['icon'],
-                                  color: localAppTheme['anchorColors']['primaryColor'],
-                                  size: double.parse((itemHeight * 0.4).toStringAsFixed(0)),
+                  return SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        //All Users Options
+                        GridView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: availableWidth / ((itemHeight * 4) - 34)),
+                          itemCount: homePageOptions.where((option) => option['coachOnly'] == false).length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return InkWell(
+                              onTap: () {
+                                internalStatusProvider.setUserUIDToShow(appUser['uid']);
+                                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => homePageOptions[index]['navigateTo']));
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                                    //left: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                                    left: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0 * (index % 2 == 1 ? 1.0 : 0.0)),
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Center(
+                                      child: Icon(
+                                        homePageOptions[index]['icon'],
+                                        color: localAppTheme['anchorColors']['primaryColor'],
+                                        size: double.parse((itemHeight * 0.4).toStringAsFixed(0)),
+                                      ),
+                                    ),
+                                    Center(
+                                      child: Container(
+                                        width: 150,
+                                        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                                        decoration: BoxDecoration(
+                                          color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(8.0),
+                                          border: Border.all(color: localAppTheme['anchorColors']['primaryColor']),
+                                        ),
+                                        child: Center(
+                                          child: header2(
+                                            header: homePageOptions[index]['pageName'],
+                                            color: localAppTheme['anchorColors']['primaryColor'],
+                                            context: context,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              Center(
-                                child: Container(
-                                  width: 150,
-                                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-                                  decoration: BoxDecoration(
-                                    color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    border: Border.all(color: localAppTheme['anchorColors']['primaryColor']),
-                                  ),
-                                  child: Center(
-                                    child: header2(
-                                      header: homePageOptions[index]['pageName'],
-                                      color: localAppTheme['anchorColors']['primaryColor'],
-                                      context: context,
+                            );
+                          },
+                        ),                       
+                        //Coach Only Options
+                        if(isCoach)
+                        Column(
+                          children: [
+                            Container(
+                              alignment: Alignment.center,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.1),
+                                border: Border(
+                                  bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                                ),
+                              ),
+                              height: 50,
+                              child: header2(
+                                header: 'Coach Options:', 
+                                context: context, 
+                                color: localAppTheme['anchorColors']['primaryColor'],
+                                ),
+                            ),
+                            GridView.builder(
+                              physics: const NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              //gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1, childAspectRatio: availableWidth / itemHeight),
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: availableWidth / ((itemHeight * 4) - 34)),
+                              itemCount: homePageOptions.where((option) => option['coachOnly'] == true).length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return InkWell(
+                                  onTap: () {
+                                    internalStatusProvider.setUserUIDToShow(appUser['uid']);
+                                    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => homePageOptions[index]['navigateTo']));
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                                      ),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Center(
+                                          child: Icon(
+                                            homePageOptions[index]['icon'],
+                                            color: localAppTheme['anchorColors']['primaryColor'],
+                                            size: double.parse((itemHeight * 0.4).toStringAsFixed(0)),
+                                          ),
+                                        ),
+                                        Center(
+                                          child: Container(
+                                            width: 150,
+                                            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                                            decoration: BoxDecoration(
+                                              color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.1),
+                                              borderRadius: BorderRadius.circular(8.0),
+                                              border: Border.all(color: localAppTheme['anchorColors']['primaryColor']),
+                                            ),
+                                            child: Center(
+                                              child: header2(
+                                                header: homePageOptions[index]['pageName'],
+                                                color: localAppTheme['anchorColors']['primaryColor'],
+                                                context: context,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+                                );
+                              },
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
                   );
                 },
               ),

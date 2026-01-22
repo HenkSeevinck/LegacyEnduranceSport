@@ -167,8 +167,10 @@ class _EventPageState extends State<EventPage> {
                             children: List<Widget>.generate(filteredEvents.length, (index) {
                               final itemCount = filteredEvents.length;
                               final event = filteredEvents[index];
-                              final hasRSVPed = event['attendees'] != null && (event['attendees'] as List).contains(appUser['uid']);
-                              String eventDateStr = 'No Date Provided';
+                              final attendees = event['attendees'] as List?;
+                              final hasRSVPed = attendees != null && (attendees).contains(appUser['uid']);
+                              final attendeesExpanded = eventsProvider.attendees;
+                              String eventDateStr = 'No Date Provided';                              
                               final rawDate = event['eventDate'];
                               if (rawDate != null) {
                                 if (rawDate is Timestamp) {
@@ -179,14 +181,7 @@ class _EventPageState extends State<EventPage> {
                                   eventDateStr = rawDate.toString();
                                 }
                               }
-                              return Container(
-                                // decoration: BoxDecoration(
-                                //       border: Border(
-                                //         top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                                //         bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: index == (itemCount - 1) ? 1.0 : 0.0),
-                                //       ),
-                                //     ),
-                                child: ExpansionTile(
+                              return ExpansionTile(
                                   shape: Border(
                                     top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
                                     bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: index == (itemCount - 1) ? 1.0 : 0.0),
@@ -260,10 +255,13 @@ class _EventPageState extends State<EventPage> {
                                                     SizedBox(width: 20.0),
                                                     InkWell(
                                                       onTap: () => _openUrl(event['link']?.toString() ?? 'www.google.com'),
-                                                      child: body(
-                                                        header: event['link']?.toString() ?? 'www.google.com',
-                                                        color: localAppTheme['anchorColors']['primaryColor'],
-                                                        context: context,
+                                                      child: SizedBox(
+                                                        width: MediaQuery.of(context).size.width * 0.5,
+                                                        child: body(
+                                                          header: event['link']?.toString() ?? 'www.google.com',
+                                                          color: localAppTheme['anchorColors']['primaryColor'],
+                                                          context: context,
+                                                        ),
                                                       ),
                                                     ),
                                                   ],
@@ -344,12 +342,12 @@ class _EventPageState extends State<EventPage> {
                                                     SizedBox(height: 20.0),
                                                     Column(
                                                         crossAxisAlignment: CrossAxisAlignment.start,
-                                                        children: List<Widget>.generate(filteredEvents[index]['attendees'].length, (attendeeIndex) {
-                                                          final attendeeId = filteredEvents[index]['attendees'][attendeeIndex];
+                                                        children: List<Widget>.generate(attendeesExpanded!.length, (attendeeIndex) {
+                                                          final attendeeId = attendeesExpanded[attendeeIndex];
                                                           return Padding(
                                                             padding: const EdgeInsets.symmetric(vertical: 5.0),
                                                             child: body(
-                                                              header: attendeeId.toString(),
+                                                              header: '${attendeeId['name']} ${attendeeId['surname']}',
                                                               color: localAppTheme['anchorColors']['primaryColor'],
                                                               context: context,
                                                             ),
@@ -363,9 +361,13 @@ class _EventPageState extends State<EventPage> {
                                         ],
                                       ),
                                     ),
-                                  ]
-                                ),
-                              );
+                                  ],
+                                  onExpansionChanged: (value) {
+                                    if (value) {
+                                      eventsProvider.fetchAttendeesForEvent(event['attendees'] ?? [], appUserProvider);
+                                    }
+                                  },
+                                );
                             }),
                           ),
                       ],

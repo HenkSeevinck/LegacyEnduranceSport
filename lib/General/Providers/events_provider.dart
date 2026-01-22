@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 
 class EventsProvider with ChangeNotifier {
   final CollectionReference _eventsCollection = FirebaseFirestore.instance.collection('Events');
@@ -12,6 +13,10 @@ class EventsProvider with ChangeNotifier {
 
   List<Map<String, dynamic>>? _todaysEvents;
   List<Map<String, dynamic>>? get todaysEvents => _todaysEvents;
+
+  List<Map<String, dynamic>>? _attendees;
+  List<Map<String, dynamic>>? get attendees => _attendees;
+
   //---------------------------------------------------------------
   // Fetch all events from Firestore
   Future<void> fetchAllEvents() async {
@@ -91,5 +96,23 @@ class EventsProvider with ChangeNotifier {
           eventDate.day == selectedDate.day;
     }).toList();
     notifyListeners();
+  }
+
+  //---------------------------------------------------------------
+  // Fetch attendees for a specific event
+  Future<void> fetchAttendeesForEvent(List athleteUIDs, AppUserProvider appUserProvider) async {
+    for (var athleteUID in athleteUIDs) {
+      try {
+        final appUserData = await appUserProvider.getUserRecord(athleteUID);
+        if (appUserData != null) {
+          _attendees ??= [];
+          _attendees!.add(appUserData);
+          notifyListeners();
+        }
+      } catch (e) {
+        Exception('Error fetching Attendee with UID $athleteUID: $e');
+        rethrow;
+      }
+    }
   }
 }
