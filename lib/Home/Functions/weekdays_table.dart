@@ -142,7 +142,15 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
         final localAppTheme = ResponsiveTheme(context).theme;
 
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return SizedBox(
+              width: double.infinity,
+              height: 150,
+              child: SizedBox(
+                width: 50,
+                height: 50,
+                child: Center(child: CircularProgressIndicator())
+                )
+              );
         } else if (snapshot.hasError) {
           print('snapshot error: ${snapshot.error}');
           return Center(
@@ -166,7 +174,7 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
                 builder: (context, constraints) {
                   final tileWidth = (constraints.maxWidth) / 7;
                   final tileHeight = tileWidth * 1.0;
-                  final effectiveHeight = (tileHeight < widget.minTileHeight ? widget.minTileHeight : tileHeight) + 55;
+                  final effectiveHeight = (tileHeight < widget.minTileHeight ? widget.minTileHeight : tileHeight) + 75;
 
                   return SizedBox(
                     height: effectiveHeight,
@@ -204,109 +212,117 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
                         });
 
                         return Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                            child: Material(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(8),
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(8),
-                                onTap: () => _selectDate(d),
-                                child: Container(
-                                  padding: const EdgeInsets.all(2.0),
-                                  height: effectiveHeight,
-                                  decoration: BoxDecoration(
-                                    color: isSelected ? primary.withOpacity(0.12) : (isToday ? secondary.withOpacity(0.10) : Colors.transparent),
+                          child: Column(
+                            children: [
+                              body(
+                                header: DateFormat.E().format(d).substring(0, 1),
+                                color: isSelected ? secondary : (isToday ? primary : localAppTheme['anchorColors']['primaryColor']),
+                                context: context,
+                              ),
+                              SizedBox(height: 4),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                  child: Material(
+                                    color: Colors.transparent,
                                     borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: isSelected ? primary : (isToday ? secondary : primary), width: isSelected ? 2.0 : 1.0),
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      body(
-                                        header: DateFormat.E().format(d).substring(0, 1),
-                                        color: isSelected ? secondary : (isToday ? primary : localAppTheme['anchorColors']['primaryColor']),
-                                        context: context,
-                                      ),
-                                      body(
-                                        header: DateFormat.d().format(d),
-                                        color: isSelected ? secondary : (isToday ? primary : localAppTheme['anchorColors']['primaryColor']),
-                                        context: context,
-                                      ),
-                                      SizedBox(height: 4),
-                                      Visibility(
-                                        visible: hasEvent,
-                                        child: Container(
-                                          margin: EdgeInsets.only(top: 1, bottom: 1),
-                                          padding: EdgeInsets.all(1),
-                                          width: double.infinity,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(4),
-                                            color: localAppTheme['utilityColorPair1']['color1'],
-                                          ),
-                                          child: Icon(
-                                            Icons.event, 
-                                            size: 15, 
-                                            color: localAppTheme['utilityColorPair1']['color2'],
-                                          ),
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(8),
+                                      onTap: () => _selectDate(d),
+                                      child: Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.all(2.0),
+                                        height: effectiveHeight,
+                                        decoration: BoxDecoration(
+                                          color: isSelected ? primary.withOpacity(0.12) : (isToday ? secondary.withOpacity(0.10) : Colors.transparent),
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(color: isSelected ? primary : (isToday ? secondary : primary), width: isSelected ? 2.0 : 1.0),
+                                        ),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          children: [
+                                            body(
+                                              header: DateFormat.d().format(d),
+                                              color: isSelected ? secondary : (isToday ? primary : localAppTheme['anchorColors']['primaryColor']),
+                                              context: context,
+                                            ),
+                                            SizedBox(height: 4),
+                                            Visibility(
+                                              visible: hasEvent,
+                                              child: Container(
+                                                margin: EdgeInsets.only(top: 1, bottom: 1),
+                                                padding: EdgeInsets.all(1),
+                                                width: double.infinity,
+                                                decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.circular(4),
+                                                  color: localAppTheme['utilityColorPair1']['color1'],
+                                                ),
+                                                child: Icon(
+                                                  Icons.event, 
+                                                  size: 15, 
+                                                  color: localAppTheme['utilityColorPair1']['color2'],
+                                                ),
+                                              ),
+                                            ),
+                                            Visibility(
+                                              visible: hasSchedulledWorkout,
+                                              child: Container(
+                                                margin: EdgeInsets.only(top: 1, bottom: 1),
+                                                padding: EdgeInsets.all(1),
+                                                width: double.infinity,
+                                                decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.circular(4),
+                                                  color: localAppTheme['utilityColorPair3']['color1'],
+                                                ),
+                                                child: Icon(
+                                                  Icons.fitness_center, 
+                                                  size: 15, 
+                                                  color: localAppTheme['utilityColorPair3']['color2'],
+                                                ),
+                                              ),
+                                            ),
+                                            Visibility(
+                                              visible: hasUnSchedulledWorkout,
+                                              child: Container(
+                                                margin: EdgeInsets.only(top: 1, bottom: 1),
+                                                padding: EdgeInsets.all(1),
+                                                width: double.infinity,
+                                                decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.circular(4),
+                                                  color: localAppTheme['utilityColorPair2']['color1'],
+                                                ),
+                                                child: Icon(
+                                                  Icons.fitness_center_outlined, 
+                                                  size: 15, 
+                                                  color: localAppTheme['utilityColorPair2']['color2'],
+                                                ),
+                                              ),
+                                            ),
+                                            Visibility(
+                                              visible: hasGoal,
+                                              child: Container(
+                                                margin: EdgeInsets.only(top: 1, bottom: 1),
+                                                padding: EdgeInsets.all(1),
+                                                width: double.infinity,
+                                                decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.circular(4),
+                                                  color: localAppTheme['utilityColorPair4']['color1'],
+                                                ),
+                                                child: Icon(
+                                                  Icons.flag_outlined, 
+                                                  size: 15, 
+                                                  color: localAppTheme['utilityColorPair4']['color2']
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                      Visibility(
-                                        visible: hasSchedulledWorkout,
-                                        child: Container(
-                                          margin: EdgeInsets.only(top: 1, bottom: 1),
-                                          padding: EdgeInsets.all(1),
-                                          width: double.infinity,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(4),
-                                            color: localAppTheme['utilityColorPair3']['color1'],
-                                          ),
-                                          child: Icon(
-                                            Icons.fitness_center, 
-                                            size: 15, 
-                                            color: localAppTheme['utilityColorPair3']['color2'],
-                                          ),
-                                        ),
-                                      ),
-                                      Visibility(
-                                        visible: hasUnSchedulledWorkout,
-                                        child: Container(
-                                          margin: EdgeInsets.only(top: 1, bottom: 1),
-                                          padding: EdgeInsets.all(1),
-                                          width: double.infinity,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(4),
-                                            color: localAppTheme['utilityColorPair2']['color1'],
-                                          ),
-                                          child: Icon(
-                                            Icons.fitness_center_outlined, 
-                                            size: 15, 
-                                            color: localAppTheme['utilityColorPair2']['color2'],
-                                          ),
-                                        ),
-                                      ),
-                                      Visibility(
-                                        visible: hasGoal,
-                                        child: Container(
-                                          margin: EdgeInsets.only(top: 1, bottom: 1),
-                                          padding: EdgeInsets.all(1),
-                                          width: double.infinity,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(4),
-                                            color: localAppTheme['utilityColorPair4']['color1'],
-                                          ),
-                                          child: Icon(
-                                            Icons.flag_outlined, 
-                                            size: 15, 
-                                            color: localAppTheme['utilityColorPair4']['color2']
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
                         );
                       }).toList(),

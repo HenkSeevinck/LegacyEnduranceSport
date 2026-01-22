@@ -1,11 +1,11 @@
 {
-    "name": "legacyendurancesport",
-    "short_name": "legacyendurancesport",
+    "name": "Legacy Endurance Sport",
+    "short_name": "Legacy Sport",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Legacy Endurance Sport tracking and community app.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

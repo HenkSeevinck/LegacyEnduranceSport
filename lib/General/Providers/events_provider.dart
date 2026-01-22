@@ -115,4 +115,11 @@ class EventsProvider with ChangeNotifier {
       }
     }
   }
+
+  //---------------------------------------------------------------
+  // Clear attendees list
+  void clearAttendees() {
+    _attendees = null;
+    notifyListeners();
+  }
 }

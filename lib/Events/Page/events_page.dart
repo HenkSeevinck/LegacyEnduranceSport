@@ -20,6 +20,7 @@ class EventPage extends StatefulWidget {
 class _EventPageState extends State<EventPage> {
   Future<void>? _fetchDataFuture;
   final TextEditingController searchController = TextEditingController();
+  bool isLoadingAthleteList = false;
 
   //----------------------------------------------------
   // initState load data when form is built
@@ -169,7 +170,7 @@ class _EventPageState extends State<EventPage> {
                               final event = filteredEvents[index];
                               final attendees = event['attendees'] as List?;
                               final hasRSVPed = attendees != null && (attendees).contains(appUser['uid']);
-                              final attendeesExpanded = eventsProvider.attendees;
+                              final attendeesExpanded = eventsProvider.attendees ?? [];
                               String eventDateStr = 'No Date Provided';                              
                               final rawDate = event['eventDate'];
                               if (rawDate != null) {
@@ -322,7 +323,13 @@ class _EventPageState extends State<EventPage> {
                                       ],
                                     ),
                                   children: [
-                                    SizedBox(
+                                    !isLoadingAthleteList
+                                    ? Container(
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                                        ),
+                                      ),
                                       width: double.infinity,
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,12 +349,12 @@ class _EventPageState extends State<EventPage> {
                                                     SizedBox(height: 20.0),
                                                     Column(
                                                         crossAxisAlignment: CrossAxisAlignment.start,
-                                                        children: List<Widget>.generate(attendeesExpanded!.length, (attendeeIndex) {
+                                                        children: List<Widget>.generate(attendeesExpanded.length, (attendeeIndex) {
                                                           final attendeeId = attendeesExpanded[attendeeIndex];
                                                           return Padding(
                                                             padding: const EdgeInsets.symmetric(vertical: 5.0),
                                                             child: body(
-                                                              header: '${attendeeId['name']} ${attendeeId['surname']}',
+                                                              header: '${attendeeId['name'] ?? ''} ${attendeeId['surname'] ?? ''}',
                                                               color: localAppTheme['anchorColors']['primaryColor'],
                                                               context: context,
                                                             ),
@@ -360,11 +367,30 @@ class _EventPageState extends State<EventPage> {
                                           ),
                                         ],
                                       ),
+                                    )
+                                    : Container(
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                                        ),
+                                      ),
+                                        height: 100,
+                                        width: double.infinity,
+                                        child: Center(
+                                      child: CircularProgressIndicator()
+                                      ),
                                     ),
                                   ],
-                                  onExpansionChanged: (value) {
+                                  onExpansionChanged: (value) async{
                                     if (value) {
-                                      eventsProvider.fetchAttendeesForEvent(event['attendees'] ?? [], appUserProvider);
+                                      setState(() {
+                                        isLoadingAthleteList = true;
+                                      });
+                                      eventsProvider.clearAttendees();
+                                      await eventsProvider.fetchAttendeesForEvent(event['attendees'] ?? [], appUserProvider);
+                                      setState(() {
+                                        isLoadingAthleteList = false;
+                                      });
                                     }
                                   },
                                 );

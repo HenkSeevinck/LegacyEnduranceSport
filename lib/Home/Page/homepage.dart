@@ -74,11 +74,14 @@ class _HomePageState extends State<HomePage> {
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  //final itemCount = homePageOptions.length;
                   final itemCount = isCoach ? homePageOptions.length : homePageOptions.where((option) => option['coachOnly'] == false).length;
                   final availableHeight = constraints.maxHeight;
                   final availableWidth = constraints.maxWidth;
                   final itemHeight = itemCount > 0 ? availableHeight / itemCount : availableHeight;
+                  final coachOptions = homePageOptions.where((option) => option['coachOnly'] == true).toList();
+                  //final coachOptionCount = coachOptions.length;
+                  final athleteOptions = homePageOptions.where((option) => option['coachOnly'] == false).toList();
+                  //final athleteOptionCount = athleteOptions.length;
 
                   return SingleChildScrollView(
                     child: Column(
@@ -88,18 +91,17 @@ class _HomePageState extends State<HomePage> {
                           physics: const NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: availableWidth / ((itemHeight * 4) - 34)),
-                          itemCount: homePageOptions.where((option) => option['coachOnly'] == false).length,
+                          itemCount: athleteOptions.length,
                           itemBuilder: (BuildContext context, int index) {
                             return InkWell(
                               onTap: () {
                                 internalStatusProvider.setUserUIDToShow(appUser['uid']);
-                                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => homePageOptions[index]['navigateTo']));
+                                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => athleteOptions[index]['navigateTo']));
                               },
                               child: Container(
                                 decoration: BoxDecoration(
                                   border: Border(
                                     bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                                    //left: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
                                     left: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0 * (index % 2 == 1 ? 1.0 : 0.0)),
                                   ),
                                 ),
@@ -108,7 +110,7 @@ class _HomePageState extends State<HomePage> {
                                   children: [
                                     Center(
                                       child: Icon(
-                                        homePageOptions[index]['icon'],
+                                        athleteOptions[index]['icon'],
                                         color: localAppTheme['anchorColors']['primaryColor'],
                                         size: double.parse((itemHeight * 0.4).toStringAsFixed(0)),
                                       ),
@@ -124,7 +126,7 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                         child: Center(
                                           child: header2(
-                                            header: homePageOptions[index]['pageName'],
+                                            header: athleteOptions[index]['pageName'],
                                             color: localAppTheme['anchorColors']['primaryColor'],
                                             context: context,
                                           ),
@@ -160,18 +162,18 @@ class _HomePageState extends State<HomePage> {
                             GridView.builder(
                               physics: const NeverScrollableScrollPhysics(),
                               shrinkWrap: true,
-                              //gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1, childAspectRatio: availableWidth / itemHeight),
                               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: availableWidth / ((itemHeight * 4) - 34)),
-                              itemCount: homePageOptions.where((option) => option['coachOnly'] == true).length,
+                              itemCount: coachOptions.length,
                               itemBuilder: (BuildContext context, int index) {
                                 return InkWell(
                                   onTap: () {
                                     internalStatusProvider.setUserUIDToShow(appUser['uid']);
-                                    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => homePageOptions[index]['navigateTo']));
+                                    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => coachOptions[index]['navigateTo']));
                                   },
                                   child: Container(
                                     decoration: BoxDecoration(
                                       border: Border(
+                                        left: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0 * (index % 2 == 1 ? 1.0 : 0.0)),
                                         bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
                                       ),
                                     ),
@@ -180,7 +182,7 @@ class _HomePageState extends State<HomePage> {
                                       children: [
                                         Center(
                                           child: Icon(
-                                            homePageOptions[index]['icon'],
+                                            coachOptions[index]['icon'],
                                             color: localAppTheme['anchorColors']['primaryColor'],
                                             size: double.parse((itemHeight * 0.4).toStringAsFixed(0)),
                                           ),
@@ -196,7 +198,7 @@ class _HomePageState extends State<HomePage> {
                                             ),
                                             child: Center(
                                               child: header2(
-                                                header: homePageOptions[index]['pageName'],
+                                                header: coachOptions[index]['pageName'],
                                                 color: localAppTheme['anchorColors']['primaryColor'],
                                                 context: context,
                                               ),
