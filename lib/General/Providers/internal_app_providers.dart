@@ -41,6 +41,7 @@ class InternalStatusProvider with ChangeNotifier {
     {'blockTypeID': 3, 'blockType': 'ENDURANCE'},
     {'blockTypeID': 4, 'blockType': 'LACTATE'},
     {'blockTypeID': 5, 'blockType': 'VO2 MAX'},
+    {'blockTypeID': 6, 'blockType': 'STRENGTH'},
   ];
 
   List<Map<String, dynamic>> mesoBlocks = [

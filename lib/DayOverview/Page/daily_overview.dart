@@ -10,14 +10,16 @@ import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/Goals/Functions/add_goal_popup.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
+import 'package:legacyendurancesport/MyAthletes/Page/my_athletes_page.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 // ignore: must_be_immutable
 class DailyOverview extends StatefulWidget {
+  String navPath;
   DateTime selectedDate;
 
-  DailyOverview({super.key, required this.selectedDate});
+  DailyOverview({super.key, required this.selectedDate, required this.navPath});
 
   @override
   State<DailyOverview> createState() => _DailyOverviewState();
@@ -152,7 +154,9 @@ class _DailyOverviewState extends State<DailyOverview> {
                   toolTip: 'BACK',
                   context: context,
                   onPressed: () {
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
+                    widget.navPath == 'HomePage'
+                        ? Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => HomePage()))
+                        : Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => MyAthletesPage()));
                   },
                 ),
               ),
@@ -393,7 +397,7 @@ class _DailyOverviewState extends State<DailyOverview> {
                                       ),
                                     ),
                                     Visibility(
-                                      visible: loadedWorkout['completedworkoutData'] == null,
+                                      visible: loadedWorkout['completedworkoutData'] == null && widget.navPath == 'HomePage',
                                       child: Container(
                                         padding: EdgeInsets.only(left: 15.0),
                                         height: 180,
@@ -444,20 +448,41 @@ class _DailyOverviewState extends State<DailyOverview> {
                         }),
                       ),
                 const SizedBox(height: 10),
-                SizedBox(
-                  height: 50,
-                  width: double.infinity,
-                  child: elevatedButton(
-                    label: 'Log another Workout',
-                    onPressed: () {
-                      _logAnotherWorkout();
-                      imageVerificationProvider.clearWorkoutResult();
-                    },
-                    backgroundColor: localAppTheme['anchorColors']['primaryColor'],
-                    labelColor: localAppTheme['anchorColors']['secondaryColor'],
-                    leadingIcon: null,
-                    trailingIcon: null,
-                    context: context,
+                Visibility(
+                  visible: widget.navPath == 'HomePage',
+                  child: SizedBox(
+                    height: 50,
+                    width: double.infinity,
+                    child: elevatedButton(
+                      label: 'Log another Workout',
+                      onPressed: () {
+                        _logAnotherWorkout();
+                        imageVerificationProvider.clearWorkoutResult();
+                      },
+                      backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                      labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                      leadingIcon: null,
+                      trailingIcon: null,
+                      context: context,
+                    ),
+                  ),
+                ),
+                Visibility(
+                  visible: widget.navPath != 'HomePage',
+                  child: SizedBox(
+                    height: 50,
+                    width: double.infinity,
+                    child: elevatedButton(
+                      label: 'Add a Planned Workout',
+                      onPressed: () {
+                        
+                      },
+                      backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                      labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                      leadingIcon: null,
+                      trailingIcon: null,
+                      context: context,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -529,16 +554,19 @@ class _DailyOverviewState extends State<DailyOverview> {
                         }),
                       ),
                 const SizedBox(height: 10),
-                elevatedButton(
-                  label: 'Add New Goal',
-                  onPressed: () {
-                    _showCreateGoalPopupDialog(context, null, null);
-                  },
-                  backgroundColor: localAppTheme['anchorColors']['primaryColor'],
-                  labelColor: localAppTheme['anchorColors']['secondaryColor'],
-                  leadingIcon: null,
-                  trailingIcon: null,
-                  context: context,
+                Visibility(
+                  visible: widget.navPath == 'HomePage',
+                  child: elevatedButton(
+                    label: 'Add New Goal',
+                    onPressed: () {
+                      _showCreateGoalPopupDialog(context, null, null);
+                    },
+                    backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                    labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                    leadingIcon: null,
+                    trailingIcon: null,
+                    context: context,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 header1(header: 'Day\'s Events:', context: context, color: localAppTheme['anchorColors']['primaryColor']),

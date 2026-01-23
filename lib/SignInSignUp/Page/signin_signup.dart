@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
+import 'package:legacyendurancesport/SignInSignUp/Functions/resetpassword.dart';
 import 'package:legacyendurancesport/SignInSignUp/Functions/usersignin.dart';
 import 'package:legacyendurancesport/SignInSignUp/Functions/usersignup.dart';
 import 'package:provider/provider.dart';
@@ -43,7 +44,9 @@ class _SigninPageState extends State<SigninPage> {
                 child: SizedBox(
                   child: signInsignUpStatus == 'SignIn' 
                   ? UserSignIn(width: 0.8, height: 0.4) 
-                  : UserSignUp(width: 0.8, height: 0.4),
+                  : signInsignUpStatus == 'SignUp' 
+                  ? UserSignUp(width: 0.8, height: 0.4) 
+                  : ResetPassword(width: 0.8, height: 0.27),
                 ),
               ),
             ),

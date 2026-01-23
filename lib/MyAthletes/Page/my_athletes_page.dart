@@ -3,13 +3,14 @@ import 'package:legacyendurancesport/General/Providers/internal_app_providers.da
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Goals/Page/goals_page.dart';
+import 'package:legacyendurancesport/Home/Functions/weekdays_table.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:legacyendurancesport/Profile/Page/profile_page.dart';
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:provider/provider.dart';
 
 class MyAthletesPage extends StatefulWidget {
-  const MyAthletesPage({super.key});
+  const MyAthletesPage({super.key,});
 
   @override
   State<MyAthletesPage> createState() => _MyAthletesPageState();
@@ -43,7 +44,8 @@ class _MyAthletesPageState extends State<MyAthletesPage> {
     final localAppTheme = ResponsiveTheme(context).theme;
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
     final appUser = appUserProvider.appUser;
-    final allUsers = appUserProvider.allUsers;
+    final String currentUserUID = appUser['uid'];
+    final allUsers = appUserProvider.allUsers.where((user) => user['uid'] != currentUserUID).toList();
     Map<String, dynamic>? selectedAthlete;
 
     return showDialog<void>(
@@ -224,6 +226,11 @@ class _MyAthletesPageState extends State<MyAthletesPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 10.0),
                           child: Column(
                             children: [
+                              // body(
+                              //   header: '${athlete['name'] ?? '-'} ${athlete['surname'] ?? '-'}', 
+                              //   color: localAppTheme['anchorColors']['primaryColor'], 
+                              //   context: context
+                              // ),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
@@ -260,6 +267,8 @@ class _MyAthletesPageState extends State<MyAthletesPage> {
                                   ),
                                 ],
                               ),
+                              WeekDaysTable(athleteUID: athlete['uid'], navPath: 'MyAthletesPage'),
+                              SizedBox(height: 10.0),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                 children: [
@@ -313,7 +322,8 @@ class _MyAthletesPageState extends State<MyAthletesPage> {
                                     context: context, 
                                   ),
                                 ],
-                              )
+                              ),
+                              SizedBox(height: 10.0),
                             ],
                           ),
                         );

@@ -64,7 +64,7 @@ class _UserSignInState extends State<UserSignIn> {
                         context: context,
                         ),
                       onTap: () {
-                        // Navigate to reset password page
+                        internalStatusProvider.setSignInSignUpStatus('ResetPassword');
                       },
                     ),
                   ],

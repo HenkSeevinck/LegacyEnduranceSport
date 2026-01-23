@@ -768,14 +768,14 @@ class _WorkoutsState extends State<Workouts> {
                                             Row(
                                               children: [
                                                 Icon(
-                                                  workoutTypes.firstWhere((type) => type['type'] == workout['workoutTypeID'])['icon'] ?? Icons.fitness_center,
+                                                  workoutTypes.firstWhere((type) => type['workoutTypeID'] == workout['type'])['icon'] ?? Icons.fitness_center,
                                                   color: localAppTheme['anchorColors']['primaryColor'],
                                                   size: 20,
                                                 ),
                                                 SizedBox(width: 20.0),
                                                 body(
                                                   header:
-                                                      workoutTypes.firstWhere((type) => type['type'] == workout['workoutTypeID'])['workoutType'] ?? 'Unknown',
+                                                      workoutTypes.firstWhere((type) => type['workoutTypeID'] == workout['type'])['workoutType'] ?? 'Unknown',
                                                   color: localAppTheme['anchorColors']['primaryColor'],
                                                   context: context,
                                                 ),

@@ -69,7 +69,7 @@ class _HomePageState extends State<HomePage> {
                   bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
                 ),
               ),
-              child: WeekDaysTable(),
+              child: WeekDaysTable(athleteUID: appUser['uid'], navPath: 'HomePage'),
             ),
             Expanded(
               child: LayoutBuilder(

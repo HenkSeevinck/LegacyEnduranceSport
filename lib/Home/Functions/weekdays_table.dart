@@ -13,12 +13,13 @@ import 'package:provider/provider.dart';
 /// - has back / forward controls to move weeks
 /// - reports selected day via `onDaySelected`
 class WeekDaysTable extends StatefulWidget {
+  final String athleteUID;
   final DateTime? initialDate;
   final ValueChanged<DateTime>? onDaySelected;
   final double minTileHeight;
+  final String navPath;
 
-  const WeekDaysTable({super.key, this.initialDate, this.onDaySelected, this.minTileHeight = 64});
-
+  const WeekDaysTable({super.key, required this.athleteUID, required this.navPath, this.initialDate, this.onDaySelected, this.minTileHeight = 64});
   @override
   State<WeekDaysTable> createState() => _WeekDaysTableState();
 }
@@ -48,7 +49,7 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
   Future<void> _fetchData(EventsProvider eventsProvider, WorkoutsProvider workoutsProvider, AppUserProvider appUserProvider) async {
     appUserProvider.appUser;
     await eventsProvider.fetchEventsBetweenDates(_weekStart, _weekStart.add(const Duration(days: 6)));
-    await workoutsProvider.fetchLoadedWorkoutsBetweenDates(appUserProvider.appUser['uid'], _weekStart, _weekStart.add(const Duration(days: 6)));
+    await workoutsProvider.fetchLoadedWorkoutsBetweenDates(widget.athleteUID, _weekStart, _weekStart.add(const Duration(days: 6)));
     await appUserProvider.fetchUserGoalsBetweenDates(_weekStart, _weekStart.add(const Duration(days: 6)));
   }
 
@@ -121,7 +122,7 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
     widget.onDaySelected?.call(d);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => DailyOverview(selectedDate: d),
+        builder: (context) => DailyOverview(selectedDate: d, navPath: widget.navPath),
       ),
     );
   }
