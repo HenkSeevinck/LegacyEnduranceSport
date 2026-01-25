@@ -7,6 +7,7 @@ import 'package:legacyendurancesport/Home/Functions/weekdays_table.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:legacyendurancesport/Profile/Page/profile_page.dart';
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
+import 'package:legacyendurancesport/Statistics/Page/statistics_page.dart';
 import 'package:provider/provider.dart';
 
 class MyAthletesPage extends StatefulWidget {
@@ -315,10 +316,16 @@ class _MyAthletesPageState extends State<MyAthletesPage> {
                                     label: 'TRAINING PLAN', 
                                     backgroundColor: null, 
                                     iconColor: localAppTheme['anchorColors']['primaryColor'], 
-                                    icon: Icons.nordic_walking, 
+                                    icon: Icons.bar_chart, 
                                     size: 30, 
                                     toolTip: 'VIEW TRAINING PLAN', 
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => StatisticsPage(),
+                                        ),
+                                      );
+                                    },
                                     context: context, 
                                   ),
                                 ],

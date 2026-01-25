@@ -67,13 +67,14 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
     final eventsProvider = Provider.of<EventsProvider>(context, listen: false);
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
+    final athleteUID = widget.athleteUID;
     
     setState(() {
       _weekStart = _weekStart.subtract(const Duration(days: 7));
     });
     await eventsProvider.fetchEventsBetweenDates(_weekStart, _weekStart.add(const Duration(days: 6)));
     await workoutsProvider.fetchLoadedWorkoutsBetweenDates(
-      appUserProvider.appUser['uid'],
+      athleteUID,
       _weekStart,
       _weekStart.add(const Duration(days: 6)),
     );
@@ -89,13 +90,14 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
     final eventsProvider = Provider.of<EventsProvider>(context, listen: false);
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
+    final athleteUID = widget.athleteUID;
     
     setState(() {
       _weekStart = _weekStart.add(const Duration(days: 7));
     });
     await eventsProvider.fetchEventsBetweenDates(_weekStart, _weekStart.add(const Duration(days: 6)));
     await workoutsProvider.fetchLoadedWorkoutsBetweenDates(
-      appUserProvider.appUser['uid'],
+      athleteUID,
       _weekStart,
       _weekStart.add(const Duration(days: 6)),
     );
@@ -158,180 +160,189 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
             child: body(header: 'Error: ${snapshot.error}', color: localAppTheme['anchorColors']['primaryColor'], context: context),
           );
         } else {
-          return Column(
-            children: [
-              Row(
-                children: [
-                  IconButton(onPressed: _prevWeek, icon: const Icon(Icons.chevron_left)),
-                  Expanded(
-                    child: Center(
-                      child: body(header: weekLabel, color: localAppTheme['anchorColors']['primaryColor'], context: context),
+          return GestureDetector(
+            onHorizontalDragEnd: (details) {
+              if (details.velocity.pixelsPerSecond.dx > 0) {
+                  _prevWeek();  // Swipe right = previous week
+                } else if (details.velocity.pixelsPerSecond.dx < 0) {
+                  _nextWeek();  // Swipe left = next week
+                }
+            },
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    IconButton(onPressed: _prevWeek, icon: const Icon(Icons.chevron_left)),
+                    Expanded(
+                      child: Center(
+                        child: body(header: weekLabel, color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                      ),
                     ),
-                  ),
-                  IconButton(onPressed: _nextWeek, icon: const Icon(Icons.chevron_right)),
-                ],
-              ),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final tileWidth = (constraints.maxWidth) / 7;
-                  final tileHeight = tileWidth * 1.0;
-                  final effectiveHeight = (tileHeight < widget.minTileHeight ? widget.minTileHeight : tileHeight) + 75;
-
-                  return SizedBox(
-                    height: effectiveHeight,
-                    child: Row(
-                      children: weekDays.map((d) {
-                        final eventsProvider = Provider.of<EventsProvider>(context, listen: true);
-                        final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: true);
-                        final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
-                        final eventsBetweenDates = eventsProvider.eventsBetweenDates;
-                        final workoutsBetweenDates = workoutsProvider.workoutsBetweenDates;
-                        final goalsBetweenDates = appUserProvider.goalsBetweenDates;
-                        final isSelected = _selectedDate != null && _isSameDay(_selectedDate!, d);
-                        final isToday = _isSameDay(DateTime.now(), d);
-                        final primary = localAppTheme['anchorColors']['primaryColor'];
-                        final secondary = localAppTheme['anchorColors']['primaryColor'];
-                        
-                        bool hasEvent = eventsBetweenDates!.any((event) {
-                          final eventDate = event['eventDate']?.toDate();
-                          return eventDate != null && _isSameDay(eventDate, d);
-                        });
-                        
-                        bool hasSchedulledWorkout = workoutsBetweenDates.any((workout) {
-                          final workoutDate = workout['workoutDate']?.toDate();
-                          return workoutDate != null && workout['workout'] != null && _isSameDay(workoutDate, d);
-                        });
-
-                        bool hasUnSchedulledWorkout = workoutsBetweenDates.any((workout) {
-                          final workoutDate = workout['workoutDate']?.toDate();
-                          return workoutDate != null && workout['workout'] == null && _isSameDay(workoutDate, d);
-                        });
-
-                        bool hasGoal = goalsBetweenDates.any((goal) {
-                          final goalDate = goal['date']?.toDate();
-                          return goalDate != null && _isSameDay(goalDate, d);
-                        });
-
-                        return Expanded(
-                          child: Column(
-                            children: [
-                              body(
-                                header: DateFormat.E().format(d).substring(0, 1),
-                                color: isSelected ? secondary : (isToday ? primary : localAppTheme['anchorColors']['primaryColor']),
-                                context: context,
-                              ),
-                              SizedBox(height: 4),
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: InkWell(
+                    IconButton(onPressed: _nextWeek, icon: const Icon(Icons.chevron_right)),
+                  ],
+                ),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final tileWidth = (constraints.maxWidth) / 7;
+                    final tileHeight = tileWidth * 1.0;
+                    final effectiveHeight = (tileHeight < widget.minTileHeight ? widget.minTileHeight : tileHeight) + 75;
+            
+                    return SizedBox(
+                      height: effectiveHeight,
+                      child: Row(
+                        children: weekDays.map((d) {
+                          final eventsProvider = Provider.of<EventsProvider>(context, listen: true);
+                          final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: true);
+                          final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
+                          final eventsBetweenDates = eventsProvider.eventsBetweenDates;
+                          final workoutsBetweenDates = workoutsProvider.workoutsBetweenDates;
+                          final goalsBetweenDates = appUserProvider.goalsBetweenDates;
+                          final isSelected = _selectedDate != null && _isSameDay(_selectedDate!, d);
+                          final isToday = _isSameDay(DateTime.now(), d);
+                          final primary = localAppTheme['anchorColors']['primaryColor'];
+                          final secondary = localAppTheme['anchorColors']['primaryColor'];
+                          
+                          bool hasEvent = eventsBetweenDates!.any((event) {
+                            final eventDate = event['eventDate']?.toDate();
+                            return eventDate != null && _isSameDay(eventDate, d);
+                          });
+                          
+                          bool hasSchedulledWorkout = workoutsBetweenDates.any((workout) {
+                            final workoutDate = workout['workoutDate']?.toDate();
+                            return workoutDate != null && workout['workout'] != null && _isSameDay(workoutDate, d);
+                          });
+            
+                          bool hasUnSchedulledWorkout = workoutsBetweenDates.any((workout) {
+                            final workoutDate = workout['workoutDate']?.toDate();
+                            return workoutDate != null && workout['workout'] == null && _isSameDay(workoutDate, d);
+                          });
+            
+                          bool hasGoal = goalsBetweenDates.any((goal) {
+                            final goalDate = goal['date']?.toDate();
+                            return goalDate != null && _isSameDay(goalDate, d);
+                          });
+            
+                          return Expanded(
+                            child: Column(
+                              children: [
+                                body(
+                                  header: DateFormat.E().format(d).substring(0, 1),
+                                  color: isSelected ? secondary : (isToday ? primary : localAppTheme['anchorColors']['primaryColor']),
+                                  context: context,
+                                ),
+                                SizedBox(height: 4),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                    child: Material(
+                                      color: Colors.transparent,
                                       borderRadius: BorderRadius.circular(8),
-                                      onTap: () => _selectDate(d),
-                                      child: Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.all(2.0),
-                                        height: effectiveHeight,
-                                        decoration: BoxDecoration(
-                                          color: isSelected ? primary.withOpacity(0.12) : (isToday ? secondary.withOpacity(0.10) : Colors.transparent),
-                                          borderRadius: BorderRadius.circular(8),
-                                          border: Border.all(color: isSelected ? primary : (isToday ? secondary : primary), width: isSelected ? 2.0 : 1.0),
-                                        ),
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          children: [
-                                            body(
-                                              header: DateFormat.d().format(d),
-                                              color: isSelected ? secondary : (isToday ? primary : localAppTheme['anchorColors']['primaryColor']),
-                                              context: context,
-                                            ),
-                                            SizedBox(height: 4),
-                                            Visibility(
-                                              visible: hasEvent,
-                                              child: Container(
-                                                margin: EdgeInsets.only(top: 1, bottom: 1),
-                                                padding: EdgeInsets.all(1),
-                                                width: double.infinity,
-                                                decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(4),
-                                                  color: localAppTheme['utilityColorPair1']['color1'],
-                                                ),
-                                                child: Icon(
-                                                  Icons.event, 
-                                                  size: 15, 
-                                                  color: localAppTheme['utilityColorPair1']['color2'],
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(8),
+                                        onTap: () => _selectDate(d),
+                                        child: Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.all(2.0),
+                                          height: effectiveHeight,
+                                          decoration: BoxDecoration(
+                                            color: isSelected ? primary.withOpacity(0.12) : (isToday ? secondary.withOpacity(0.10) : Colors.transparent),
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(color: isSelected ? primary : (isToday ? secondary : primary), width: isSelected ? 2.0 : 1.0),
+                                          ),
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              body(
+                                                header: DateFormat.d().format(d),
+                                                color: isSelected ? secondary : (isToday ? primary : localAppTheme['anchorColors']['primaryColor']),
+                                                context: context,
+                                              ),
+                                              SizedBox(height: 4),
+                                              Visibility(
+                                                visible: hasEvent,
+                                                child: Container(
+                                                  margin: EdgeInsets.only(top: 1, bottom: 1),
+                                                  padding: EdgeInsets.all(1),
+                                                  width: double.infinity,
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(4),
+                                                    color: localAppTheme['utilityColorPair1']['color1'],
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.event, 
+                                                    size: 15, 
+                                                    color: localAppTheme['utilityColorPair1']['color2'],
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                            Visibility(
-                                              visible: hasSchedulledWorkout,
-                                              child: Container(
-                                                margin: EdgeInsets.only(top: 1, bottom: 1),
-                                                padding: EdgeInsets.all(1),
-                                                width: double.infinity,
-                                                decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(4),
-                                                  color: localAppTheme['utilityColorPair3']['color1'],
-                                                ),
-                                                child: Icon(
-                                                  Icons.fitness_center, 
-                                                  size: 15, 
-                                                  color: localAppTheme['utilityColorPair3']['color2'],
-                                                ),
-                                              ),
-                                            ),
-                                            Visibility(
-                                              visible: hasUnSchedulledWorkout,
-                                              child: Container(
-                                                margin: EdgeInsets.only(top: 1, bottom: 1),
-                                                padding: EdgeInsets.all(1),
-                                                width: double.infinity,
-                                                decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(4),
-                                                  color: localAppTheme['utilityColorPair2']['color1'],
-                                                ),
-                                                child: Icon(
-                                                  Icons.fitness_center_outlined, 
-                                                  size: 15, 
-                                                  color: localAppTheme['utilityColorPair2']['color2'],
+                                              Visibility(
+                                                visible: hasSchedulledWorkout,
+                                                child: Container(
+                                                  margin: EdgeInsets.only(top: 1, bottom: 1),
+                                                  padding: EdgeInsets.all(1),
+                                                  width: double.infinity,
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(4),
+                                                    color: localAppTheme['utilityColorPair3']['color1'],
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.fitness_center, 
+                                                    size: 15, 
+                                                    color: localAppTheme['utilityColorPair3']['color2'],
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                            Visibility(
-                                              visible: hasGoal,
-                                              child: Container(
-                                                margin: EdgeInsets.only(top: 1, bottom: 1),
-                                                padding: EdgeInsets.all(1),
-                                                width: double.infinity,
-                                                decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(4),
-                                                  color: localAppTheme['utilityColorPair4']['color1'],
-                                                ),
-                                                child: Icon(
-                                                  Icons.flag_outlined, 
-                                                  size: 15, 
-                                                  color: localAppTheme['utilityColorPair4']['color2']
+                                              Visibility(
+                                                visible: hasUnSchedulledWorkout,
+                                                child: Container(
+                                                  margin: EdgeInsets.only(top: 1, bottom: 1),
+                                                  padding: EdgeInsets.all(1),
+                                                  width: double.infinity,
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(4),
+                                                    color: localAppTheme['utilityColorPair2']['color1'],
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.fitness_center_outlined, 
+                                                    size: 15, 
+                                                    color: localAppTheme['utilityColorPair2']['color2'],
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
+                                              Visibility(
+                                                visible: hasGoal,
+                                                child: Container(
+                                                  margin: EdgeInsets.only(top: 1, bottom: 1),
+                                                  padding: EdgeInsets.all(1),
+                                                  width: double.infinity,
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(4),
+                                                    color: localAppTheme['utilityColorPair4']['color1'],
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.flag_outlined, 
+                                                    size: 15, 
+                                                    color: localAppTheme['utilityColorPair4']['color2']
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  );
-                },
-              ),
-            ],
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
           );
         }
       },

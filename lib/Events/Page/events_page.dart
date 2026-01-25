@@ -21,6 +21,8 @@ class _EventPageState extends State<EventPage> {
   Future<void>? _fetchDataFuture;
   final TextEditingController searchController = TextEditingController();
   bool isLoadingAthleteList = false;
+  // Track which event tiles are expanded so we know when to refresh attendees after RSVP.
+  final Set<String> _expandedEventIds = <String>{};
 
   //----------------------------------------------------
   // initState load data when form is built
@@ -171,17 +173,22 @@ class _EventPageState extends State<EventPage> {
                               final attendees = event['attendees'] as List?;
                               final hasRSVPed = attendees != null && (attendees).contains(appUser['uid']);
                               final attendeesExpanded = eventsProvider.attendees ?? [];
-                              String eventDateStr = 'No Date Provided';                              
+                              final String eventId = (event['eventID'] ?? '').toString();
+                              final bool isExpanded = _expandedEventIds.contains(eventId);
+                              String eventDateStr = 'No Date Provided';                                                            
                               final rawDate = event['eventDate'];
                               if (rawDate != null) {
                                 if (rawDate is Timestamp) {
-                                  eventDateStr = DateFormat.yMMMMd().add_jm().format(rawDate.toDate());
+                                  eventDateStr = DateFormat.yMMMMd().format(rawDate.toDate());
                                 } else if (rawDate is DateTime) {
-                                  eventDateStr = DateFormat.yMMMMd().add_jm().format(rawDate);
+                                  eventDateStr = DateFormat.yMMMMd().format(rawDate);
                                 } else {
                                   eventDateStr = rawDate.toString();
                                 }
                               }
+
+
+                             
                               return ExpansionTile(
                                   shape: Border(
                                     top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
@@ -271,11 +278,13 @@ class _EventPageState extends State<EventPage> {
                                             ),
                                             Container(
                                               width: 75,
+                                              height: 125,
                                               padding: const EdgeInsets.only(left: 10.0),
                                               decoration: BoxDecoration(
                                                 border: Border(left: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
                                               ),
                                               child: Column(
+                                                mainAxisAlignment: MainAxisAlignment.center,
                                                 children: [
                                                   iconButton(
                                                     label: null,
@@ -285,33 +294,41 @@ class _EventPageState extends State<EventPage> {
                                                     size: 30,
                                                     toolTip: 'RSVP',
                                                     context: context,
-                                                    onPressed: () {
+                                                    onPressed: () async{
                                                       try{
+                                                      // Update RSVP status
+                                                      List<dynamic> updatedAttendees = List<dynamic>.from(event['attendees'] ?? <dynamic>[]);
                                                       if (!hasRSVPed) {
-                                                        eventsProvider.updateEvent(event['eventID'], {
+                                                        await eventsProvider.updateEvent(event['eventID'], {
                                                           'attendees': FieldValue.arrayUnion(appUser['uid'] != null ? [appUser['uid']] : []),
                                                         });
+                                                        updatedAttendees.add(appUser['uid']);
                                                       } else {
-                                                        eventsProvider.updateEvent(event['eventID'], {
+                                                        await eventsProvider.updateEvent(event['eventID'], {
                                                           'attendees': FieldValue.arrayRemove(appUser['uid'] != null ? [appUser['uid']] : []),
                                                         });
+                                                        updatedAttendees.remove(appUser['uid']);
                                                       }
                                                       } catch (e) {
                                                         showGeneralPopupDialog(context, 'Error', 'An error occurred while updating your RSVP. Please try again later.');
                                                       }
-                                                    },
-                                                  ),
-                                                  SizedBox(height: 10.0),
-                                                  iconButton(
-                                                    label: null,
-                                                    backgroundColor: null,
-                                                    iconColor: localAppTheme['anchorColors']['primaryColor'],
-                                                    icon: Icons.group_outlined,
-                                                    size: 30,
-                                                    toolTip: 'See Attendees',
-                                                    context: context,
-                                                    onPressed: () {
-                                                      
+                                                                                                          
+                                                      // Load attendees if not already loaded
+                                                      if (isExpanded) {
+                                                        setState(() {
+                                                          isLoadingAthleteList = true;
+                                                        });
+                                                        eventsProvider.clearAttendees();
+                                                        await eventsProvider.fetchAttendeesForEvent(
+                                                          (!hasRSVPed)
+                                                            ? (List<dynamic>.from(event['attendees'] ?? <dynamic>[])..add(appUser['uid']))
+                                                            : (List<dynamic>.from(event['attendees'] ?? <dynamic>[])..remove(appUser['uid'])),
+                                                          appUserProvider
+                                                        );
+                                                        setState(() {
+                                                          isLoadingAthleteList = false;
+                                                        });
+                                                      }
                                                     },
                                                   ),
                                                 ],
@@ -386,11 +403,14 @@ class _EventPageState extends State<EventPage> {
                                       setState(() {
                                         isLoadingAthleteList = true;
                                       });
+                                      _expandedEventIds.add(eventId);
                                       eventsProvider.clearAttendees();
                                       await eventsProvider.fetchAttendeesForEvent(event['attendees'] ?? [], appUserProvider);
                                       setState(() {
                                         isLoadingAthleteList = false;
                                       });
+                                    } else {
+                                      _expandedEventIds.remove(eventId);
                                     }
                                   },
                                 );

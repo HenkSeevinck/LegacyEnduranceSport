@@ -250,29 +250,26 @@ class _FormInputFieldState extends State<FormInputField> {
       );
     }
 
-    // Single-line inputs keep the fixed height for consistent layout.
-    return SizedBox(
-      height: localAppTheme['formInputFieldHeight'],
-      child: TextFormField(
-        style: localAppTheme['font'](
-          textStyle: TextStyle(
-            color: localAppTheme['anchorColors']['primaryColor'],
-            fontSize: localAppTheme['bodySize'],
-          ),
+    // Single-line inputs allow natural sizing so error messages display below without squishing the input field.
+    return TextFormField(
+      style: localAppTheme['font'](
+        textStyle: TextStyle(
+          color: localAppTheme['anchorColors']['primaryColor'],
+          fontSize: localAppTheme['bodySize'],
         ),
-        autocorrect: true,
-        enableSuggestions: true,
-        controller: widget.controller,
-        obscureText: widget.isPassword ? _obscureText : false,
-        readOnly: widget.readOnly ?? false,
-        decoration: decoration,
-        maxLines: 1,
-        minLines: 1,
-        validator: widget.validator,
-        initialValue: widget.controller == null ? widget.initialValue : null,
-        enabled: widget.enabled,
-        onChanged: widget.onChanged,
       ),
+      autocorrect: true,
+      enableSuggestions: true,
+      controller: widget.controller,
+      obscureText: widget.isPassword ? _obscureText : false,
+      readOnly: widget.readOnly ?? false,
+      decoration: decoration,
+      maxLines: 1,
+      minLines: 1,
+      validator: widget.validator,
+      initialValue: widget.controller == null ? widget.initialValue : null,
+      enabled: widget.enabled,
+      onChanged: widget.onChanged,
     );
   }
 }
@@ -811,10 +808,7 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
         Row(
           children: [
             Expanded(
-              child: SizedBox(
-                //height: MediaQuery.of(context).size.height * 0.0175 * 3, // Testing
-                height: 50,
-                child: FormField<Map<String, dynamic>>(
+              child: FormField<Map<String, dynamic>>(
                   validator: widget.validator,
                   initialValue: selectedItem,
                   builder: (FormFieldState<Map<String, dynamic>> field) {
@@ -865,7 +859,6 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
                     // initialValue changes from the parent.
                   },
                 ),
-              ),
             ),
             if (widget.isEnabled && widget.searchBoxVisable)
               iconButton(

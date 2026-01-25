@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/SignInSignUp/Page/signin_signup.dart';
+import 'package:provider/provider.dart';
 
 class MobileLanding extends StatefulWidget {
   const MobileLanding({super.key});
@@ -75,9 +77,11 @@ class _MobileLandingState extends State<MobileLanding> {
     Widget buildHero() {
       final localAppTheme = ResponsiveTheme(context).theme;
       final double clampedOffset = _clampDouble(_scrollOffset, 0.0, sectionHeight);
-      final double logoTranslate = -(clampedOffset) * 0.25;
-      double t = 1 - (_scrollOffset / 250);
+      final double logoTranslate = -(clampedOffset) * 0.75 - 150;
+      double t = 1 - (_scrollOffset / 500);
       final double titleOpacity = _clampDouble(t, 0.0, 1.0);
+      double s = 1 - (_scrollOffset / 540);
+      double logoSize = size.width * 0.8 * s * s * s * s;
 
       return SizedBox(
         height: sectionHeight,
@@ -89,13 +93,13 @@ class _MobileLandingState extends State<MobileLanding> {
               offset: Offset(0, logoTranslate),
               child: Image.asset(
                 'images/Legacy-Endurance-Logo.png',
-                height: size.width * 0.8,
-                width: size.width * 0.8,
+                height: logoSize,
+                width: logoSize,
                 fit: BoxFit.contain,
               ),
             ),
             Positioned(
-              bottom: 80,
+              bottom: 200,
               child: Opacity(
                 opacity: titleOpacity,
                 child: Column(
@@ -116,9 +120,10 @@ class _MobileLandingState extends State<MobileLanding> {
     // Allow custom section heights so cards/CTA can be closer vertically
     final List<double> sectionHeights = [
       sectionHeight, // hero
-      sectionHeight * 0.55, // card 1
-      sectionHeight * 0.55, // card 2 (smaller)
-      sectionHeight, // CTA (full page height so previous card scrolls off and button centers)
+      sectionHeight * 0.55,
+      sectionHeight * 0.55,
+      sectionHeight * 0.55,
+      sectionHeight,
     ];
 
     //-----------------------------------------------------------------------------
@@ -168,7 +173,7 @@ class _MobileLandingState extends State<MobileLanding> {
               child: Row(
                 children: [
                   const SizedBox(width: 18),
-                  CircleAvatar(backgroundColor: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.1), radius: 34, child: Icon(icon, color: localAppTheme['anchorColors']['primaryColor'], size: 30)),
+                  CircleAvatar(backgroundColor: localAppTheme['anchorColors']['primaryColor'], radius: 34, child: Icon(icon, color: localAppTheme['anchorColors']['secondaryColor'], size: 30)),
                   const SizedBox(width: 18),
                   Expanded(
                     child: Column(
@@ -192,13 +197,14 @@ class _MobileLandingState extends State<MobileLanding> {
 
     //---------------------------------------------------------------------------------
     // Build Call to Action section
-    Widget buildCTA() {
+    Widget buildCTA(int index) {
       final localAppTheme = ResponsiveTheme(context).theme;
-      final double progress = sectionProgress(3);
+      final double progress = sectionProgress(index);
       final double eased = Curves.easeOut.transform(progress);
+      final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
 
       return Container(
-        height: sectionHeights[3],
+        height: sectionHeights[index],
         alignment: Alignment.center,
         child: Opacity(
           opacity: eased,
@@ -212,7 +218,13 @@ class _MobileLandingState extends State<MobileLanding> {
                 width: 200,
                 child: elevatedButton(
                   label: 'Sign Up Now', 
-                  onPressed: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const SigninPage())), 
+                  onPressed: () {
+                    internalStatusProvider.setSignInSignUpStatus('SignUp');
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => const SigninPage()
+                      ),
+                    );
+                  }, 
                   backgroundColor: localAppTheme['anchorColors']['primaryColor'], 
                   labelColor: localAppTheme['anchorColors']['secondaryColor'], 
                   leadingIcon: Icons.fitness_center, 
@@ -220,12 +232,6 @@ class _MobileLandingState extends State<MobileLanding> {
                   context: context,
                 ),
               ),
-              // ElevatedButton.icon(
-              //   style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-              //   onPressed: () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const SigninPage())),
-              //   icon: const Icon(Icons.fitness_center),
-              //   label: const Text('Dive In'),
-              // ),
             ],
           ),
         ),
@@ -258,7 +264,8 @@ class _MobileLandingState extends State<MobileLanding> {
                 positionedSection(0, buildHero()),
                 positionedSection(1, buildCard(1, 'Guided Workouts', 'Plans tailored to your goals and time.', Icons.directions_run)),
                 positionedSection(2, buildCard(2, 'Track Progress', 'Graphs and insights to keep you motivated.', Icons.show_chart)),
-                positionedSection(3, buildCTA()),
+                positionedSection(3, buildCard(3, 'Community', 'Connect with others and share your journey.', Icons.people)),
+                positionedSection(4, buildCTA(4)),
               ],
             ),
           ),

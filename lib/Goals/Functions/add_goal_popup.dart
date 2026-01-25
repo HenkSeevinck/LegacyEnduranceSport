@@ -30,6 +30,25 @@ class _AddGoalPopupState extends State<AddGoalPopup> {
   TextEditingController titleController = TextEditingController();
   TextEditingController distanceController = TextEditingController();
   TextEditingController durationController = TextEditingController();
+  
+  late final GlobalKey<FormState> formKey;
+  late bool showEventDropdown;
+  late Map<String, dynamic> draftGoal;
+
+  //----------------------------------------------------
+  // Initialize state
+  @override
+  void initState() {
+    super.initState();
+    formKey = GlobalKey<FormState>();
+    showEventDropdown = false;
+    
+    Map<String, dynamic>? goal = widget.goal;
+    draftGoal = goal != null
+        ? Map<String, dynamic>.from(goal)
+        : {'title': null, 'date': null, 'type': null, 'distance': null, 'duration': 'hh:mm:ss'};
+    _updateTextControllers(draftGoal);
+  }
 
   //----------------------------------------------------
   // Dispose controllers
@@ -91,14 +110,6 @@ class _AddGoalPopupState extends State<AddGoalPopup> {
     final events = eventsProvider.events ?? <Map<String, dynamic>>[];
     Map<String, dynamic>? goal = widget.goal;
     int? index = widget.index;
-    // Local form key and a working copy of the goal so edits don't mutate the
-    // original until the user submits.
-    final formKey = GlobalKey<FormState>();
-    bool showEventDropdown = false;
-    Map<String, dynamic> draftGoal = goal != null
-        ? Map<String, dynamic>.from(goal)
-        : {'title': null, 'date': null, 'type': null, 'distance': null, 'duration': 'hh:mm:ss'};
-    _updateTextControllers(draftGoal);
 
     return AlertDialog(
           backgroundColor: localAppTheme['anchorColors']['secondaryColor'],

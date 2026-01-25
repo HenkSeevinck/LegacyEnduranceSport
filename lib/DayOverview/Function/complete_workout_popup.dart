@@ -14,13 +14,7 @@ class CompleteWorkoutPopup extends StatefulWidget {
   String workoutStatus; // 'completed' or 'new'
   Map<String, dynamic>? loadedWorkout;
 
-
-  CompleteWorkoutPopup({
-    super.key, 
-    required this.workoutData, 
-    required this.workoutStatus, 
-    required this.loadedWorkout,
-    });
+  CompleteWorkoutPopup({super.key, required this.workoutData, required this.workoutStatus, required this.loadedWorkout});
 
   @override
   State<CompleteWorkoutPopup> createState() => _CompleteWorkoutPopupState();
@@ -35,6 +29,7 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
   bool _pickerOpen = false;
   bool isVerifyingImage = false;
   Map<String, dynamic> completedworkoutData = {};
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   //--------------------------------------------------------------
   // Dispose
@@ -116,132 +111,171 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
     // final workoutData = widget.workoutData;
     final workoutStatus = widget.workoutStatus;
     // final completedworkoutData = workoutData!['completedworkoutData'];
-    
-    if(workoutResult.isNotEmpty) {
+
+    if (workoutResult.isNotEmpty) {
       _resetTextControllers();
       setState(() {
         isVerifyingImage = false;
       });
     }
 
-    return isVerifyingImage 
-    ? Center(child: CircularProgressIndicator(),)
-    : Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Visibility(
-          visible: workoutStatus == 'completed',
-          child: FormInputField(
-            label: 'Workout Type:',
-            errorMessage: 'Please enter workout type',
-            isMultiline: false,
-            isPassword: false,
-            prefixIcon: null,
-            suffixIcon: null,
-            showLabel: true,
-            enabled: false,
-            initialValue: completedworkoutData['type'] != null
-                ? workoutTypes.where((type) => type['workoutTypeID'] == completedworkoutData['type']).first['workoutType']
-                : '',
-          ),
-        ),
-        Visibility(
-          visible: workoutStatus == 'new',
-          child: SearchableDropdown(
-            labelText: '',
-            hint: '',
-            dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
-            searchBoxVisable: false,
-            dropDownList: workoutTypes,
-            header: 'Workout Type:',
-            iconColor: localAppTheme['anchorColors']['primaryColor'],
-            idField: 'workoutTypeID',
-            displayField: 'workoutType',
-            onChanged: (value) {
-              setState(() {
-                completedworkoutData['type'] = value?['workoutTypeID'];
-              });
-            },
-            isEnabled: inputData,
-          ),
-        ),
-        SizedBox(height: 10),
-        FormInputField(
-          label: 'Duration:',
-          errorMessage: 'Please enter duration',
-          isMultiline: false,
-          isPassword: false,
-          prefixIcon: null,
-          suffixIcon: null,
-          showLabel: true,
-          enabled: inputData,
-          onChanged: (value) {
-            completedworkoutData['duration'] = value;
-          },
-          controller: durationController,
-        ),
-        SizedBox(height: 10),
-        FormInputField(
-          label: 'Distance:',
-          errorMessage: 'Please enter distance',
-          isMultiline: false,
-          isPassword: false,
-          prefixIcon: null,
-          suffixIcon: null,
-          showLabel: true,
-          enabled: inputData,
-          onChanged: (value) {
-            completedworkoutData['distance'] = value;
-          },
-          controller: distanceController,
-        ),
-        SizedBox(height: 10),
-        Visibility(
-          visible: uploadType != null && inputData != true,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              body(header: 'Perceived Effort:\n1: Very Easy\n10: Very Hard', color: localAppTheme['anchorColors']['primaryColor'], context: context),
-              Slider(
-                value: (completedworkoutData['perceivedEffort'] ?? 0).toDouble(),
-                onChanged: !inputData
-                    ? (double value) {
-                        setState(() {
-                          completedworkoutData['perceivedEffort'] = value;
-                        });
+    return isVerifyingImage
+        ? Center(child: CircularProgressIndicator())
+        : Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Visibility(
+                  visible: workoutStatus == 'completed',
+                  child: FormInputField(
+                    label: 'Workout Type:',
+                    errorMessage: 'Please enter workout type',
+                    isMultiline: false,
+                    isPassword: false,
+                    prefixIcon: null,
+                    suffixIcon: null,
+                    showLabel: true,
+                    enabled: false,
+                    initialValue: completedworkoutData['type'] != null
+                        ? workoutTypes.where((type) => type['workoutTypeID'] == completedworkoutData['type']).first['workoutType']
+                        : '',
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter workout type';
                       }
-                    : null,
-                min: 0,
-                max: 10,
-                divisions: 10,
-                label: (completedworkoutData['perceivedEffort'] ?? 0).toString(),
-                activeColor: localAppTheme['anchorColors']['primaryColor'],
-                thumbColor: localAppTheme['anchorColors']['primaryColor'],
-              ),
-              SizedBox(height: 10),
-              body(header: 'How did you feel:\n1: Very Weak\n10: Very Strong', color: localAppTheme['anchorColors']['primaryColor'], context: context),
-              Slider(
-                value: (completedworkoutData['feeling'] ?? 0).toDouble(),
-                onChanged: !inputData
-                    ? (double value) {
-                        setState(() {
-                          completedworkoutData['feeling'] = value;
-                        });
+                      return null;
+                    },
+                  ),
+                ),
+                Visibility(
+                  visible: workoutStatus == 'new',
+                  child: SearchableDropdown(
+                    labelText: '',
+                    hint: '',
+                    dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
+                    searchBoxVisable: false,
+                    dropDownList: workoutTypes,
+                    header: 'Workout Type:',
+                    iconColor: localAppTheme['anchorColors']['primaryColor'],
+                    idField: 'workoutTypeID',
+                    displayField: 'workoutType',
+                    onChanged: (value) {
+                      setState(() {
+                        completedworkoutData['type'] = value?['workoutTypeID'];
+                      });
+                    },
+                    isEnabled: inputData,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select a workout type';
                       }
-                    : null,
-                min: 0,
-                max: 10,
-                divisions: 10,
-                label: (completedworkoutData['feeling'] ?? 0).toString(),
-                activeColor: localAppTheme['anchorColors']['primaryColor'],
-                thumbColor: localAppTheme['anchorColors']['primaryColor'],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-    }
+                      return null;
+                    },
+                  ),
+                ),
+                SizedBox(height: 10),
+                FormInputField(
+                  label: 'Duration:',
+                  errorMessage: 'Please enter duration',
+                  isMultiline: false,
+                  isPassword: false,
+                  prefixIcon: null,
+                  suffixIcon: null,
+                  showLabel: true,
+                  enabled: inputData,
+                  onChanged: (value) {
+                    completedworkoutData['duration'] = value;
+                  },
+                  controller: durationController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter duration';
+                    }
+                    if (!RegExp(r'^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$').hasMatch(value)) {
+                      return 'Please use format hh:mm:ss';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 10),
+                FormInputField(
+                  label: 'Distance:',
+                  errorMessage: 'Please enter distance',
+                  isMultiline: false,
+                  isPassword: false,
+                  prefixIcon: null,
+                  suffixIcon: null,
+                  showLabel: true,
+                  enabled: inputData,
+                  onChanged: (value) {
+                    completedworkoutData['distance'] = value;
+                  },
+                  controller: distanceController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter distance';
+                    }
+                    if (double.tryParse(value) == null) {
+                      return 'Please enter a valid number';
+                    }
+                    if (!RegExp(r'^\d+\.\d{2}$').hasMatch(value)) {
+                      return 'Please use format 0.00';
+                    }
+                    if (double.parse(value) == 0.0) {
+                      return 'Distance cannot be 0.00';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 10),
+                Visibility(
+                  visible: uploadType != null && inputData != true,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      body(header: 'Perceived Effort:\n1: Very Easy\n10: Very Hard', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                      Slider(
+                        value: (completedworkoutData['perceivedEffort'] ?? 0).toDouble(),
+                        onChanged: !inputData
+                            ? (double value) {
+                                setState(() {
+                                  completedworkoutData['perceivedEffort'] = value;
+                                });
+                              }
+                            : null,
+                        min: 0,
+                        max: 10,
+                        divisions: 10,
+                        label: (completedworkoutData['perceivedEffort'] ?? 0).toString(),
+                        activeColor: localAppTheme['anchorColors']['primaryColor'],
+                        thumbColor: localAppTheme['anchorColors']['primaryColor'],
+                      ),
+                      SizedBox(height: 10),
+                      body(header: 'How did you feel:\n1: Very Weak\n10: Very Strong', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                      Slider(
+                        value: (completedworkoutData['feeling'] ?? 0).toDouble(),
+                        onChanged: !inputData
+                            ? (double value) {
+                                setState(() {
+                                  completedworkoutData['feeling'] = value;
+                                });
+                              }
+                            : null,
+                        min: 0,
+                        max: 10,
+                        divisions: 10,
+                        label: (completedworkoutData['feeling'] ?? 0).toString(),
+                        activeColor: localAppTheme['anchorColors']['primaryColor'],
+                        thumbColor: localAppTheme['anchorColors']['primaryColor'],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+  }
 
   //-------------------------------------------------------------
   // Helper that opens the mobile browser camera via a hidden file input
@@ -252,22 +286,18 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
     try {
       final ImagePicker picker = ImagePicker();
       // Setting source to camera triggers the 'capture' attribute on web
-      final XFile? image = await picker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 10,
-        preferredCameraDevice: CameraDevice.rear,
-      );
+      final XFile? image = await picker.pickImage(source: ImageSource.camera, imageQuality: 10, preferredCameraDevice: CameraDevice.rear);
 
       if (image != null) {
         final bytes = await image.readAsBytes();
         final provider = Provider.of<ImageVerificationProvider>(context, listen: false);
-        
+
         setState(() {
           isVerifyingImage = true;
         });
 
         await provider.verifyImage(bytes);
-        
+
         if (mounted) {
           setState(() {
             imageData = bytes;
@@ -289,21 +319,18 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
 
     try {
       final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 10,
-      );
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 10);
 
       if (image != null) {
         final bytes = await image.readAsBytes();
         final provider = Provider.of<ImageVerificationProvider>(context, listen: false);
-        
+
         setState(() {
           isVerifyingImage = true;
         });
 
         await provider.verifyImage(bytes);
-        
+
         if (mounted) {
           setState(() {
             imageData = bytes;
@@ -380,7 +407,9 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
                 toolTip: 'Take Photo',
                 context: context,
                 onPressed: () {
-                  setState(() { uploadType = 'camera'; });
+                  setState(() {
+                    uploadType = 'camera';
+                  });
                   _openCameraAndStore();
                 },
               ),
@@ -393,7 +422,9 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
                 toolTip: 'Upload image',
                 context: context,
                 onPressed: () {
-                  setState(() { uploadType = 'filePicker'; });
+                  setState(() {
+                    uploadType = 'filePicker';
+                  });
                   _openFilePickerAndStore();
                 },
               ),
@@ -436,9 +467,13 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
                   child: elevatedButton(
                     label: 'SUBMIT',
                     onPressed: () {
-                      setState(() {
-                        inputData = false;
-                      });
+                      if (_formKey.currentState!.validate()) {
+                        setState(() {
+                          inputData = false;
+                        });
+                      } else {
+                        return;
+                      }
                     },
                     backgroundColor: localAppTheme['anchorColors']['primaryColor'],
                     labelColor: localAppTheme['anchorColors']['secondaryColor'],
