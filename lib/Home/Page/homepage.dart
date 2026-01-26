@@ -50,10 +50,11 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: SafeArea(
-          top: true,
-          child: Center(child: Image.asset('images/Legacy-Endurance-Logo.png', height: 70, width: 70, fit: BoxFit.cover)),
-        ),
+        automaticallyImplyLeading: false,
+        title: appheader(
+          context: context,
+          automaticallyImplyLeading: false,
+          )
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
@@ -79,9 +80,7 @@ class _HomePageState extends State<HomePage> {
                   final availableWidth = constraints.maxWidth;
                   final itemHeight = itemCount > 0 ? availableHeight / itemCount : availableHeight;
                   final coachOptions = homePageOptions.where((option) => option['coachOnly'] == true).toList();
-                  //final coachOptionCount = coachOptions.length;
                   final athleteOptions = homePageOptions.where((option) => option['coachOnly'] == false).toList();
-                  //final athleteOptionCount = athleteOptions.length;
 
                   return SingleChildScrollView(
                     child: Column(
@@ -102,7 +101,7 @@ class _HomePageState extends State<HomePage> {
                                 decoration: BoxDecoration(
                                   border: Border(
                                     bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                                    left: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0 * (index % 2 == 1 ? 1.0 : 0.0)),
+                                    //left: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0 * (index % 2 == 1 ? 1.0 : 0.0)),
                                   ),
                                 ),
                                 child: Column(
@@ -115,6 +114,7 @@ class _HomePageState extends State<HomePage> {
                                         size: double.parse((itemHeight * 0.4).toStringAsFixed(0)),
                                       ),
                                     ),
+                                    SizedBox(height: 10),
                                     Center(
                                       child: Container(
                                         width: 150,
@@ -173,7 +173,7 @@ class _HomePageState extends State<HomePage> {
                                   child: Container(
                                     decoration: BoxDecoration(
                                       border: Border(
-                                        left: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0 * (index % 2 == 1 ? 1.0 : 0.0)),
+                                        //left: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0 * (index % 2 == 1 ? 1.0 : 0.0)),
                                         bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
                                       ),
                                     ),
@@ -187,6 +187,7 @@ class _HomePageState extends State<HomePage> {
                                             size: double.parse((itemHeight * 0.4).toStringAsFixed(0)),
                                           ),
                                         ),
+                                        SizedBox(height: 10),
                                         Center(
                                           child: Container(
                                             width: 150,

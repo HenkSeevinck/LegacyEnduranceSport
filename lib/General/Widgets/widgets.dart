@@ -126,21 +126,13 @@ Widget header3({required String header, required BuildContext context, required 
 
 //------------------------------------------------------------------------
 //Body
-Widget body({
-  required String header, 
-  required Color? color, 
-  required BuildContext context,
-  TextAlign? textAlign,
-  }) {
+Widget body({required String header, required Color? color, required BuildContext context, TextAlign? textAlign}) {
   final localAppTheme = ResponsiveTheme(context).theme;
   return Text(
     header,
     textAlign: textAlign ?? TextAlign.start,
     style: localAppTheme['font'](
-      textStyle: TextStyle(
-        fontSize: localAppTheme['bodySize'], 
-        color: color, fontWeight: FontWeight.normal
-        ),
+      textStyle: TextStyle(fontSize: localAppTheme['bodySize'], color: color, fontWeight: FontWeight.normal),
     ),
   );
 }
@@ -230,10 +222,7 @@ class _FormInputFieldState extends State<FormInputField> {
     if (widget.isMultiline) {
       return TextFormField(
         style: localAppTheme['font'](
-          textStyle: TextStyle(
-            color: localAppTheme['anchorColors']['primaryColor'],
-            fontSize: localAppTheme['bodySize'],
-          ),
+          textStyle: TextStyle(color: localAppTheme['anchorColors']['primaryColor'], fontSize: localAppTheme['bodySize']),
         ),
         autocorrect: true,
         enableSuggestions: true,
@@ -253,10 +242,7 @@ class _FormInputFieldState extends State<FormInputField> {
     // Single-line inputs allow natural sizing so error messages display below without squishing the input field.
     return TextFormField(
       style: localAppTheme['font'](
-        textStyle: TextStyle(
-          color: localAppTheme['anchorColors']['primaryColor'],
-          fontSize: localAppTheme['bodySize'],
-        ),
+        textStyle: TextStyle(color: localAppTheme['anchorColors']['primaryColor'], fontSize: localAppTheme['bodySize']),
       ),
       autocorrect: true,
       enableSuggestions: true,
@@ -276,7 +262,15 @@ class _FormInputFieldState extends State<FormInputField> {
 
 //------------------------------------------------------------------------
 //Elevated Button
-Widget elevatedButton({required String label, required VoidCallback? onPressed, required Color? backgroundColor, required Color labelColor, required IconData? leadingIcon, required IconData? trailingIcon, required BuildContext context}) {
+Widget elevatedButton({
+  required String label,
+  required VoidCallback? onPressed,
+  required Color? backgroundColor,
+  required Color labelColor,
+  required IconData? leadingIcon,
+  required IconData? trailingIcon,
+  required BuildContext context,
+}) {
   final localAppTheme = ResponsiveTheme(context).theme;
   return SizedBox(
     height: localAppTheme['formInputFieldHeight'],
@@ -328,12 +322,13 @@ Widget elevatedButton({required String label, required VoidCallback? onPressed, 
 //------------------------------------------------------------------------
 //Text Button
 Widget textButton({
-  required String label, 
-  required VoidCallback? onPressed, 
-  required Color? labelColor, 
-  required IconData? leadingIcon, 
-  required IconData? trailingIcon, 
-  required BuildContext context}) {
+  required String label,
+  required VoidCallback? onPressed,
+  required Color? labelColor,
+  required IconData? leadingIcon,
+  required IconData? trailingIcon,
+  required BuildContext context,
+}) {
   final localAppTheme = ResponsiveTheme(context).theme;
   return TextButton(
     style: ButtonStyle(
@@ -399,21 +394,11 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackbar({required Bui
 //------------------------------------------------------------------------
 //Tick Box Widget
 
-Widget tickBox({
-  required String label, 
-  required bool value, 
-  required ValueChanged<bool?> onChanged, 
-  required BuildContext context,
-  required bool? enabled,
-  }) {
+Widget tickBox({required String label, required bool value, required ValueChanged<bool?> onChanged, required BuildContext context, required bool? enabled}) {
   final localAppTheme = ResponsiveTheme(context).theme;
   return Row(
     children: [
-      Checkbox(
-        value: value, 
-        onChanged: enabled == true ? onChanged : null, 
-        activeColor: localAppTheme['anchorColors']['primaryColor'],
-      ),
+      Checkbox(value: value, onChanged: enabled == true ? onChanged : null, activeColor: localAppTheme['anchorColors']['primaryColor']),
       body(header: label, color: localAppTheme['anchorColors']['primaryColor'], context: context),
     ],
   );
@@ -436,20 +421,20 @@ class DatePicker extends StatefulWidget {
   final bool? enabled;
 
   const DatePicker({
-    super.key, 
-    this.buttonBackgroundColor, 
-    this.blockedRanges, 
-    required this.buttonLabelColor, 
-    required this.label, 
-    required this.buttonVisibility, 
-    required this.initialDate, 
-    required this.validator, 
-    required this.controller, 
-    this.onChanged, 
-    this.firstDate, 
+    super.key,
+    this.buttonBackgroundColor,
+    this.blockedRanges,
+    required this.buttonLabelColor,
+    required this.label,
+    required this.buttonVisibility,
+    required this.initialDate,
+    required this.validator,
+    required this.controller,
+    this.onChanged,
+    this.firstDate,
     this.lastDate,
     this.enabled,
-    });
+  });
 
   @override
   State<DatePicker> createState() => _DatePickerState();
@@ -515,7 +500,13 @@ class _DatePickerState extends State<DatePicker> {
       return;
     }
 
-    final DateTime? picked = await showDatePicker(context: context, initialDate: initialDate, firstDate: defaultFirstDate, lastDate: defaultLastDate, selectableDayPredicate: (date) => !isBlocked(date));
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: defaultFirstDate,
+      lastDate: defaultLastDate,
+      selectableDayPredicate: (date) => !isBlocked(date),
+    );
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
@@ -537,20 +528,20 @@ class _DatePickerState extends State<DatePicker> {
           Expanded(
             child: SizedBox(
               child: FormInputField(
-                label: widget.label, 
-                errorMessage: '', 
-                readOnly: true, 
-                controller: widget.controller, 
-                isMultiline: false, 
-                isPassword: false, 
-                prefixIcon: null, 
-                suffixIcon: null, 
-                showLabel: false, 
-                initialValue: null, 
-                enabled: widget.enabled ?? true, 
-                validator: widget.validator, 
+                label: widget.label,
+                errorMessage: '',
+                readOnly: true,
+                controller: widget.controller,
+                isMultiline: false,
+                isPassword: false,
+                prefixIcon: null,
+                suffixIcon: null,
+                showLabel: false,
+                initialValue: null,
+                enabled: widget.enabled ?? true,
+                validator: widget.validator,
                 onChanged: null,
-                ),
+              ),
             ),
           ),
           if (widget.buttonVisibility && widget.enabled == true)
@@ -568,7 +559,7 @@ class _DatePickerState extends State<DatePicker> {
                   onPressed: () => _selectDate(context),
                 ),
               ],
-          ),
+            ),
         ],
       ),
     );
@@ -578,25 +569,22 @@ class _DatePickerState extends State<DatePicker> {
 //------------------------------------------------------------------------
 //Icon Button
 Widget iconButton({
-  required String? label, 
-  required Color? 
-  backgroundColor, 
-  required Color iconColor, 
-  required IconData icon, 
-  required double? size, 
-  required String? toolTip, 
-  required BuildContext context, 
+  required String? label,
+  required Color? backgroundColor,
+  required Color iconColor,
+  required IconData icon,
+  required double? size,
+  required String? toolTip,
+  required BuildContext context,
   required Function()? onPressed,
-  }) {
+}) {
   return Container(
-    decoration: BoxDecoration(
-      color: backgroundColor ?? Colors.transparent,
-    ),
+    decoration: BoxDecoration(color: backgroundColor ?? Colors.transparent),
     child: IconButton(
-        tooltip: toolTip,
-        onPressed: onPressed,
-        icon: Icon(icon, color: iconColor, size: size),
-      )
+      tooltip: toolTip,
+      onPressed: onPressed,
+      icon: Icon(icon, color: iconColor, size: size),
+    ),
   );
 }
 
@@ -740,7 +728,10 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
     filteredItems = List<Map<String, dynamic>>.from(widget.dropDownList);
 
     if (widget.initialValue != null) {
-      selectedItem = widget.dropDownList.firstWhere((item) => item[widget.idField].toString() == widget.initialValue.toString(), orElse: () => <String, dynamic>{});
+      selectedItem = widget.dropDownList.firstWhere(
+        (item) => item[widget.idField].toString() == widget.initialValue.toString(),
+        orElse: () => <String, dynamic>{},
+      );
       if (selectedItem!.isEmpty) selectedItem = null;
     }
   }
@@ -751,7 +742,10 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
     if (widget.initialValue != oldWidget.initialValue) {
       setState(() {
         if (widget.initialValue != null) {
-          selectedItem = widget.dropDownList.firstWhere((item) => item[widget.idField].toString() == widget.initialValue.toString(), orElse: () => <String, dynamic>{});
+          selectedItem = widget.dropDownList.firstWhere(
+            (item) => item[widget.idField].toString() == widget.initialValue.toString(),
+            orElse: () => <String, dynamic>{},
+          );
           if (selectedItem!.isEmpty) selectedItem = null;
         } else {
           selectedItem = null;
@@ -763,7 +757,10 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
   void resetSelectedItem() {
     setState(() {
       if (widget.initialValue != null) {
-        selectedItem = widget.dropDownList.firstWhere((item) => item[widget.idField].toString() == widget.initialValue.toString(), orElse: () => <String, dynamic>{});
+        selectedItem = widget.dropDownList.firstWhere(
+          (item) => item[widget.idField].toString() == widget.initialValue.toString(),
+          orElse: () => <String, dynamic>{},
+        );
         if (selectedItem!.isEmpty) selectedItem = null;
       } else {
         selectedItem = null;
@@ -791,17 +788,17 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
           Column(
             children: [
               FormInputField(
-                label: widget.labelText, 
-                errorMessage: '', 
+                label: widget.labelText,
+                errorMessage: '',
                 isMultiline: false,
                 backgroundColor: widget.backgroundColor,
-                isPassword: false, 
-                prefixIcon: null, 
-                suffixIcon: null, 
+                isPassword: false,
+                prefixIcon: null,
+                suffixIcon: null,
                 showLabel: true,
                 controller: _searchController,
                 onChanged: (value) => _filterItems(value),
-                ),
+              ),
               const SizedBox(height: 10),
             ],
           ),
@@ -809,56 +806,56 @@ class _SearchableDropdownState extends State<SearchableDropdown> {
           children: [
             Expanded(
               child: FormField<Map<String, dynamic>>(
-                  validator: widget.validator,
-                  initialValue: selectedItem,
-                  builder: (FormFieldState<Map<String, dynamic>> field) {
-                    return InputDecorator(
-                      decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                        labelText: widget.header,
-                        labelStyle: TextStyle(fontSize: fontSize),
-                        filled: widget.backgroundColor != null,
-                        fillColor: widget.backgroundColor,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.0),
-                          borderSide: BorderSide(color: widget.dropdownTextColor),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5.0),
-                          borderSide: BorderSide(color: widget.isEnabled ? widget.dropdownTextColor : Colors.grey.shade300),
-                        ),
-                        errorText: field.errorText,
+                validator: widget.validator,
+                initialValue: selectedItem,
+                builder: (FormFieldState<Map<String, dynamic>> field) {
+                  return InputDecorator(
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                      labelText: widget.header,
+                      labelStyle: TextStyle(fontSize: fontSize),
+                      filled: widget.backgroundColor != null,
+                      fillColor: widget.backgroundColor,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                        borderSide: BorderSide(color: widget.dropdownTextColor),
                       ),
-                      isEmpty: field.value == null,
-                        child: DropdownButtonHideUnderline(
-                        child: DropdownButton<Map<String, dynamic>>(
-                          isExpanded: true,
-                          hint: body(header: widget.hint, color: widget.dropdownTextColor, context: context),
-                          value: selectedItem,
-                          items: filteredItems.map((item) {
-                            return DropdownMenuItem<Map<String, dynamic>>(
-                              value: item,
-                              child: body(header: item[widget.displayField].toString(), color: widget.dropdownTextColor, context: context),
-                            );
-                          }).toList(),
-                          onChanged: widget.isEnabled
-                              ? (newValue) {
-                                  setState(() {
-                                    selectedItem = newValue;
-                                  });
-                                  field.didChange(newValue);
-                                  if (widget.onChanged != null) {
-                                    widget.onChanged!(newValue);
-                                  }
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                        borderSide: BorderSide(color: widget.isEnabled ? widget.dropdownTextColor : Colors.grey.shade300),
+                      ),
+                      errorText: field.errorText,
+                    ),
+                    isEmpty: field.value == null,
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<Map<String, dynamic>>(
+                        isExpanded: true,
+                        hint: body(header: widget.hint, color: widget.dropdownTextColor, context: context),
+                        value: selectedItem,
+                        items: filteredItems.map((item) {
+                          return DropdownMenuItem<Map<String, dynamic>>(
+                            value: item,
+                            child: body(header: item[widget.displayField].toString(), color: widget.dropdownTextColor, context: context),
+                          );
+                        }).toList(),
+                        onChanged: widget.isEnabled
+                            ? (newValue) {
+                                setState(() {
+                                  selectedItem = newValue;
+                                });
+                                field.didChange(newValue);
+                                if (widget.onChanged != null) {
+                                  widget.onChanged!(newValue);
                                 }
-                              : null,
-                        ),
+                              }
+                            : null,
                       ),
-                    );
-                    // Keep FormField state in sync with our selectedItem when
-                    // initialValue changes from the parent.
-                  },
-                ),
+                    ),
+                  );
+                  // Keep FormField state in sync with our selectedItem when
+                  // initialValue changes from the parent.
+                },
+              ),
             ),
             if (widget.isEnabled && widget.searchBoxVisable)
               iconButton(
@@ -900,7 +897,19 @@ class SliderBarWidget extends StatefulWidget {
   final int? headerFlex;
   final int? sliderFlex;
 
-  const SliderBarWidget({super.key, required this.min, required this.max, this.divisions, required this.initialValue, required this.label, this.onChanged, this.activeColor, this.inactiveColor, this.headerFlex, this.sliderFlex});
+  const SliderBarWidget({
+    super.key,
+    required this.min,
+    required this.max,
+    this.divisions,
+    required this.initialValue,
+    required this.label,
+    this.onChanged,
+    this.activeColor,
+    this.inactiveColor,
+    this.headerFlex,
+    this.sliderFlex,
+  });
 
   @override
   State<SliderBarWidget> createState() => _SliderBarWidgetState();
@@ -984,17 +993,9 @@ Future<void> showGeneralPopupDialog(BuildContext context, String title, String m
     builder: (BuildContext context) {
       return AlertDialog(
         backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
-        title: header3(
-          header: title, 
-          context: context, 
-          color: localAppTheme['anchorColors']['primaryColor'],
-        ),
+        title: header3(header: title, context: context, color: localAppTheme['anchorColors']['primaryColor']),
         content: SingleChildScrollView(
-          child: body(
-            header: message, 
-            color: localAppTheme['anchorColors']['primaryColor'], 
-            context: context,
-          ),
+          child: body(header: message, color: localAppTheme['anchorColors']['primaryColor'], context: context),
         ),
         actions: <Widget>[
           TextButton(
@@ -1006,5 +1007,43 @@ Future<void> showGeneralPopupDialog(BuildContext context, String title, String m
         ],
       );
     },
+  );
+}
+
+//------------------------------------------------------------------------
+// App Header Widget
+Widget appheader({
+  required BuildContext context,
+  required bool automaticallyImplyLeading,
+  Function? onPressed,
+  }) {
+  final localAppTheme = ResponsiveTheme(context).theme;
+  return SafeArea(
+    top: true,
+    child: Stack(
+      children: [
+        Center(child: Image.asset('images/Legacy-Endurance-Logo.png', height: 70, width: 70, fit: BoxFit.contain)),
+        if (automaticallyImplyLeading)
+          Positioned(
+            left: 0,
+            top: 0,
+            bottom: 0,
+            child: iconButton(
+              label: null,
+              backgroundColor: null,
+              iconColor: localAppTheme['anchorColors']['primaryColor'],
+              icon: Icons.arrow_back,
+              size: 30,
+              toolTip: 'BACK',
+              context: context,
+              onPressed: () {
+                if (onPressed != null) {
+                  onPressed();
+                }
+              },
+            ),
+          ),
+      ],
+    ),
   );
 }

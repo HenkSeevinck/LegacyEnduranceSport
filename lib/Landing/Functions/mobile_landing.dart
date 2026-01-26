@@ -123,6 +123,7 @@ class _MobileLandingState extends State<MobileLanding> {
       sectionHeight * 0.55,
       sectionHeight * 0.55,
       sectionHeight * 0.55,
+      sectionHeight * 0.55,
       sectionHeight,
     ];
 
@@ -265,7 +266,8 @@ class _MobileLandingState extends State<MobileLanding> {
                 positionedSection(1, buildCard(1, 'Guided Workouts', 'Plans tailored to your goals and time.', Icons.directions_run)),
                 positionedSection(2, buildCard(2, 'Track Progress', 'Graphs and insights to keep you motivated.', Icons.show_chart)),
                 positionedSection(3, buildCard(3, 'Community', 'Connect with others and share your journey.', Icons.people)),
-                positionedSection(4, buildCTA(4)),
+                positionedSection(4, buildCard(4, 'Events', 'Join upcoming events and challenges.', Icons.event)),
+                positionedSection(5, buildCTA(5)),
               ],
             ),
           ),

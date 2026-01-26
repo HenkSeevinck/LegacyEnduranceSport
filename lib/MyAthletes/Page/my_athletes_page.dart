@@ -145,30 +145,16 @@ class _MyAthletesPageState extends State<MyAthletesPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: SafeArea(
-          top: true,
-          child: Stack(
-            children: [
-              Center(child: Image.asset('images/Legacy-Endurance-Logo.png', height: 70, width: 70, fit: BoxFit.contain)),
-              Positioned(
-                left: 0,
-                top: 0,
-                bottom: 0,
-                child: iconButton(
-                  label: null,
-                  backgroundColor: null,
-                  iconColor: localAppTheme['anchorColors']['primaryColor'],
-                  icon: Icons.arrow_back,
-                  size: 30,
-                  toolTip: 'BACK',
-                  context: context,
-                  onPressed: () {
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
-                  },
-                ),
+        title: appheader(
+          context: context, 
+          automaticallyImplyLeading: true, 
+          onPressed: () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => HomePage()
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
       body: Padding(
@@ -287,6 +273,7 @@ class _MyAthletesPageState extends State<MyAthletesPage> {
                                         MaterialPageRoute(
                                           builder: (context) => UserProfile(
                                             isCoachView: true,
+                                            formEditable: false,
                                           ),
                                         ),
                                       );
@@ -320,9 +307,12 @@ class _MyAthletesPageState extends State<MyAthletesPage> {
                                     size: 30, 
                                     toolTip: 'VIEW TRAINING PLAN', 
                                     onPressed: () {
+                                      internalStatusProvider.setUserUIDToShow(athlete['uid']);
                                       Navigator.of(context).push(
                                         MaterialPageRoute(
-                                          builder: (context) => StatisticsPage(),
+                                          builder: (context) => StatisticsPage(
+                                            isCoachView: true,
+                                          ),
                                         ),
                                       );
                                     },

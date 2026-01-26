@@ -5,12 +5,17 @@ import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:legacyendurancesport/General/Providers/clubs_provided.dart';
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
+import 'package:legacyendurancesport/MyAthletes/Page/my_athletes_page.dart';
 import 'package:provider/provider.dart';
 
 class UserProfile extends StatefulWidget {
   final bool isCoachView;
+  final bool formEditable;
 
-  const UserProfile({super.key, required this.isCoachView});
+  const UserProfile({super.key, 
+  required this.isCoachView,
+  required this.formEditable  
+  });
 
   @override
   State<UserProfile> createState() => _UserProfileState();
@@ -25,8 +30,9 @@ class _UserProfileState extends State<UserProfile> {
   bool showsearch = false;
   String? searchPrase;
   Future<void>? _fetchDataFuture;
-  bool formEditable = false;
+  //bool formEditable = false;
   Map<String, dynamic>? selectedClub;
+  late bool formEditable = widget.formEditable;
 
   //----------------------------------------------------
   // initState load data when form is built
@@ -58,19 +64,19 @@ class _UserProfileState extends State<UserProfile> {
         : disciplineOtherController.text = userProfileToShow['athleteDisciplines']['otherDiscipline'];
   }
 
-  //----------------------------------------------------
-  //Reset controllers
-  Future<void> _resetControllers(AppUserProvider appUserProvider) async {
-    // Refresh user data from deep store first, then read the provider value
-    await appUserProvider.refreshDeepStore();
-    final userProfileToShow = appUserProvider.userProfileToShow;
+  // //----------------------------------------------------
+  // //Reset controllers
+  // Future<void> _resetControllers(AppUserProvider appUserProvider) async {
+  //   // Refresh user data from deep store first, then read the provider value
+  //   await appUserProvider.refreshDeepStore();
+  //   final userProfileToShow = appUserProvider.userProfileToShow;
 
-    firstNameController.text = userProfileToShow['name'] ?? '';
-    lastNameController.text = userProfileToShow['surname'] ?? '';
-    emailController.text = userProfileToShow['email'] ?? '';
-    dateOfBirthController.text = userProfileToShow['dateOfBirth'] ?? '';
-    disciplineOtherController.text = userProfileToShow['athleteDisciplines']['otherDiscipline'] ?? '';
-  }
+  //   firstNameController.text = userProfileToShow['name'] ?? '';
+  //   lastNameController.text = userProfileToShow['surname'] ?? '';
+  //   emailController.text = userProfileToShow['email'] ?? '';
+  //   dateOfBirthController.text = userProfileToShow['dateOfBirth'] ?? '';
+  //   disciplineOtherController.text = userProfileToShow['athleteDisciplines']['otherDiscipline'] ?? '';
+  // }
 
   //----------------------------------------------------
   // Dispose controllers
@@ -173,39 +179,25 @@ class _UserProfileState extends State<UserProfile> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: SafeArea(
-          top: true,
-          child: Stack(
-            children: [
-              Center(child: Image.asset('images/Legacy-Endurance-Logo.png', height: 70, width: 70, fit: BoxFit.contain)),
-              Positioned(
-                left: 0,
-                top: 0,
-                bottom: 0,
-                child: iconButton(
-                  label: null,
-                  backgroundColor: null,
-                  iconColor: localAppTheme['anchorColors']['primaryColor'],
-                  icon: Icons.arrow_back,
-                  size: 30,
-                  toolTip: 'BACK',
-                  context: context,
-                  onPressed: () {
-                    if (widget.isCoachView) {
-                      Navigator.of(context).pop();
-                      return;
-                    } else {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => HomePage()
-                          ),
-                        );
-                    }
-                  },
-                ),
-              ),
-            ],
-          ),
+        title: appheader(
+          context: context,
+          automaticallyImplyLeading: true,
+          onPressed: () {
+            if (widget.isCoachView) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => MyAthletesPage()
+                  ),
+                );
+              return;
+            } else {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => HomePage()
+                  ),
+                );
+            }
+          },
         ),
       ),
       body: Padding(
@@ -464,23 +456,23 @@ class _UserProfileState extends State<UserProfile> {
                     visible: formEditable,
                     child: Row(
                       children: [
-                        Expanded(
-                          child: elevatedButton(
-                            label: 'CANCEL',
-                            onPressed: () async {
-                              await _resetControllers(appUserProvider);
-                              setState(() {
-                                formEditable = false;
-                              });
-                            },
-                            backgroundColor: localAppTheme['anchorColors']['primaryColor'],
-                            labelColor: localAppTheme['anchorColors']['secondaryColor'],
-                            leadingIcon: null,
-                            trailingIcon: null,
-                            context: context,
-                          ),
-                        ),
-                        SizedBox(width: 10.0),
+                        // Expanded(
+                        //   child: elevatedButton(
+                        //     label: 'CANCEL',
+                        //     onPressed: () async {
+                        //       await _resetControllers(appUserProvider);
+                        //       setState(() {
+                        //         formEditable = false;
+                        //       });
+                        //     },
+                        //     backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                        //     labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                        //     leadingIcon: null,
+                        //     trailingIcon: null,
+                        //     context: context,
+                        //   ),
+                        // ),
+                        // SizedBox(width: 10.0),
                         Expanded(
                           child: elevatedButton(
                             label: 'SAVE CHANGES',

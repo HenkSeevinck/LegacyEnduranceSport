@@ -4,10 +4,18 @@ import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
+import 'package:legacyendurancesport/MyAthletes/Page/my_athletes_page.dart';
+import 'package:legacyendurancesport/Statistics/Functions/Yearly_statistics.dart';
+import 'package:legacyendurancesport/Statistics/Functions/monthly_statistics.dart';
+import 'package:legacyendurancesport/Statistics/Functions/weekly_statistics.dart';
 import 'package:provider/provider.dart';
 
 class StatisticsPage extends StatefulWidget {
-  const StatisticsPage({super.key});
+   final bool isCoachView;
+  
+  const StatisticsPage({super.key,
+    required this.isCoachView,
+  });
 
   @override
   State<StatisticsPage> createState() => _StatisticsPageState();
@@ -15,57 +23,57 @@ class StatisticsPage extends StatefulWidget {
 
 class _StatisticsPageState extends State<StatisticsPage> {
   Future<void>? _fetchDataFuture;
+  late bool isCoachView = widget.isCoachView;
+  late String? athleteUID;
 
   //----------------------------------------------------
   // initState load data when form is built
   @override
   void initState() {
     super.initState();
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
+    final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
     //Add Providers you want to fetch data from here
-    _fetchDataFuture = _fetchData();
+    _fetchDataFuture = _fetchData(internalStatusProvider, appUserProvider);
   }
 
   //----------------------------------------------------
   // Fetch data function
-  Future<void> _fetchData() async {
-    //Add fetch functions from Providers you want to fetch data from here
+  Future<void> _fetchData(InternalStatusProvider internalStatusProvider, AppUserProvider appUserProvider) async {
+    if (isCoachView) {
+      athleteUID = internalStatusProvider.userUIDToShow;
+    } else {
+      final appUser = appUserProvider.appUser;
+      athleteUID = appUser['uid'];
+    }
   }
 
   //----------------------------------------------------
   // Mobile Layout
   Widget _buildMobileStatisticsPage() {
     final localAppTheme = ResponsiveTheme(context).theme;
-    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
-    final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
-    final appUser = appUserProvider.appUser;
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: SafeArea(
-          top: true,
-          child: Stack(
-            children: [
-              Center(child: Image.asset('images/Legacy-Endurance-Logo.png', height: 70, width: 70, fit: BoxFit.contain)),
-              Positioned(
-                left: 0,
-                top: 0,
-                bottom: 0,
-                child: iconButton(
-                  label: null,
-                  backgroundColor: null,
-                  iconColor: localAppTheme['anchorColors']['primaryColor'],
-                  icon: Icons.arrow_back,
-                  size: 30,
-                  toolTip: 'BACK',
-                  context: context,
-                  onPressed: () {
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
-                  },
+        title: appheader(
+          context: context,
+          automaticallyImplyLeading: true,
+          onPressed: () {
+            if (isCoachView) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => MyAthletesPage(),
                 ),
-              ),
-            ],
-          ),
+              );
+            } else {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => HomePage()
+                ),
+              );
+            }
+          },
         ),
       ),
       body: Padding(
@@ -79,7 +87,45 @@ class _StatisticsPageState extends State<StatisticsPage> {
               border: Border.all(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
               borderRadius: BorderRadius.circular(8.0),
             ),
-            child: SizedBox(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                header1(header: 'Statistics:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                const SizedBox(height: 10),
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0
+                        ),
+                      ),
+                    ),
+                    child: WeeklyStatistics(athleteUID: athleteUID!),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0
+                        ),
+                      ),
+                    ),
+                    child: MonthlyStatistics(athleteUID: athleteUID!),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: SizedBox(
+                    child: YearlyStatistics(athleteUID: athleteUID!),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

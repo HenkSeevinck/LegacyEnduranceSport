@@ -155,7 +155,6 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
                 )
               );
         } else if (snapshot.hasError) {
-          print('snapshot error: ${snapshot.error}');
           return Center(
             child: body(header: 'Error: ${snapshot.error}', color: localAppTheme['anchorColors']['primaryColor'], context: context),
           );

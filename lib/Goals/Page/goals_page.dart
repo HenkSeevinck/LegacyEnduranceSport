@@ -7,6 +7,7 @@ import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Goals/Functions/add_goal_popup.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
+import 'package:legacyendurancesport/MyAthletes/Page/my_athletes_page.dart';
 import 'package:provider/provider.dart';
 
 class GoalsPage extends StatefulWidget {
@@ -125,40 +126,26 @@ class _GoalsPageState extends State<GoalsPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: SafeArea(
-          top: true,
-          child: Stack(
-            children: [
-              Center(child: Image.asset('images/Legacy-Endurance-Logo.png', height: 70, width: 70, fit: BoxFit.contain)),
-              Positioned(
-                left: 0,
-                top: 0,
-                bottom: 0,
-                child: iconButton(
-                  label: null,
-                  backgroundColor: null,
-                  iconColor: localAppTheme['anchorColors']['primaryColor'],
-                  icon: Icons.arrow_back,
-                  size: 30,
-                  toolTip: 'BACK',
-                  context: context,
-                  onPressed: () {
-                    if (widget.isCoachView) {
-                      Navigator.of(context).pop();
-                      return;
-                    } else {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => HomePage()
-                        ),
-                      );
-                    }
-                  },
+        title: appheader(
+          context: context, 
+          automaticallyImplyLeading: true,
+          onPressed: () {
+            if (widget.isCoachView) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => MyAthletesPage()
                 ),
-              ),
-            ],
-          ),
-        ),
+              );
+              return;
+            } else {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => HomePage()
+                ),
+              );
+            }
+          },
+        )
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
