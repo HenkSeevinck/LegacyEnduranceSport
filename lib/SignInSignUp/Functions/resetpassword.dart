@@ -67,7 +67,6 @@ class _ResetPasswordState extends State<ResetPassword> {
                       if (!mounted) return;
                       // You might want to parse 'e' to show a user-friendly message
                       snackbar(context: context, header: 'Reset failed. Please try again.');
-                      print(e);
                     }
                   },
                   backgroundColor: localAppTheme['anchorColors']['primaryColor'],

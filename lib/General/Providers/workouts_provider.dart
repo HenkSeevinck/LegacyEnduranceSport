@@ -223,7 +223,6 @@ class WorkoutsProvider with ChangeNotifier {
       _statisticsBetweenDates = querySnapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
         data['loadedWorkoutUID'] = doc.id; // Add the document ID
-        print(_statisticsBetweenDates);
         return data;
       }).toList();
       notifyListeners();

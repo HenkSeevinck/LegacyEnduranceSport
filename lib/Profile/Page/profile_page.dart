@@ -530,7 +530,6 @@ class _UserProfileState extends State<UserProfile> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          print('snapshot error: ${snapshot.error}');
           return Center(
             child: body(header: 'Error: ${snapshot.error}', color: localAppTheme['anchorColors']['primaryColor'], context: context),
           );
