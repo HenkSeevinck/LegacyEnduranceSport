@@ -377,16 +377,16 @@ Widget textButton({
 //------------------------------------------------------------------------
 //Snackbar Widget
 ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackbar({required BuildContext context, required String header}) {
-  final localAppTheme = Theme.of(context);
+  final localAppTheme = ResponsiveTheme(context).theme;
   return ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Center(
-        child: Text(
-          header,
-          style: TextStyle(color: localAppTheme.colorScheme.onPrimary, fontSize: 24, fontWeight: FontWeight.bold),
+        child: header2(
+          header: header, 
+          context: context, 
+          color: localAppTheme['anchorColors']['primaryColor'])
         ),
-      ),
-      backgroundColor: localAppTheme.colorScheme.primary,
+      backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
     ),
   );
 }

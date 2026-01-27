@@ -342,4 +342,15 @@ class AppUserProvider with ChangeNotifier {
     }).toList();
     notifyListeners();
   }
+
+  //--------------------------------------------------------------
+  // Reset user Password
+  Future<void> resetUserPassword(String email) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      Exception('Error sending password reset email: $e');
+      rethrow;
+    }
+  }
 }

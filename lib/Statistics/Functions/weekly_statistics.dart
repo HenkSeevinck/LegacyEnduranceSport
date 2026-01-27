@@ -8,8 +8,9 @@ import 'package:legacyendurancesport/Statistics/Functions/statistics_window.dart
 // ignore: must_be_immutable
 class WeeklyStatistics extends StatefulWidget {
   String athleteUID;
+  int workoutTypeID;
   
-  WeeklyStatistics({super.key, required this.athleteUID});
+  WeeklyStatistics({super.key, required this.athleteUID, required this.workoutTypeID});
 
   @override
   State<WeeklyStatistics> createState() => _WeeklyStatisticsState();
@@ -18,6 +19,7 @@ class WeeklyStatistics extends StatefulWidget {
 class _WeeklyStatisticsState extends State<WeeklyStatistics> {
   late DateTime _weekStart;
   late String athleteUID = widget.athleteUID;
+  late int workoutTypeID = widget.workoutTypeID;
 
   //----------------------------------------------------
   // initState
@@ -26,6 +28,19 @@ class _WeeklyStatisticsState extends State<WeeklyStatistics> {
     super.initState();
     final now = DateTime.now();
     _weekStart = _startOfWeek(now);
+  }
+
+  //----------------------------------------------------
+  // Update when widget parameters change
+  @override
+  void didUpdateWidget(covariant WeeklyStatistics oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.athleteUID != widget.athleteUID || oldWidget.workoutTypeID != widget.workoutTypeID) {
+      setState(() {
+        athleteUID = widget.athleteUID;
+        workoutTypeID = widget.workoutTypeID;
+      });
+    }
   }
 
   //----------------------------------------------------
@@ -77,6 +92,7 @@ class _WeeklyStatisticsState extends State<WeeklyStatistics> {
           startDate: weekDays.first,
           endDate: weekDays.last,
           athleteUID: athleteUID,
+          workoutTypeID: workoutTypeID,
         ),
       ],
     );

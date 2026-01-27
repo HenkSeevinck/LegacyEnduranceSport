@@ -8,7 +8,9 @@ import 'package:legacyendurancesport/Statistics/Functions/statistics_window.dart
 // ignore: must_be_immutable
 class YearlyStatistics extends StatefulWidget {
   String athleteUID;
-  YearlyStatistics({super.key, required this.athleteUID});
+  int workoutTypeID;
+
+  YearlyStatistics({super.key, required this.athleteUID, required this.workoutTypeID});
   
   @override
   State<YearlyStatistics> createState() => _YearlyStatisticsState();
@@ -17,6 +19,7 @@ class YearlyStatistics extends StatefulWidget {
 class _YearlyStatisticsState extends State<YearlyStatistics> {
   late DateTime _yearStart;
   late String athleteUID = widget.athleteUID;
+  late int workoutTypeID = widget.workoutTypeID;
 
   //----------------------------------------------------
   // initState
@@ -25,6 +28,19 @@ class _YearlyStatisticsState extends State<YearlyStatistics> {
     super.initState();
     final now = DateTime.now();
     _yearStart = _startOfYear(now);
+  }
+
+  //----------------------------------------------------
+  // Update when widget parameters change
+  @override
+  void didUpdateWidget(covariant YearlyStatistics oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.athleteUID != widget.athleteUID || oldWidget.workoutTypeID != widget.workoutTypeID) {
+      setState(() {
+        athleteUID = widget.athleteUID;
+        workoutTypeID = widget.workoutTypeID;
+      });
+    }
   }
 
   //----------------------------------------------------
@@ -73,6 +89,7 @@ class _YearlyStatisticsState extends State<YearlyStatistics> {
           startDate: _yearStart, 
           endDate: DateTime(_yearStart.year + 1, 1, 0), 
           athleteUID: athleteUID,
+          workoutTypeID: workoutTypeID,
         )
       ],
     );

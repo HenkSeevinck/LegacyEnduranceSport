@@ -10,6 +10,9 @@ class WorkoutsProvider with ChangeNotifier {
   List<Map<String, dynamic>> _workoutsBetweenDates = [];
   List<Map<String, dynamic>> get workoutsBetweenDates => _workoutsBetweenDates;
 
+  List<Map<String, dynamic>> _statisticsBetweenDates = [];
+  List<Map<String, dynamic>> get statisticsBetweenDates => _statisticsBetweenDates;
+
   List<Map<String, dynamic>> _todaysWorkouts = [];
   List<Map<String, dynamic>> get todaysWorkouts => _todaysWorkouts;
   
@@ -197,6 +200,35 @@ class WorkoutsProvider with ChangeNotifier {
       return null;
     } catch (e) {
       Exception('Error fetching workout by ID: $e');
+      rethrow;
+    }
+  }
+
+  //--------------------------------------------------------------
+  // Method to get loaded workouts for a specific athlete between dates
+  Future<void> fetchLoadedWorkoutsBetweenDatesForStatistics(String athleteUID, DateTime startDate, DateTime endDate, int workoutType) async {
+    final startTs = Timestamp.fromDate(startDate);
+    final endTs = Timestamp.fromDate(endDate.add(const Duration(days: 1)));
+
+    try {
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('LoadedWorkouts')
+          .where('athleteUID', isEqualTo: athleteUID)
+          .where('workoutDate', isGreaterThanOrEqualTo: startTs)
+          .where('workoutDate', isLessThan: endTs)
+          .where('completedworkoutData', isNotEqualTo: null)
+          .where('completedworkoutData.type', isEqualTo: workoutType)
+          .get();
+
+      _statisticsBetweenDates = querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['loadedWorkoutUID'] = doc.id; // Add the document ID
+        print(_statisticsBetweenDates);
+        return data;
+      }).toList();
+      notifyListeners();
+    } catch (e) {
+      Exception('Error fetching workouts for statistics: $e');
       rethrow;
     }
   }

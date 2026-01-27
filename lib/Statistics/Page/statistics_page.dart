@@ -25,6 +25,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
   Future<void>? _fetchDataFuture;
   late bool isCoachView = widget.isCoachView;
   late String? athleteUID;
+  int _currentWorkoutTypeIndex = 0;
 
   //----------------------------------------------------
   // initState load data when form is built
@@ -49,9 +50,30 @@ class _StatisticsPageState extends State<StatisticsPage> {
   }
 
   //----------------------------------------------------
+  // Navigate to previous workout type
+  void _prevWorkoutType() {
+    setState(() {
+      _currentWorkoutTypeIndex = (_currentWorkoutTypeIndex - 1).clamp(0, _currentWorkoutTypeIndex);
+    });
+  }
+
+  //----------------------------------------------------
+  // Navigate to next workout type
+  void _nextWorkoutType() {
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
+    final workoutTypes = internalStatusProvider.workoutTypes;
+    final maxIndex = workoutTypes.length - 1;
+    setState(() {
+      _currentWorkoutTypeIndex = (_currentWorkoutTypeIndex + 1).clamp(0, maxIndex);
+    });
+  }
+
+  //----------------------------------------------------
   // Mobile Layout
   Widget _buildMobileStatisticsPage() {
     final localAppTheme = ResponsiveTheme(context).theme;
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
+    final workoutTypes = internalStatusProvider.workoutTypes;
 
     return Scaffold(
       appBar: AppBar(
@@ -91,7 +113,17 @@ class _StatisticsPageState extends State<StatisticsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 header1(header: 'Statistics:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    IconButton(onPressed: _prevWorkoutType, icon: const Icon(Icons.chevron_left)),
+                    Expanded(
+                      child: Center(
+                        child: body(header: workoutTypes[_currentWorkoutTypeIndex]['workoutType'], color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                      ),
+                    ),
+                    IconButton(onPressed: _nextWorkoutType, icon: const Icon(Icons.chevron_right)),
+                  ],
+                ),
                 Expanded(
                   flex: 1,
                   child: Container(
@@ -102,7 +134,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                         ),
                       ),
                     ),
-                    child: WeeklyStatistics(athleteUID: athleteUID!),
+                    child: WeeklyStatistics(athleteUID: athleteUID!, workoutTypeID: workoutTypes[_currentWorkoutTypeIndex]['workoutTypeID']),
                   ),
                 ),
                 Expanded(
@@ -115,13 +147,13 @@ class _StatisticsPageState extends State<StatisticsPage> {
                         ),
                       ),
                     ),
-                    child: MonthlyStatistics(athleteUID: athleteUID!),
+                    child: MonthlyStatistics(athleteUID: athleteUID!, workoutTypeID: workoutTypes[_currentWorkoutTypeIndex]['workoutTypeID']),
                   ),
                 ),
                 Expanded(
                   flex: 1,
                   child: SizedBox(
-                    child: YearlyStatistics(athleteUID: athleteUID!),
+                    child: YearlyStatistics(athleteUID: athleteUID!, workoutTypeID: workoutTypes[_currentWorkoutTypeIndex]['workoutTypeID']),
                   ),
                 ),
               ],

@@ -57,7 +57,8 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
     final imageVerificationProvider = Provider.of<ImageVerificationProvider>(context, listen: false);
     final workoutResult = imageVerificationProvider.workoutResult;
 
-    completedworkoutData = workoutResult;
+    // Update only the fields from image verification, preserve existing fields like 'type'
+    completedworkoutData.addAll(workoutResult);
 
     durationController.text = completedworkoutData['duration'] ?? '';
     distanceController.text = completedworkoutData['distance'] ?? '';
@@ -108,9 +109,8 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
     final imageVerificationProvider = Provider.of<ImageVerificationProvider>(context, listen: true);
     final workoutResult = imageVerificationProvider.workoutResult;
     final workoutTypes = internalStatusProvider.workoutTypes;
-    // final workoutData = widget.workoutData;
     final workoutStatus = widget.workoutStatus;
-    // final completedworkoutData = workoutData!['completedworkoutData'];
+    //final completedworkoutData = workoutData!['completedworkoutData'];
 
     if (workoutResult.isNotEmpty) {
       _resetTextControllers();

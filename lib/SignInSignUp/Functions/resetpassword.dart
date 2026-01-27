@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
+import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/SignInSignUp/Functions/validators.dart';
@@ -30,6 +31,7 @@ class _ResetPasswordState extends State<ResetPassword> {
   Widget build(BuildContext context) {
     final localAppTheme = ResponsiveTheme(context).theme;
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
+    final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
 
     return Center(
       child: SizedBox(
@@ -48,6 +50,25 @@ class _ResetPasswordState extends State<ResetPassword> {
                 child: elevatedButton(
                   label: 'RESET PASSWORD',
                   onPressed: () async {
+                    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+                    final email = emailController.text.trim();
+                    
+                    try {
+                      await appUserProvider.resetUserPassword(email);
+                      
+                      // Check if the user hasn't closed the screen during the 'await'
+                      if (!mounted) return; 
+
+                      snackbar(context: context, header: 'Check your inbox for a reset link.\nCheck your spam folder if you don\'t see it.');
+                      internalStatusProvider.setSignInSignUpStatus('SignIn');
+                      
+                    } catch (e) {
+                      if (!mounted) return;
+                      // You might want to parse 'e' to show a user-friendly message
+                      snackbar(context: context, header: 'Reset failed. Please try again.');
+                      print(e);
+                    }
                   },
                   backgroundColor: localAppTheme['anchorColors']['primaryColor'],
                   labelColor: localAppTheme['anchorColors']['secondaryColor'],
