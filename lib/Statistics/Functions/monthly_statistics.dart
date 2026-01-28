@@ -69,29 +69,32 @@ class _MonthlyStatisticsState extends State<MonthlyStatistics> {
   Widget build(BuildContext context) {
     final localAppTheme = ResponsiveTheme(context).theme;
     final monthLabel = DateFormat.yMMM().format(_monthStart);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        header2(header: 'Monthly Statistics:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-        Row(
-          children: [
-            IconButton(onPressed: _prevMonth, icon: const Icon(Icons.chevron_left)),
-            Expanded(
-              child: Center(
-                child: body(header: monthLabel, color: localAppTheme['anchorColors']['primaryColor'], context: context),
+    return Container(
+      padding: EdgeInsets.only(top: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          header2(header: 'Monthly Statistics:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+          Row(
+            children: [
+              IconButton(onPressed: _prevMonth, icon: const Icon(Icons.chevron_left)),
+              Expanded(
+                child: Center(
+                  child: body(header: monthLabel, color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                ),
               ),
-            ),
-            IconButton(onPressed: _nextMonth, icon: const Icon(Icons.chevron_right)),
-          ],
-        ),
-        SizedBox(height: 10),
-        StatisticsWindow(
-          startDate: _monthStart, 
-          endDate: DateTime(_monthStart.year, _monthStart.month + 1, 0), 
-          athleteUID: athleteUID,
-          workoutTypeID: workoutTypeID,
-        )
-      ],
+              IconButton(onPressed: _nextMonth, icon: const Icon(Icons.chevron_right)),
+            ],
+          ),
+          SizedBox(height: 10),
+          StatisticsWindow(
+            startDate: _monthStart, 
+            endDate: DateTime(_monthStart.year, _monthStart.month + 1, 0), 
+            athleteUID: athleteUID,
+            workoutTypeID: workoutTypeID,
+          )
+        ],
+      ),
     );
   }
 }

@@ -69,29 +69,32 @@ class _YearlyStatisticsState extends State<YearlyStatistics> {
   Widget build(BuildContext context) {
     final localAppTheme = ResponsiveTheme(context).theme;
     final yearLabel = DateFormat.y().format(_yearStart);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        header2(header: 'Yearly Statistics:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-        Row(
-          children: [
-            IconButton(onPressed: _prevYear, icon: const Icon(Icons.chevron_left)),
-            Expanded(
-              child: Center(
-                child: body(header: yearLabel, color: localAppTheme['anchorColors']['primaryColor'], context: context),
+    return Container(
+      padding: EdgeInsets.only(top: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          header2(header: 'Yearly Statistics:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+          Row(
+            children: [
+              IconButton(onPressed: _prevYear, icon: const Icon(Icons.chevron_left)),
+              Expanded(
+                child: Center(
+                  child: body(header: yearLabel, color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                ),
               ),
-            ),
-            IconButton(onPressed: _nextYear, icon: const Icon(Icons.chevron_right)),
-          ],
-        ),
-        SizedBox(height: 10),
-        StatisticsWindow(
-          startDate: _yearStart, 
-          endDate: DateTime(_yearStart.year + 1, 1, 0), 
-          athleteUID: athleteUID,
-          workoutTypeID: workoutTypeID,
-        )
-      ],
+              IconButton(onPressed: _nextYear, icon: const Icon(Icons.chevron_right)),
+            ],
+          ),
+          SizedBox(height: 10),
+          StatisticsWindow(
+            startDate: _yearStart, 
+            endDate: DateTime(_yearStart.year + 1, 1, 0), 
+            athleteUID: athleteUID,
+            workoutTypeID: workoutTypeID,
+          )
+        ],
+      ),
     );
   }
 }

@@ -113,47 +113,51 @@ class _StatisticsPageState extends State<StatisticsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 header1(header: 'Statistics:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                Row(
-                  children: [
-                    IconButton(onPressed: _prevWorkoutType, icon: const Icon(Icons.chevron_left)),
-                    Expanded(
-                      child: Center(
-                        child: body(header: workoutTypes[_currentWorkoutTypeIndex]['workoutType'], color: localAppTheme['anchorColors']['primaryColor'], context: context),
-                      ),
+                SizedBox(height: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      top: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0),
+                      bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0),
                     ),
-                    IconButton(onPressed: _nextWorkoutType, icon: const Icon(Icons.chevron_right)),
-                  ],
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0
+                  ),
+                  child: Row(
+                    children: [
+                      IconButton(onPressed: _prevWorkoutType, icon: const Icon(Icons.chevron_left)),
+                      Expanded(
+                        child: Center(
+                          child: body(
+                            header: workoutTypes[_currentWorkoutTypeIndex]['workoutType'],
+                            color: localAppTheme['anchorColors']['primaryColor'],
+                            context: context,
+                          ),
                         ),
                       ),
-                    ),
-                    child: WeeklyStatistics(athleteUID: athleteUID!, workoutTypeID: workoutTypes[_currentWorkoutTypeIndex]['workoutTypeID']),
+                      IconButton(onPressed: _nextWorkoutType, icon: const Icon(Icons.chevron_right)),
+                    ],
                   ),
                 ),
                 Expanded(
-                  flex: 1,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0)),
+                          ),
+                          child: WeeklyStatistics(athleteUID: athleteUID!, workoutTypeID: workoutTypes[_currentWorkoutTypeIndex]['workoutTypeID']),
                         ),
-                      ),
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0)),
+                          ),
+                          child: MonthlyStatistics(athleteUID: athleteUID!, workoutTypeID: workoutTypes[_currentWorkoutTypeIndex]['workoutTypeID']),
+                        ),
+                        SizedBox(
+                          child: YearlyStatistics(athleteUID: athleteUID!, workoutTypeID: workoutTypes[_currentWorkoutTypeIndex]['workoutTypeID']),
+                        ),
+                      ],
                     ),
-                    child: MonthlyStatistics(athleteUID: athleteUID!, workoutTypeID: workoutTypes[_currentWorkoutTypeIndex]['workoutTypeID']),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: SizedBox(
-                    child: YearlyStatistics(athleteUID: athleteUID!, workoutTypeID: workoutTypes[_currentWorkoutTypeIndex]['workoutTypeID']),
                   ),
                 ),
               ],

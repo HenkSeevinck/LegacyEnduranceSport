@@ -19,6 +19,8 @@ class StatisticsWindow extends StatefulWidget {
 
 class _StatisticsWindowState extends State<StatisticsWindow> {
   Future<void>? _fetchDataFuture;
+  late final ScrollController _horizontalController;
+  bool _hasScrolledToToday = false;
 
   //----------------------------------------------------
   // initState load data when form is built
@@ -27,6 +29,13 @@ class _StatisticsWindowState extends State<StatisticsWindow> {
     super.initState();
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
     _fetchDataFuture = _fetchData(workoutsProvider);
+    _horizontalController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _horizontalController.dispose();
+    super.dispose();
   }
 
   //----------------------------------------------------
@@ -121,9 +130,9 @@ class _StatisticsWindowState extends State<StatisticsWindow> {
     }
 
     return Padding(
-      padding: EdgeInsetsGeometry.only(top: 5, bottom: 5),
+      padding: EdgeInsetsGeometry.only(top: 70, bottom: 20),
       child: SizedBox(
-        height: MediaQuery.of(context).size.height * 0.165,
+        height: MediaQuery.of(context).size.height * 0.2,
         width: days.length * 25 < MediaQuery.of(context).size.width 
         ? MediaQuery.of(context).size.width * 0.85
         : days.isNotEmpty ? days.length * 25 : MediaQuery.of(context).size.width,
@@ -204,30 +213,55 @@ class _StatisticsWindowState extends State<StatisticsWindow> {
           final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: true);
           final statisticsBetweenDates = workoutsProvider.statisticsBetweenDates;
 
+          // Compute days/count and chart sizing to determine scroll target for today
+          final start = DateTime(widget.startDate.year, widget.startDate.month, widget.startDate.day);
+          final end = DateTime(widget.endDate.year, widget.endDate.month, widget.endDate.day);
+          final daysCount = end.isBefore(start) ? 0 : end.difference(start).inDays + 1;
+          final screenWidth = MediaQuery.of(context).size.width;
+          final chartWidth = (daysCount * 25) < screenWidth ? screenWidth * 0.85 : (daysCount * 25).toDouble();
+          final perDay = daysCount > 0 ? chartWidth / daysCount : 25.0;
+
+          // Schedule one-time scroll to today's index (centered) after first layout
+          if (!_hasScrolledToToday) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!_horizontalController.hasClients) return;
+              final today = DateTime.now();
+              int targetIndex = 0;
+              if (daysCount > 0) {
+                final clippedToday = DateTime(today.year, today.month, today.day);
+                if (clippedToday.isBefore(start)) {
+                  targetIndex = 0;
+                } else if (clippedToday.isAfter(end)) {
+                  targetIndex = daysCount - 1;
+                } else {
+                  targetIndex = clippedToday.difference(start).inDays;
+                }
+              }
+
+              // Desired scroll to center the day's column
+              final desired = (targetIndex * perDay) - (screenWidth / 2) + (perDay / 2);
+              final maxScroll = _horizontalController.position.maxScrollExtent;
+              final offset = desired.clamp(0.0, maxScroll);
+              if (offset > 0) {
+                _horizontalController.animateTo(offset, duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
+              }
+              _hasScrolledToToday = true;
+            });
+          }
+
           return SingleChildScrollView(
+            controller: _horizontalController,
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
+                _lineGraph(statisticsBetweenDates),
                 // SizedBox(
                 //   width: MediaQuery.of(context).size.width * 1,
                 //   child: Column(
                 //     crossAxisAlignment: CrossAxisAlignment.start,
-                //     children: [
-                //       header3(header: widget.startDate.toString(), context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                //       header3(header: widget.endDate.toString(), context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                //       header3(header: widget.athleteUID, context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                //       header3(header: widget.workoutTypeID.toString(), context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                //     ],
+                //     children: [body(header: 'Table', color: localAppTheme['anchorColors']['primaryColor'], context: context)],
                 //   ),
                 // ),
-                _lineGraph(statisticsBetweenDates),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 1,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [body(header: 'Table', color: localAppTheme['anchorColors']['primaryColor'], context: context)],
-                  ),
-                ),
               ],
             ),
           );

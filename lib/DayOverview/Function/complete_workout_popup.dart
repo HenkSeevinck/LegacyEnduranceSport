@@ -29,6 +29,7 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
   bool _pickerOpen = false;
   bool isVerifyingImage = false;
   Map<String, dynamic> completedworkoutData = {};
+  bool _appliedWorkoutResult = false;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   //--------------------------------------------------------------
@@ -69,8 +70,6 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
   Future<void> _completeWorkout() async {
     final loadedWorkout = widget.loadedWorkout;
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
-    //final workoutData = widget.workoutData;
-    //final completedworkoutData = workoutData!['completedworkoutData'];
 
     loadedWorkout!['completedworkoutData'] = completedworkoutData;
     try {
@@ -88,8 +87,6 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
   Future<void> _createNewWorkout() async {
     final loadedWorkout = widget.loadedWorkout;
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
-    //final workoutData = widget.workoutData;
-    //final completedworkoutData = workoutData!['completedworkoutData'];
 
     loadedWorkout!['completedworkoutData'] = completedworkoutData;
     try {
@@ -110,13 +107,15 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
     final workoutResult = imageVerificationProvider.workoutResult;
     final workoutTypes = internalStatusProvider.workoutTypes;
     final workoutStatus = widget.workoutStatus;
-    //final completedworkoutData = workoutData!['completedworkoutData'];
 
-    if (workoutResult.isNotEmpty) {
+    if (workoutResult.isNotEmpty && !_appliedWorkoutResult) {
       _resetTextControllers();
-      setState(() {
-        isVerifyingImage = false;
-      });
+      _appliedWorkoutResult = true;
+      if (mounted) {
+        setState(() {
+          isVerifyingImage = false;
+        });
+      }
     }
 
     return isVerifyingImage
@@ -199,34 +198,37 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
                   },
                 ),
                 SizedBox(height: 10),
-                FormInputField(
-                  label: 'Distance:',
-                  errorMessage: 'Please enter distance',
-                  isMultiline: false,
-                  isPassword: false,
-                  prefixIcon: null,
-                  suffixIcon: null,
-                  showLabel: true,
-                  enabled: inputData,
-                  onChanged: (value) {
-                    completedworkoutData['distance'] = value;
-                  },
-                  controller: distanceController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter distance';
-                    }
-                    if (double.tryParse(value) == null) {
-                      return 'Please enter a valid number';
-                    }
-                    if (!RegExp(r'^\d+\.\d{2}$').hasMatch(value)) {
-                      return 'Please use format 0.00';
-                    }
-                    if (double.parse(value) == 0.0) {
-                      return 'Distance cannot be 0.00';
-                    }
-                    return null;
-                  },
+                Visibility(
+                  visible: completedworkoutData['type'] != 4,
+                  child: FormInputField(
+                    label: 'Distance:',
+                    errorMessage: 'Please enter distance',
+                    isMultiline: false,
+                    isPassword: false,
+                    prefixIcon: null,
+                    suffixIcon: null,
+                    showLabel: true,
+                    enabled: inputData,
+                    onChanged: (value) {
+                      completedworkoutData['distance'] = value;
+                    },
+                    controller: distanceController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter distance';
+                      }
+                      if (double.tryParse(value) == null) {
+                        return 'Please enter a valid number';
+                      }
+                      if (!RegExp(r'^\d+\.\d{2}$').hasMatch(value)) {
+                        return 'Please use format 0.00';
+                      }
+                      if (double.parse(value) == 0.0) {
+                        return 'Distance cannot be 0.00';
+                      }
+                      return null;
+                    },
+                  ),
                 ),
                 SizedBox(height: 10),
                 Visibility(
@@ -395,6 +397,7 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
                 onPressed: () {
                   setState(() {
                     uploadType = 'manual';
+                    _appliedWorkoutResult = false;
                   });
                 },
               ),
@@ -409,6 +412,7 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
                 onPressed: () {
                   setState(() {
                     uploadType = 'camera';
+                    _appliedWorkoutResult = false;
                   });
                   _openCameraAndStore();
                 },
@@ -424,6 +428,7 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
                 onPressed: () {
                   setState(() {
                     uploadType = 'filePicker';
+                    _appliedWorkoutResult = false;
                   });
                   _openFilePickerAndStore();
                 },

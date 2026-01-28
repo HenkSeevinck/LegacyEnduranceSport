@@ -72,29 +72,32 @@ class _WeeklyStatisticsState extends State<WeeklyStatistics> {
     final localAppTheme = ResponsiveTheme(context).theme;
     final weekDays = List<DateTime>.generate(7, (i) => _weekStart.add(Duration(days: i)));
     final weekLabel = '${DateFormat.yMMMd().format(weekDays.first)} - ${DateFormat.yMMMd().format(weekDays.last)}';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        header2(header: 'Weekly Statistics:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-        Row(
-          children: [
-            IconButton(onPressed: _prevWeek, icon: const Icon(Icons.chevron_left)),
-            Expanded(
-              child: Center(
-                child: body(header: weekLabel, color: localAppTheme['anchorColors']['primaryColor'], context: context),
+    return Container(
+      padding: EdgeInsets.only(top: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          header2(header: 'Weekly Statistics:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+          Row(
+            children: [
+              IconButton(onPressed: _prevWeek, icon: const Icon(Icons.chevron_left)),
+              Expanded(
+                child: Center(
+                  child: body(header: weekLabel, color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                ),
               ),
-            ),
-            IconButton(onPressed: _nextWeek, icon: const Icon(Icons.chevron_right)),
-          ],
-        ),
-        SizedBox(height: 10),
-        StatisticsWindow(
-          startDate: weekDays.first,
-          endDate: weekDays.last,
-          athleteUID: athleteUID,
-          workoutTypeID: workoutTypeID,
-        ),
-      ],
+              IconButton(onPressed: _nextWeek, icon: const Icon(Icons.chevron_right)),
+            ],
+          ),
+          SizedBox(height: 10),
+          StatisticsWindow(
+            startDate: weekDays.first,
+            endDate: weekDays.last,
+            athleteUID: athleteUID,
+            workoutTypeID: workoutTypeID,
+          ),
+        ],
+      ),
     );
   }
 }

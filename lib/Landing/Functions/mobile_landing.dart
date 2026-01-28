@@ -77,10 +77,10 @@ class _MobileLandingState extends State<MobileLanding> {
     Widget buildHero() {
       final localAppTheme = ResponsiveTheme(context).theme;
       final double clampedOffset = _clampDouble(_scrollOffset, 0.0, sectionHeight);
-      final double logoTranslate = -(clampedOffset) * 0.75 - 150;
+      final double logoTranslate = -(clampedOffset) * 0.75 - 75; // move up to 75 pixels above center
       double t = 1 - (_scrollOffset / 500);
       final double titleOpacity = _clampDouble(t, 0.0, 1.0);
-      double s = 1 - (_scrollOffset / 540);
+      double s = 1 - (_scrollOffset / 650);
       double logoSize = size.width * 0.8 * s * s * s * s;
 
       return SizedBox(
@@ -99,7 +99,7 @@ class _MobileLandingState extends State<MobileLanding> {
               ),
             ),
             Positioned(
-              bottom: 200,
+              bottom: MediaQuery.of(context).size.height * 0.10,
               child: Opacity(
                 opacity: titleOpacity,
                 child: Column(
@@ -212,7 +212,7 @@ class _MobileLandingState extends State<MobileLanding> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Ready to start?', style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+              header2(header: 'Ready to start?', context: context, color: localAppTheme['anchorColors']['primaryColor']),
               const SizedBox(height: 12),
               SizedBox(
                 height: 50,

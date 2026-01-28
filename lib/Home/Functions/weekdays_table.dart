@@ -210,6 +210,11 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
                             final workoutDate = workout['workoutDate']?.toDate();
                             return workoutDate != null && workout['workout'] != null && _isSameDay(workoutDate, d);
                           });
+
+                          bool hasCompletedSchedulledWorkout = workoutsBetweenDates.any((workout) {
+                            final workoutDate = workout['workoutDate']?.toDate();
+                            return workoutDate != null && workout['workout'] != null && workout['completedworkoutData'] != null && _isSameDay(workoutDate, d);
+                          });
             
                           bool hasUnSchedulledWorkout = workoutsBetweenDates.any((workout) {
                             final workoutDate = workout['workoutDate']?.toDate();
@@ -275,7 +280,7 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
                                                 ),
                                               ),
                                               Visibility(
-                                                visible: hasSchedulledWorkout,
+                                                visible: hasSchedulledWorkout && !hasCompletedSchedulledWorkout,
                                                 child: Container(
                                                   margin: EdgeInsets.only(top: 1, bottom: 1),
                                                   padding: EdgeInsets.all(1),
@@ -288,6 +293,23 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
                                                     Icons.fitness_center, 
                                                     size: 15, 
                                                     color: localAppTheme['utilityColorPair3']['color2'],
+                                                  ),
+                                                ),
+                                              ),
+                                              Visibility(
+                                                visible: hasCompletedSchedulledWorkout,
+                                                child: Container(
+                                                  margin: EdgeInsets.only(top: 1, bottom: 1),
+                                                  padding: EdgeInsets.all(1),
+                                                  width: double.infinity,
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(4),
+                                                    color: localAppTheme['utilityColorPair1']['color1'],
+                                                  ),
+                                                  child: Icon(
+                                                    Icons.fitness_center, 
+                                                    size: 15, 
+                                                    color: localAppTheme['utilityColorPair1']['color2'],
                                                   ),
                                                 ),
                                               ),
