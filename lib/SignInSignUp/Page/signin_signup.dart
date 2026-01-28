@@ -45,7 +45,7 @@ class _SigninPageState extends State<SigninPage> {
                   child: signInsignUpStatus == 'SignIn' 
                   ? UserSignIn(width: 0.8, height: 0.4) 
                   : signInsignUpStatus == 'SignUp' 
-                  ? UserSignUp(width: 0.8, height: 0.4) 
+                  ? UserSignUp(width: 0.8, height: 0.6) 
                   : ResetPassword(width: 0.8, height: 0.27),
                 ),
               ),

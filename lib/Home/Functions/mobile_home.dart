@@ -261,7 +261,7 @@ class MobileHome extends StatelessWidget {
             ),
             //Coach Section
             if (isCoach)
-              _coachSection(context, MediaQuery.of(context).size.width - 20, 80),
+              _coachSection(context, MediaQuery.of(context).size.width - 20, 90),
             //Admin Section
             appUser['isAdmin'] || appUser['isModerator'] 
             ? _adminSection(context) 

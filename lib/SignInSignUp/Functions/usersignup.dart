@@ -22,13 +22,18 @@ class _UserSignUpState extends State<UserSignUp> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController reEnterPasswordController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController surnameController = TextEditingController();
   final FirebaseAuthService _authService = FirebaseAuthService();
+  Map<String, String?>? appUser;
 
   @override
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
     reEnterPasswordController.dispose();
+    nameController.dispose();
+    surnameController.dispose();
     super.dispose();
   }
 
@@ -49,9 +54,73 @@ class _UserSignUpState extends State<UserSignUp> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               header1(header: 'SIGN-UP:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-              FormInputField(label: 'Enter Email', errorMessage: 'Please enter a valid email address', isMultiline: false, isPassword: false, prefixIcon: Icons.email, suffixIcon: null, showLabel: true, controller: emailController, validator: emailValidator),
-              FormInputField(label: 'Enter Password', errorMessage: 'Please enter a valid password', isMultiline: false, isPassword: true, prefixIcon: Icons.lock, suffixIcon: Icons.visibility, showLabel: true, controller: passwordController, validator: passwordValidator),
-              FormInputField(label: 'Re-Enter Password', errorMessage: 'Please enter a valid password', isMultiline: false, isPassword: true, prefixIcon: Icons.lock, suffixIcon: Icons.visibility, showLabel: true, controller: reEnterPasswordController, validator: (value) => reEnterPasswordValidator(value, passwordController.text)),
+              FormInputField(
+                label: 'Name', 
+                errorMessage: 'Please enter a valid name', 
+                isMultiline: false, 
+                isPassword: false, 
+                prefixIcon: null, 
+                suffixIcon: null, 
+                showLabel: true, 
+                controller: nameController,
+                onChanged: (value) {
+                  appUser?['name'] = value;
+                },
+                validator: (value){
+                    value == null || value.isEmpty ? 'Please enter your name' : null;
+                    return null;
+                  },
+                ),
+              FormInputField(
+                label: 'Surname', 
+                errorMessage: 'Please enter a valid Surname', 
+                isMultiline: false, 
+                isPassword: false, 
+                prefixIcon: null, 
+                suffixIcon: null, 
+                showLabel: true, 
+                controller: surnameController,
+                onChanged: (value) {
+                  appUser?['surname'] = value;
+                },
+                validator: (value){
+                    value == null || value.isEmpty ? 'Please enter your surname' : null;
+                    return null;
+                  },
+                ),
+              FormInputField(
+                label: 'Email', 
+                errorMessage: 'Please enter a valid email address', 
+                isMultiline: false, 
+                isPassword: false, 
+                prefixIcon: Icons.email, 
+                suffixIcon: null, 
+                showLabel: true, 
+                controller: emailController, 
+                validator: emailValidator,
+                ),
+              FormInputField(
+                label: 'Password', 
+                errorMessage: 'Please enter a valid password', 
+                isMultiline: false, 
+                isPassword: true, 
+                prefixIcon: Icons.lock, 
+                suffixIcon: Icons.visibility, 
+                showLabel: true, 
+                controller: passwordController, 
+                validator: passwordValidator,
+                ),
+              FormInputField(
+                label: 'Re-Enter Password', 
+                errorMessage: 'Please enter a valid password', 
+                isMultiline: false, 
+                isPassword: true, 
+                prefixIcon: Icons.lock, 
+                suffixIcon: Icons.visibility, 
+                showLabel: true, 
+                controller: reEnterPasswordController, 
+                validator: (value) => reEnterPasswordValidator(value, passwordController.text),
+                ),
               SizedBox(
                 height: 50,
                 child: elevatedButton(
