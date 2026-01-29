@@ -135,7 +135,9 @@ class _MobileLandingState extends State<MobileLanding> {
     // Compute cumulative top position for each section
     double cumulativeTop(int idx) {
       double t = 0.0;
-      for (int i = 0; i < idx; i++) t += sectionHeights[i];
+      for (int i = 0; i < idx; i++) {
+        t += sectionHeights[i];
+      }
       return t;
     }
 

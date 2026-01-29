@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/SignInSignUp/Functions/resetpassword.dart';
-import 'package:legacyendurancesport/SignInSignUp/Functions/usersignin.dart';
-import 'package:legacyendurancesport/SignInSignUp/Functions/usersignup.dart';
+import 'package:legacyendurancesport/SignInSignUp/Functions/usersignin_page.dart';
+import 'package:legacyendurancesport/SignInSignUp/Functions/usersignup_page.dart';
 import 'package:provider/provider.dart';
 
 class SigninPage extends StatefulWidget {

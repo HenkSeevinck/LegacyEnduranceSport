@@ -71,7 +71,7 @@ class _StatisticsWindowState extends State<StatisticsWindow> {
     //print('StartDate: ${widget.startDate}, EndDate: ${widget.endDate}, Data: $statisticsBetweenDates');
 
     // Helper to convert possible Timestamp/map types to DateTime
-    DateTime? _toDate(dynamic v) {
+    DateTime? toDate(dynamic v) {
       if (v == null) return null;
       try {
         if (v is DateTime) return v;
@@ -91,7 +91,7 @@ class _StatisticsWindowState extends State<StatisticsWindow> {
     final Map<DateTime, double> daily = {};
     for (var item in statisticsBetweenDates) {
       final rawDate = item['workoutDate'];
-      final dt = _toDate(rawDate);
+      final dt = toDate(rawDate);
       if (dt == null) continue;
       final day = DateTime(dt.year, dt.month, dt.day);
       final cw = item['completedworkoutData'];

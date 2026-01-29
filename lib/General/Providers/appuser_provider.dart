@@ -47,9 +47,15 @@ class AppUserProvider with ChangeNotifier {
   }
 
   // Method to create a new user record in Firestore
-  Future<void> createUserRecord(User user) async {
-    await _firestore.collection('AppUsers').doc(user.uid).set({'uid': user.uid, 'email': user.email});
-    _appUser = {'uid': user.uid, 'email': user.email};
+  Future<void> createUserRecord(User user, Map<String, dynamic> otherData) async {
+    await _firestore.collection('AppUsers')
+    .doc(user.uid)
+    .set({
+      'uid': user.uid, 
+      'email': user.email,
+      ...otherData
+      });
+    _appUser = {'uid': user.uid, 'email': user.email, ...otherData};
     _appUserDeepStore = _safeForJson(_appUser) as Map<String, dynamic>;
     notifyListeners();
   }

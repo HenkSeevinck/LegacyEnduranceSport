@@ -4,21 +4,17 @@ import 'package:legacyendurancesport/General/Providers/internal_app_providers.da
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/Functions/mobile_home.dart';
-//import 'package:legacyendurancesport/Home/Functions/weekdays_table.dart';
 import 'package:legacyendurancesport/General/Providers/clubs_provided.dart';
-//import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
+  
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  bool showsearch = false;
-  String? searchPhrase;
   Future<void>? _fetchDataFuture;
 
   //----------------------------------------------------
