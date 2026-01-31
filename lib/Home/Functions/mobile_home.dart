@@ -18,7 +18,6 @@ class MobileHome extends StatefulWidget {
 
 class _MobileHomeState extends State<MobileHome> {
   static const double _iconSize = 48.0;
-  static const double _gridAspectRatio = 1.2;
   LandingView _view = LandingView.landing;
 
   //------------------------------------------------------------------------------
@@ -27,48 +26,59 @@ class _MobileHomeState extends State<MobileHome> {
     final localAppTheme = ResponsiveTheme(context).theme;
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
 
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
-      ),
-      child: GridView.builder(
-        physics: const NeverScrollableScrollPhysics(),
-        shrinkWrap: true,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: _gridAspectRatio),
-        itemCount: options.length,
-        itemBuilder: (BuildContext context, int index) {
-          return InkWell(
-            onTap: () {
-              internalStatusProvider.setUserUIDToShow(userUid);
-              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => options[index]['navigateTo']));
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(options[index]['icon'], color: localAppTheme['anchorColors']['primaryColor'], size: _iconSize),
-                  const SizedBox(height: 10),
-                  Container(
-                    width: 150,
-                    padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-                    decoration: BoxDecoration(
-                      color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8.0),
-                      border: Border.all(color: localAppTheme['anchorColors']['primaryColor']),
-                    ),
-                    child: Center(
-                      child: header2(header: options[index]['pageName'], color: localAppTheme['anchorColors']['primaryColor'], context: context),
-                    ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final height = constraints.maxHeight;
+        const crossAxisCount = 2;
+        final tileWidth = width / crossAxisCount;
+        final rowsNeeded = (options.length / crossAxisCount).ceil();
+        final rowsToShow = rowsNeeded < 1 ? 1 : (rowsNeeded > 3 ? 3 : rowsNeeded);
+        final tileHeight = height / rowsToShow;
+        final aspectRatio = tileWidth / tileHeight;
+
+        return Container(
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
+          ),
+          child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: crossAxisCount, childAspectRatio: aspectRatio),
+            itemCount: options.length,
+            itemBuilder: (BuildContext context, int index) {
+              return InkWell(
+                onTap: () {
+                  internalStatusProvider.setUserUIDToShow(userUid);
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => options[index]['navigateTo']));
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
                   ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(options[index]['icon'], color: localAppTheme['anchorColors']['primaryColor'], size: _iconSize),
+                      const SizedBox(height: 10),
+                      Container(
+                        width: 150,
+                        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                        decoration: BoxDecoration(
+                          color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8.0),
+                          border: Border.all(color: localAppTheme['anchorColors']['primaryColor']),
+                        ),
+                        child: Center(
+                          child: header2(header: options[index]['pageName'], color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -104,7 +114,7 @@ class _MobileHomeState extends State<MobileHome> {
           backgroundColor: localAppTheme['anchorColors']['primaryColor'],
           elevation: 0,
         ),
-        _buildSectionGrid(context: context, options: coachOptions, userUid: userUid),
+        Expanded(child: _buildSectionGrid(context: context, options: coachOptions, userUid: userUid)),
       ],
     );
   }
@@ -143,7 +153,7 @@ class _MobileHomeState extends State<MobileHome> {
           backgroundColor: localAppTheme['anchorColors']['primaryColor'],
           elevation: 0,
         ),
-        _buildSectionGrid(context: context, options: athleteOptions, userUid: userUid)
+        Expanded(child: _buildSectionGrid(context: context, options: athleteOptions, userUid: userUid))
       ],
     );
   }
@@ -245,31 +255,13 @@ class _MobileHomeState extends State<MobileHome> {
                               onCoachTap: () => setState(() => _view = LandingView.coachGrid),
                             );
                           case LandingView.athleteGrid:
-                            return SingleChildScrollView(
-                              child: Column(
-                                children: [
-                                  _athleteSection(context, athleteOptions, appUser['uid'], isCoach),
-                                ],
-                              ),
-                            );
+                            return _athleteSection(context, athleteOptions, appUser['uid'], isCoach);
                           case LandingView.coachGrid:
-                            return SingleChildScrollView(
-                              child: Column(
-                                children: [
-                                  _coachSection(context, coachOptions, appUser['uid']),
-                                ],
-                              ),
-                            );
+                            return _coachSection(context, coachOptions, appUser['uid']);
                         }
                       },
                     )
-                  : SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          _athleteSection(context, athleteOptions, appUser['uid'], isCoach),
-                        ],
-                      ),
-                    ),
+                  : _athleteSection(context, athleteOptions, appUser['uid'], isCoach),
             )
           ],
         ),

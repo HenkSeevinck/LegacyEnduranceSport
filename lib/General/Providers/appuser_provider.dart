@@ -78,7 +78,6 @@ class AppUserProvider with ChangeNotifier {
       final data = doc.data();
       if (data != null) {
         _appUser = {'uid': uid, ...data};
-        
         await _isUserCoach(uid).then((isCoach) {
           _appUser['isCoach'] = isCoach;
         });
@@ -88,7 +87,6 @@ class AppUserProvider with ChangeNotifier {
         await _isUserModerator(uid).then((isModerator) {
           _appUser['isModerator'] = isModerator;
         });
-
         notifyListeners();
       }
       return data;
