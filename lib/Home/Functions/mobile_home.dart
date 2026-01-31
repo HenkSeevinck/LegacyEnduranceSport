@@ -6,20 +6,24 @@ import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/Functions/weekdays_table.dart';
 import 'package:provider/provider.dart';
 
-class MobileHome extends StatelessWidget {
+// Simple view state used by coach users to switch screens
+enum LandingView { landing, athleteGrid, coachGrid }
+
+class MobileHome extends StatefulWidget {
   const MobileHome({super.key});
 
-  // Constants for consistent sizing
+  @override
+  State<MobileHome> createState() => _MobileHomeState();
+}
+
+class _MobileHomeState extends State<MobileHome> {
   static const double _iconSize = 48.0;
   static const double _gridAspectRatio = 1.2;
+  LandingView _view = LandingView.landing;
 
   //------------------------------------------------------------------------------
   // Shared Grid Builder for Athlete and Coach Sections
-  Widget _buildSectionGrid({
-    required BuildContext context,
-    required List<Map<String, dynamic>> options,
-    required String userUid,
-  }) {
+  Widget _buildSectionGrid({required BuildContext context, required List<Map<String, dynamic>> options, required String userUid}) {
     final localAppTheme = ResponsiveTheme(context).theme;
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
 
@@ -30,18 +34,13 @@ class MobileHome extends StatelessWidget {
       child: GridView.builder(
         physics: const NeverScrollableScrollPhysics(),
         shrinkWrap: true,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: _gridAspectRatio,
-        ),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: _gridAspectRatio),
         itemCount: options.length,
         itemBuilder: (BuildContext context, int index) {
           return InkWell(
             onTap: () {
               internalStatusProvider.setUserUIDToShow(userUid);
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => options[index]['navigateTo']),
-              );
+              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => options[index]['navigateTo']));
             },
             child: Container(
               decoration: BoxDecoration(
@@ -50,11 +49,7 @@ class MobileHome extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    options[index]['icon'],
-                    color: localAppTheme['anchorColors']['primaryColor'],
-                    size: _iconSize,
-                  ),
+                  Icon(options[index]['icon'], color: localAppTheme['anchorColors']['primaryColor'], size: _iconSize),
                   const SizedBox(height: 10),
                   Container(
                     width: 150,
@@ -65,11 +60,7 @@ class MobileHome extends StatelessWidget {
                       border: Border.all(color: localAppTheme['anchorColors']['primaryColor']),
                     ),
                     child: Center(
-                      child: header2(
-                        header: options[index]['pageName'],
-                        color: localAppTheme['anchorColors']['primaryColor'],
-                        context: context,
-                      ),
+                      child: header2(header: options[index]['pageName'], color: localAppTheme['anchorColors']['primaryColor'], context: context),
                     ),
                   ),
                 ],
@@ -82,131 +73,151 @@ class MobileHome extends StatelessWidget {
   }
 
   //------------------------------------------------------------------------------
-  //Admin Section
-  Widget _adminSection(BuildContext context, Map<String, dynamic> appUser) {
-    final localAppTheme = ResponsiveTheme(context).theme;
-
-    return ExpansionTile(
-      collapsedShape: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Icon(Icons.admin_panel_settings, color: localAppTheme['anchorColors']['primaryColor']),
-          const SizedBox(width: 10),
-          header2(header: 'Admin / Moderator', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-        ],
-      ),
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            border: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
-          ),
-          child: Row(
-            children: [
-              if (appUser['isAdmin'] == true)
-                Expanded(
-                  child: elevatedButton(
-                    label: 'Activate Admin',
-                    onPressed: () {},
-                    backgroundColor: localAppTheme['anchorColors']['primaryColor'],
-                    labelColor: localAppTheme['anchorColors']['secondaryColor'],
-                    leadingIcon: null,
-                    trailingIcon: null,
-                    context: context,
-                  ),
-                ),
-              if (appUser['isModerator'] == true)
-                Expanded(
-                  child: elevatedButton(
-                    label: 'Activate Moderator',
-                    onPressed: () {},
-                    backgroundColor: localAppTheme['anchorColors']['primaryColor'],
-                    labelColor: localAppTheme['anchorColors']['secondaryColor'],
-                    leadingIcon: null,
-                    trailingIcon: null,
-                    context: context,
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  //------------------------------------------------------------------------------
   //Coach Section
   Widget _coachSection(BuildContext context, List<Map<String, dynamic>> coachOptions, String userUid) {
     final localAppTheme = ResponsiveTheme(context).theme;
 
-    return ExpansionTile(
-      collapsedShape: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Icon(Icons.co_present, color: localAppTheme['anchorColors']['primaryColor']),
-          const SizedBox(width: 10),
-          header2(header: 'Coach', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-        ],
-      ),
+    return Column(
       children: [
-        _buildSectionGrid(
-          context: context,
-          options: coachOptions,
-          userUid: userUid,
+        AppBar(
+          automaticallyImplyLeading: false,
+          leading: IconButton(
+            tooltip: 'BACK',
+            icon: const Icon(Icons.arrow_back),
+            color: localAppTheme['anchorColors']['secondaryColor'],
+            onPressed: () {
+              setState(() {
+                _view = LandingView.landing;
+              });
+            },
+          ),
+          centerTitle: true,
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.person, color: localAppTheme['anchorColors']['secondaryColor']),
+              const SizedBox(width: 10),
+              header2(header: 'ATHLETES:', context: context, color: localAppTheme['anchorColors']['secondaryColor']),
+            ],
+          ),
+          backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+          elevation: 0,
         ),
+        _buildSectionGrid(context: context, options: coachOptions, userUid: userUid),
       ],
     );
   }
 
   //------------------------------------------------------------------------------
   //Athlete Section
-  Widget _athleteSection(BuildContext context, List<Map<String, dynamic>> athleteOptions, String userUid) {
+  Widget _athleteSection(BuildContext context, List<Map<String, dynamic>> athleteOptions, String userUid, bool isCoach) {
     final localAppTheme = ResponsiveTheme(context).theme;
 
-    return ExpansionTile(
-      initiallyExpanded: true,
-      collapsedShape: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Icon(Icons.person, color: localAppTheme['anchorColors']['primaryColor']),
-          const SizedBox(width: 10),
-          header2(header: 'Athlete', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-        ],
-      ),
+    return Column(
       children: [
-        _buildSectionGrid(
-          context: context,
-          options: athleteOptions,
-          userUid: userUid,
+        AppBar(
+          automaticallyImplyLeading: false,
+          leading: isCoach
+              ? IconButton(
+                  tooltip: 'BACK',
+                  icon: const Icon(Icons.arrow_back),
+                  color: localAppTheme['anchorColors']['secondaryColor'],
+                  onPressed: () {
+                    setState(() {
+                      _view = LandingView.landing;
+                    });
+                  },
+                )
+              : null,
+          centerTitle: true,
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.person, color: localAppTheme['anchorColors']['secondaryColor']),
+              const SizedBox(width: 10),
+              header2(header: 'ATHLETES:', context: context, color: localAppTheme['anchorColors']['secondaryColor']),
+            ],
+          ),
+          backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+          elevation: 0,
         ),
+        _buildSectionGrid(context: context, options: athleteOptions, userUid: userUid)
       ],
     );
   }
 
   //------------------------------------------------------------------------------
-  //Build Method
+  //Coach Landing
+  Widget _coachLanding(BuildContext context, {required VoidCallback onAthleteTap, required VoidCallback onCoachTap}) {
+    final localAppTheme = ResponsiveTheme(context).theme;
+    //final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
+
+    return Column(
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Expanded(
+          child: InkWell(
+            onTap: onAthleteTap,
+            child: SizedBox(
+              width: double.infinity,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.person, color: localAppTheme['anchorColors']['primaryColor'], size: 150),
+                  const SizedBox(height: 10),
+                  header2(header: 'ATHLETE SECTION', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Expanded(
+          child: InkWell(
+            onTap: onCoachTap,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
+              ),
+              width: double.infinity,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.co_present, color: localAppTheme['anchorColors']['primaryColor'], size: 150),
+                  const SizedBox(height: 10),
+                  header2(header: 'COACH SECTION', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // No initState logic that depends on inherited widgets; derive UI in build()
+
+  //------------------------------------------------------------------------------
+  // Build Method
   @override
   Widget build(BuildContext context) {
     final localAppTheme = ResponsiveTheme(context).theme;
-    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
-    final homePageOptions = internalStatusProvider.homePageOptions;
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
     final appUser = appUserProvider.appUser;
     final isCoach = appUser['isCoach'] == true;
-    final isAdmin = appUser['isAdmin'] == true;
-    final isModerator = appUser['isModerator'] == true;
-
-    // Pre-filter options
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
+    final homePageOptions = internalStatusProvider.homePageOptions;
     final athleteOptions = homePageOptions.where((option) => option['coachOnly'] == false).toList();
     final coachOptions = homePageOptions.where((option) => option['coachOnly'] == true).toList();
+    final isAdmin = appUser['isAdmin'];
+    final isModerator = appUser['isModerator'];
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: appheader(context: context, automaticallyImplyLeading: false),
+        title: appheader(context: context, automaticallyImplyLeading: false, onPressed: null, isAdmin: isAdmin, isModerator: isModerator),
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
@@ -223,14 +234,43 @@ class MobileHome extends StatelessWidget {
               child: WeekDaysTable(athleteUID: appUser['uid'], navPath: 'HomePage'),
             ),
             Expanded(
-              child: Column(
-                children: [
-                  _athleteSection(context, athleteOptions, appUser['uid']),
-                  if (isCoach) _coachSection(context, coachOptions, appUser['uid']),
-                  if (isAdmin || isModerator) _adminSection(context, appUser),
-                ],
-              ),
-            ),
+              child: isCoach
+                  ? Builder(
+                      builder: (_) {
+                        switch (_view) {
+                          case LandingView.landing:
+                            return _coachLanding(
+                              context,
+                              onAthleteTap: () => setState(() => _view = LandingView.athleteGrid),
+                              onCoachTap: () => setState(() => _view = LandingView.coachGrid),
+                            );
+                          case LandingView.athleteGrid:
+                            return SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  _athleteSection(context, athleteOptions, appUser['uid'], isCoach),
+                                ],
+                              ),
+                            );
+                          case LandingView.coachGrid:
+                            return SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  _coachSection(context, coachOptions, appUser['uid']),
+                                ],
+                              ),
+                            );
+                        }
+                      },
+                    )
+                  : SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          _athleteSection(context, athleteOptions, appUser['uid'], isCoach),
+                        ],
+                      ),
+                    ),
+            )
           ],
         ),
       ),

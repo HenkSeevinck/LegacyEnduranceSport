@@ -1015,6 +1015,8 @@ Future<void> showGeneralPopupDialog(BuildContext context, String title, String m
 Widget appheader({
   required BuildContext context,
   required bool automaticallyImplyLeading,
+  bool isAdmin = false,
+  bool isModerator = false,
   Function? onPressed,
   }) {
   final localAppTheme = ResponsiveTheme(context).theme;
@@ -1043,6 +1045,41 @@ Widget appheader({
               },
             ),
           ),
+        Positioned(
+          right: 0,
+          top: 0,
+          bottom: 0,
+          child: Row(
+            children: [
+              Visibility(
+                visible: isAdmin,
+                child: iconButton(
+                  label: null,
+                  backgroundColor: null,
+                  iconColor: localAppTheme['anchorColors']['primaryColor'],
+                  icon: Icons.admin_panel_settings,
+                  size: 30,
+                  toolTip: 'ENABLE ADMIN',
+                  context: context,
+                  onPressed: (){},
+                ),
+              ),
+              Visibility(
+                visible: isModerator,
+                  child: iconButton(
+                    label: null,
+                  backgroundColor: null,
+                  iconColor: localAppTheme['anchorColors']['primaryColor'],
+                  icon: Icons.admin_panel_settings_outlined,
+                  size: 30,
+                  toolTip: 'ENABLE MODERATOR',
+                  context: context,
+                  onPressed: (){},
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     ),
   );
