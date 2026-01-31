@@ -3,7 +3,7 @@ import 'package:legacyendurancesport/General/Providers/events_provider.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
-import 'package:legacyendurancesport/Home/Functions/mobile_home.dart';
+import 'package:legacyendurancesport/Home/Mobile%20Functions/mobile_home.dart';
 import 'package:legacyendurancesport/General/Providers/clubs_provided.dart';
 import 'package:provider/provider.dart';
 

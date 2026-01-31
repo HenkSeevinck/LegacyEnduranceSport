@@ -25,18 +25,21 @@ class WeekDaysTable extends StatefulWidget {
 }
 
 class _WeekDaysTableState extends State<WeekDaysTable> {
-  late DateTime _weekStart; // Monday of the current week
+  late DateTime _weekStart;
   DateTime? _selectedDate;
   Future<void>? _fetchDataFuture;
+  late List<dynamic> _athleteWorkouts; // Store athlete-specific data
 
+  //----------------------------------------------------
+  // Initialize state
   @override
   void initState() {
     super.initState();
+    _athleteWorkouts = []; // Initialize empty
     final now = widget.initialDate ?? DateTime.now();
     _weekStart = _startOfWeek(now);
     _selectedDate = now;
 
-    //Add Providers you want to fetch data from here
     final eventsProvider = Provider.of<EventsProvider>(context, listen: false);
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
@@ -45,11 +48,17 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
   }
 
   //----------------------------------------------------
-  // Fetch data function
+  // Fetch data for the week
   Future<void> _fetchData(EventsProvider eventsProvider, WorkoutsProvider workoutsProvider, AppUserProvider appUserProvider) async {
     appUserProvider.appUser;
     await eventsProvider.fetchEventsBetweenDates(_weekStart, _weekStart.add(const Duration(days: 6)));
     await workoutsProvider.fetchLoadedWorkoutsBetweenDates(widget.athleteUID, _weekStart, _weekStart.add(const Duration(days: 6)));
+    
+    // Copy to local state immediately
+    setState(() {
+      _athleteWorkouts = List.from(workoutsProvider.workoutsBetweenDates);
+    });
+    
     await appUserProvider.fetchUserGoalsBetweenDates(_weekStart, _weekStart.add(const Duration(days: 6)));
   }
 
@@ -191,10 +200,8 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
                       child: Row(
                         children: weekDays.map((d) {
                           final eventsProvider = Provider.of<EventsProvider>(context, listen: true);
-                          final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: true);
                           final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
                           final eventsBetweenDates = eventsProvider.eventsBetweenDates;
-                          final workoutsBetweenDates = workoutsProvider.workoutsBetweenDates;
                           final goalsBetweenDates = appUserProvider.goalsBetweenDates;
                           final isSelected = _selectedDate != null && _isSameDay(_selectedDate!, d);
                           final isToday = _isSameDay(DateTime.now(), d);
@@ -206,17 +213,17 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
                             return eventDate != null && _isSameDay(eventDate, d);
                           });
                           
-                          bool hasSchedulledWorkout = workoutsBetweenDates.any((workout) {
+                          bool hasSchedulledWorkout = _athleteWorkouts.any((workout) {
                             final workoutDate = workout['workoutDate']?.toDate();
                             return workoutDate != null && workout['workout'] != null && _isSameDay(workoutDate, d);
                           });
 
-                          bool hasCompletedSchedulledWorkout = workoutsBetweenDates.any((workout) {
+                          bool hasCompletedSchedulledWorkout = _athleteWorkouts.any((workout) {
                             final workoutDate = workout['workoutDate']?.toDate();
                             return workoutDate != null && workout['workout'] != null && workout['completedworkoutData'] != null && _isSameDay(workoutDate, d);
                           });
             
-                          bool hasUnSchedulledWorkout = workoutsBetweenDates.any((workout) {
+                          bool hasUnSchedulledWorkout = _athleteWorkouts.any((workout) {
                             final workoutDate = workout['workoutDate']?.toDate();
                             return workoutDate != null && workout['workout'] == null && _isSameDay(workoutDate, d);
                           });

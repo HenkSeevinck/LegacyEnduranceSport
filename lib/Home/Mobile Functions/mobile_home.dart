@@ -3,7 +3,7 @@ import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
-import 'package:legacyendurancesport/Home/Functions/weekdays_table.dart';
+import 'package:legacyendurancesport/Home/General%20Functions/weekdays_table.dart';
 import 'package:provider/provider.dart';
 
 // Simple view state used by coach users to switch screens

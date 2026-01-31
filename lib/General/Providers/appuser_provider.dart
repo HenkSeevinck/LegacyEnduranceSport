@@ -145,14 +145,23 @@ class AppUserProvider with ChangeNotifier {
   }
 
   //--------------------------------------------------------------
-  // Check if user is in the coach role
+  // Check if user is in the coach role and get athlete list
   Future<bool> _isUserCoach(String userID) async {
     try {
       final query = await FirebaseFirestore.instance.collection('Coaches').where('userID', isEqualTo: userID).limit(1).get();
       if (query.docs.isNotEmpty) {
         final Map<String, dynamic> data = query.docs.first.data();
         if (data.isNotEmpty) {
-          _appUser['athletes'] = List<Map<String, dynamic>>.from(data['athletes'] ?? []);
+          List<Map<String, dynamic>> rawAthletes = List<Map<String, dynamic>>.from(data['athletes'] ?? []);
+          List<Map<String, dynamic>> athletes = [];
+          
+          for (var athlete in rawAthletes) {
+            final userDoc = await _firestore.collection('AppUsers').doc(athlete['uid']).get();
+            if (userDoc.data() != null) {
+              athletes.add({'uid': athlete['uid'], 'email': athlete['email'], ...?userDoc.data()});
+            }
+          }
+          _appUser['athletes'] = athletes;
           _appUser['coachDocID'] = query.docs.first.id;
           notifyListeners();
           return true;
@@ -207,14 +216,29 @@ class AppUserProvider with ChangeNotifier {
 
   //--------------------------------------------------------------
   // Add athlete to coach's athlete list
-  Future<void> addAthleteToCoach(String coachUserID, String athleteUID, String email) async {
+  // Future<void> addAthleteToCoach(String coachUserID, String athleteUID, String email) async {
+  //   try {
+  //     final coachDocRef = _firestore.collection('Coaches').doc(coachUserID);
+  //     final Map<String, dynamic> athleteEntry = {'uid': athleteUID, 'email': email};
+  //     await coachDocRef.update({
+  //       'athletes': FieldValue.arrayUnion([athleteEntry])
+  //     });
+  //     _appUser['athletes'].add(athleteEntry);
+  //     notifyListeners();
+  //   } catch (e) {
+  //     Exception('Error adding athlete to coach: $e'); // Log the error
+  //     rethrow;
+  //   }
+  // }
+
+  Future<void> addAthleteToCoach(String coachUserID, String athleteUID, String email, Map<String, dynamic> athleteData) async {
     try {
       final coachDocRef = _firestore.collection('Coaches').doc(coachUserID);
-      final Map<String, dynamic> athleteEntry = {'uid': athleteUID, 'email': email};
+      final Map<String, dynamic> athleteEntry = {'uid': athleteUID};
       await coachDocRef.update({
         'athletes': FieldValue.arrayUnion([athleteEntry])
       });
-      _appUser['athletes'].add(athleteEntry);
+      _appUser['athletes'].add(athleteData);
       notifyListeners();
     } catch (e) {
       Exception('Error adding athlete to coach: $e'); // Log the error

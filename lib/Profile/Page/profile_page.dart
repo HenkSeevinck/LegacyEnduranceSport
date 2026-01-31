@@ -64,20 +64,6 @@ class _UserProfileState extends State<UserProfile> {
         : disciplineOtherController.text = userProfileToShow['athleteDisciplines']['otherDiscipline'];
   }
 
-  // //----------------------------------------------------
-  // //Reset controllers
-  // Future<void> _resetControllers(AppUserProvider appUserProvider) async {
-  //   // Refresh user data from deep store first, then read the provider value
-  //   await appUserProvider.refreshDeepStore();
-  //   final userProfileToShow = appUserProvider.userProfileToShow;
-
-  //   firstNameController.text = userProfileToShow['name'] ?? '';
-  //   lastNameController.text = userProfileToShow['surname'] ?? '';
-  //   emailController.text = userProfileToShow['email'] ?? '';
-  //   dateOfBirthController.text = userProfileToShow['dateOfBirth'] ?? '';
-  //   disciplineOtherController.text = userProfileToShow['athleteDisciplines']['otherDiscipline'] ?? '';
-  // }
-
   //----------------------------------------------------
   // Dispose controllers
   @override
@@ -176,6 +162,21 @@ class _UserProfileState extends State<UserProfile> {
     final localAppTheme = ResponsiveTheme(context).theme;
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
     final userProfileToShow = appUserProvider.userProfileToShow;
+    print('Building mobile user profile: $userProfileToShow');
+
+    // Initialize athleteDisciplines if missing
+    if (userProfileToShow['athleteDisciplines'] == null) {
+      userProfileToShow['athleteDisciplines'] = {
+        'runningBool': false,
+        'ultraRunningBool': false,
+        'cyclingBool': false,
+        'swimmingBool': false,
+        'triathlonBool': false,
+        'otherBool': false,
+        'otherDiscipline': '',
+      };
+    }
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
