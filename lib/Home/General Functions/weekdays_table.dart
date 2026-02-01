@@ -132,14 +132,17 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
 
   //----------------------------------------------------
   // Select a date
-  Future<void> _selectDate(DateTime d) async {
+    Future<void> _selectDate(DateTime d) async {
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
     final eventsProvider = Provider.of<EventsProvider>(context, listen: false);
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
 
+    // Filter goals and events from provider
     await appUserProvider.filterTodaysGoals(d);
     await eventsProvider.filterTodaysEvents(d);
-    await workoutsProvider.filterTodaysWorkouts(d);
+    
+    // Filter workouts from local _athleteWorkouts list
+    await workoutsProvider.filterTodaysWorkoutsFromList(_athleteWorkouts, d);
 
     setState(() {
       _selectedDate = d;

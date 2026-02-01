@@ -164,30 +164,6 @@ class WorkoutsProvider with ChangeNotifier {
   }
 
   //---------------------------------------------------------------
-  // Filter _workoutsBetweenDates to get today's workouts for _todaysWorkouts
-  Future<void> filterTodaysWorkouts(DateTime selectedDate) async {
-    final List<Map<String, dynamic>> todays = [];
-    for (var workout in _workoutsBetweenDates) {
-      final workoutDate = workout['workoutDate'];
-      if (workoutDate is Timestamp) {
-        final date = workoutDate.toDate();
-        if (
-        date.year == selectedDate.year && date.month == selectedDate.month && date.day == selectedDate.day) {
-          if (workout['workout'] is Map && workout['workout']['workoutUID'] != null) {
-            final Map<String, dynamic>? fetchedWorkout = await fetchWorkoutByID(workout['workout']['workoutUID']);
-            if (fetchedWorkout != null) {
-              workout['workout'] = fetchedWorkout;
-            }
-          }
-          todays.add(workout);
-        }
-      }
-    }
-    _todaysWorkouts = todays;
-    notifyListeners();
-  }
-
-  //---------------------------------------------------------------
   // fetch workout by workout ID
   Future<Map<String, dynamic>?> fetchWorkoutByID(String workoutID) async {
     try {
@@ -231,4 +207,27 @@ class WorkoutsProvider with ChangeNotifier {
       rethrow;
     }
   }
+  
+  //---------------------------------------------------------------
+  // Filter provided workouts to get today's workouts
+  Future<void> filterTodaysWorkoutsFromList(List<dynamic> workoutsList, DateTime selectedDate) async {
+    final List<Map<String, dynamic>> todays = [];
+    for (var workout in workoutsList) {
+      final workoutDate = workout['workoutDate'];
+      if (workoutDate is Timestamp) {
+        final date = workoutDate.toDate();
+        if (date.year == selectedDate.year && date.month == selectedDate.month && date.day == selectedDate.day) {
+          if (workout['workout'] is Map && workout['workout']['workoutUID'] != null) {
+            final Map<String, dynamic>? fetchedWorkout = await fetchWorkoutByID(workout['workout']['workoutUID']);
+            if (fetchedWorkout != null) {
+              workout['workout'] = fetchedWorkout;
+            }
+          }
+          todays.add(workout);
+        }
+      }
+    }
+    _todaysWorkouts = todays;
+    notifyListeners();
+  }  
 }

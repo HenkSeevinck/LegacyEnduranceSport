@@ -108,11 +108,23 @@ class _MobileHomeState extends State<MobileHome> {
             children: [
               Icon(Icons.person, color: localAppTheme['anchorColors']['secondaryColor']),
               const SizedBox(width: 10),
-              header2(header: 'ATHLETES:', context: context, color: localAppTheme['anchorColors']['secondaryColor']),
+              header2(header: 'COACH:', context: context, color: localAppTheme['anchorColors']['secondaryColor']),
             ],
           ),
           backgroundColor: localAppTheme['anchorColors']['primaryColor'],
           elevation: 0,
+          actions: [
+            SizedBox(
+              width: 60,
+              child: IconButton(
+                tooltip: 'NOTIFICATIONS',
+                icon: const Icon(Icons.notifications),
+                color: localAppTheme['anchorColors']['secondaryColor'],
+                onPressed: () {
+                },
+              ),
+            ),
+          ],
         ),
         Expanded(child: _buildSectionGrid(context: context, options: coachOptions, userUid: userUid)),
       ],
@@ -140,6 +152,18 @@ class _MobileHomeState extends State<MobileHome> {
                   },
                 )
               : null,
+          actions: [
+            SizedBox(
+              width: 60,
+              child: IconButton(
+                tooltip: 'NOTIFICATIONS',
+                icon: const Icon(Icons.notifications),
+                color: localAppTheme['anchorColors']['secondaryColor'],
+                onPressed: () {
+                },
+              ),
+            ),
+          ],
           centerTitle: true,
           title: Row(
             mainAxisSize: MainAxisSize.min,
@@ -147,7 +171,7 @@ class _MobileHomeState extends State<MobileHome> {
             children: [
               Icon(Icons.person, color: localAppTheme['anchorColors']['secondaryColor']),
               const SizedBox(width: 10),
-              header2(header: 'ATHLETES:', context: context, color: localAppTheme['anchorColors']['secondaryColor']),
+              header2(header: 'ATHLETE:', context: context, color: localAppTheme['anchorColors']['secondaryColor']),
             ],
           ),
           backgroundColor: localAppTheme['anchorColors']['primaryColor'],
