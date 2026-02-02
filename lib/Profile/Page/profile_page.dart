@@ -30,6 +30,7 @@ class _UserProfileState extends State<UserProfile> {
   //bool formEditable = false;
   Map<String, dynamic>? selectedClub;
   late bool formEditable = widget.formEditable;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   //----------------------------------------------------
   // initState load data when form is built
@@ -149,6 +150,7 @@ class _UserProfileState extends State<UserProfile> {
                         onChanged: (value) {
                           userProfileToShow['workoutDays']['mondayPreference'] = value?['workoutTypeID'];
                         },
+                        backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
                         isEnabled: true,
                         initialValue: userProfileToShow['workoutDays']['mondayPreference'],
                         validator: (value) {
@@ -195,6 +197,7 @@ class _UserProfileState extends State<UserProfile> {
                         onChanged: (value) {
                           userProfileToShow['workoutDays']['tuesdayPreference'] = value?['workoutTypeID'];
                         },
+                        backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
                         isEnabled: true,
                         initialValue: userProfileToShow['workoutDays']['tuesdayPreference'],
                         validator: (value) {
@@ -249,6 +252,7 @@ class _UserProfileState extends State<UserProfile> {
                           }
                           return null;
                         },
+                        backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
                       ),
                     ),
                   ),
@@ -295,6 +299,7 @@ class _UserProfileState extends State<UserProfile> {
                           }
                           return null;
                         },
+                        backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
                       ),
                     ),
                   ),
@@ -341,6 +346,7 @@ class _UserProfileState extends State<UserProfile> {
                           }
                           return null;
                         },
+                        backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
                       ),
                     ),
                   ),
@@ -387,6 +393,7 @@ class _UserProfileState extends State<UserProfile> {
                           }
                           return null;
                         },
+                        backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
                       ),
                     ),
                   ),
@@ -433,6 +440,7 @@ class _UserProfileState extends State<UserProfile> {
                           }
                           return null;
                         },
+                        backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
                       ),
                     ),
                   ),
@@ -686,77 +694,89 @@ class _UserProfileState extends State<UserProfile> {
       ),
       children: [
         Container(
-          decoration: BoxDecoration(
-            border: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0)),
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0)),
+            ),
+            child: Column(
+              children: [
+                SizedBox(height: 20.0),
+                FormInputField(
+                  label: 'First Name:',
+                  errorMessage: 'Please enter your first name',
+                  isMultiline: false,
+                  isPassword: false,
+                  prefixIcon: null,
+                  suffixIcon: null,
+                  showLabel: true,
+                  controller: firstNameController,
+                  enabled: formEditable,
+                  onChanged: (value) {
+                    userProfileToShow['name'] = firstNameController.text;
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your first name';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 10.0),
+                FormInputField(
+                  label: 'Last Name:',
+                  errorMessage: 'Please enter your last name',
+                  isMultiline: false,
+                  isPassword: false,
+                  prefixIcon: null,
+                  suffixIcon: null,
+                  showLabel: true,
+                  controller: lastNameController,
+                  enabled: formEditable,
+                  onChanged: (value) {
+                    userProfileToShow['surname'] = lastNameController.text;
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your last name';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 10.0),
+                FormInputField(
+                  label: 'Email Name:',
+                  errorMessage: 'Please enter your first name',
+                  isMultiline: false,
+                  isPassword: false,
+                  prefixIcon: null,
+                  suffixIcon: null,
+                  showLabel: true,
+                  enabled: false,
+                  controller: emailController,
+                ),
+                SizedBox(height: 10.0),
+                DatePicker(
+                  buttonLabelColor: localAppTheme['anchorColors']['primaryColor'],
+                  label: 'Date of Birth:',
+                  buttonVisibility: true,
+                  initialDate: null,
+                  enabled: formEditable,
+                  firstDate: DateTime.now().subtract(const Duration(days: 365 * 100)),
+                  lastDate: DateTime.now(),
+                  validator: (date) {
+                    if (date == null) {
+                      return 'Please select your date of birth';
+                    }
+                    return null;
+                  },
+                  controller: dateOfBirthController,
+                  onChanged: (selectedDate) {
+                    userProfileToShow['dateOfBirth'] = dateOfBirthController.text;
+                  },
+                ),
+                SizedBox(height: 20.0),
+              ],
+            ),
           ),
-          child: Column(
-            children: [
-              SizedBox(height: 20.0),
-              FormInputField(
-                label: 'First Name:',
-                errorMessage: 'Please enter your first name',
-                isMultiline: false,
-                isPassword: false,
-                prefixIcon: null,
-                suffixIcon: null,
-                showLabel: true,
-                controller: firstNameController,
-                enabled: formEditable,
-                onChanged: (value) {
-                  userProfileToShow['name'] = firstNameController.text;
-                },
-              ),
-              SizedBox(height: 10.0),
-              FormInputField(
-                label: 'Last Name:',
-                errorMessage: 'Please enter your last name',
-                isMultiline: false,
-                isPassword: false,
-                prefixIcon: null,
-                suffixIcon: null,
-                showLabel: true,
-                controller: lastNameController,
-                enabled: formEditable,
-                onChanged: (value) {
-                  userProfileToShow['surname'] = lastNameController.text;
-                },
-              ),
-              SizedBox(height: 10.0),
-              FormInputField(
-                label: 'Email Name:',
-                errorMessage: 'Please enter your first name',
-                isMultiline: false,
-                isPassword: false,
-                prefixIcon: null,
-                suffixIcon: null,
-                showLabel: true,
-                enabled: false,
-                controller: emailController,
-              ),
-              SizedBox(height: 10.0),
-              DatePicker(
-                buttonLabelColor: localAppTheme['anchorColors']['primaryColor'],
-                label: 'Date of Birth:',
-                buttonVisibility: true,
-                initialDate: null,
-                enabled: formEditable,
-                firstDate: DateTime.now().subtract(const Duration(days: 365 * 100)),
-                lastDate: DateTime.now(),
-                validator: (date) {
-                  if (date == null) {
-                    return 'Please select your date of birth';
-                  }
-                  return null;
-                },
-                controller: dateOfBirthController,
-                onChanged: (selectedDate) {
-                  userProfileToShow['dateOfBirth'] = dateOfBirthController.text;
-                },
-              ),
-              SizedBox(height: 20.0),
-            ],
-          ),
-        ),
       ],
     );
   }
@@ -867,6 +887,7 @@ class _UserProfileState extends State<UserProfile> {
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Form(
+          key: _formKey,
           child: Container(
             padding: const EdgeInsets.all(10.0),
             width: double.infinity,
@@ -886,47 +907,29 @@ class _UserProfileState extends State<UserProfile> {
                   _clubsWidget(userProfileToShow),
                   SizedBox(height: 20.0),
                   Visibility(
-                    visible: !formEditable && !widget.isCoachView,
-                    child: elevatedButton(
-                      label: 'EDIT PROFILE',
-                      onPressed: () {
-                        setState(() {
-                          formEditable = true;
-                        });
-                      },
-                      backgroundColor: localAppTheme['anchorColors']['primaryColor'],
-                      labelColor: localAppTheme['anchorColors']['secondaryColor'],
-                      leadingIcon: null,
-                      trailingIcon: null,
-                      context: context,
-                    ),
-                  ),
-                  Visibility(
-                    visible: formEditable,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: elevatedButton(
-                            label: 'SAVE CHANGES',
-                            onPressed: () async {
-                              try {
-                                await appUserProvider.updateUserRecord(userProfileToShow);
-                                showGeneralPopupDialog(context, 'Success!', 'Your profile has been updated successfully.');
-                                setState(() {
-                                  formEditable = false;
-                                });
-                              } catch (e) {
-                                showGeneralPopupDialog(context, 'Error', 'An error occurred while updating your profile. Please try again.');
-                              }
-                            },
-                            backgroundColor: localAppTheme['anchorColors']['primaryColor'],
-                            labelColor: localAppTheme['anchorColors']['secondaryColor'],
-                            leadingIcon: null,
-                            trailingIcon: null,
-                            context: context,
-                          ),
-                        ),
-                      ],
+                    visible: !widget.isCoachView,
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: elevatedButton(
+                        label: 'SAVE CHANGES',
+                        onPressed: () async {
+                          final formState = _formKey.currentState;
+                          if (formState != null && formState.validate()) {
+                            try {
+                              await appUserProvider.updateUserRecord(userProfileToShow);
+                              showGeneralPopupDialog(context, 'Success!', 'Your profile has been updated successfully.');
+                            } catch (e) {
+                              showGeneralPopupDialog(context, 'Error', 'An error occurred while updating your profile. Please try again.');
+                            }
+                          }
+                        },
+                        backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                        labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                        leadingIcon: null,
+                        trailingIcon: null,
+                        context: context,
+                      ),
                     ),
                   ),
                 ],

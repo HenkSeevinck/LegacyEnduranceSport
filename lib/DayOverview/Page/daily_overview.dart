@@ -468,7 +468,7 @@ class _DailyOverviewState extends State<DailyOverview> {
                   ),
                 ),
                 Visibility(
-                  visible: widget.navPath != 'HomePage',
+                  visible: widget.navPath != 'HomePage' && widget.selectedDate.isAfter(DateTime.now().subtract(const Duration(days: 1))),
                   child: SizedBox(
                     height: 50,
                     width: double.infinity,
@@ -555,7 +555,7 @@ class _DailyOverviewState extends State<DailyOverview> {
                       ),
                 const SizedBox(height: 10),
                 Visibility(
-                  visible: widget.navPath == 'HomePage',
+                  visible: widget.navPath == 'HomePage' && widget.selectedDate.isAfter(DateTime.now().subtract(const Duration(days: 1))),
                   child: elevatedButton(
                     label: 'Add New Goal',
                     onPressed: () {
