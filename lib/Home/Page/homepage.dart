@@ -1,11 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/General/Providers/events_provider.dart';
+import 'package:legacyendurancesport/General/Providers/firebase_auth_service.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/Mobile%20Functions/mobile_home.dart';
 import 'package:legacyendurancesport/General/Providers/clubs_provided.dart';
+import 'package:legacyendurancesport/Landing/Page/landing_page.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,19 +26,51 @@ class _HomePageState extends State<HomePage> {
   //----------------------------------------------------
   // initState load data when form is built
   @override
-  void initState() {
-    super.initState();
-    final clubsProvider = Provider.of<ClubsProvider>(context, listen: false);
-    final eventsProvider = Provider.of<EventsProvider>(context, listen: false);
-
-    _fetchDataFuture = _fetchData(clubsProvider, eventsProvider);
-  }
+void initState() {
+  super.initState();
+  final clubsProvider = Provider.of<ClubsProvider>(context, listen: false);
+  final eventsProvider = Provider.of<EventsProvider>(context, listen: false);
+  final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
+  final sharedPreferences = SharedPreferences.getInstance();
+    
+  _fetchDataFuture = _fetchData(clubsProvider, eventsProvider, appUserProvider, sharedPreferences);
+}
 
   //----------------------------------------------------
   // Fetch data function
-  Future<void> _fetchData(ClubsProvider clubsProvider, EventsProvider eventsProvider) async {
+  Future<void> _fetchData(
+    ClubsProvider clubsProvider, 
+    EventsProvider eventsProvider, 
+    AppUserProvider appUserProvider, 
+    Future<SharedPreferences> sharedPreferences
+    ) async {
     await clubsProvider.fetchAllClubs();
     await eventsProvider.fetchAllEvents();
+    final appUser = appUserProvider.appUser;
+    final prefs = await sharedPreferences;
+    final startTimeStr = prefs.getString('auth_session_start');
+    final expiryDate = startTimeStr != null ? DateTime.parse(startTimeStr).add(const Duration(days: 14)) : null;
+
+    if (appUser.isEmpty) {
+      await appUserProvider.getUserRecord(FirebaseAuthService().currentUser?.uid ?? ''); 
+    }
+
+    // Check for 14-day session expiry
+    if (startTimeStr != null && expiryDate != null) {
+      if (DateTime.now().isAfter(expiryDate)) {
+      
+        // Sign out of Firebase
+        await FirebaseAuthService().forceLogout(); 
+        
+        // Navigate back to Landing/Login page
+        if (mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const LandingPage()),
+            (route) => false,
+          );
+        }
+      }
+    }
   }
 
   //----------------------------------------------------

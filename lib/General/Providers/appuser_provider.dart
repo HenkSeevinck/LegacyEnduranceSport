@@ -216,21 +216,6 @@ class AppUserProvider with ChangeNotifier {
 
   //--------------------------------------------------------------
   // Add athlete to coach's athlete list
-  // Future<void> addAthleteToCoach(String coachUserID, String athleteUID, String email) async {
-  //   try {
-  //     final coachDocRef = _firestore.collection('Coaches').doc(coachUserID);
-  //     final Map<String, dynamic> athleteEntry = {'uid': athleteUID, 'email': email};
-  //     await coachDocRef.update({
-  //       'athletes': FieldValue.arrayUnion([athleteEntry])
-  //     });
-  //     _appUser['athletes'].add(athleteEntry);
-  //     notifyListeners();
-  //   } catch (e) {
-  //     Exception('Error adding athlete to coach: $e'); // Log the error
-  //     rethrow;
-  //   }
-  // }
-
   Future<void> addAthleteToCoach(String coachUserID, String athleteUID, String email, Map<String, dynamic> athleteData) async {
     try {
       final coachDocRef = _firestore.collection('Coaches').doc(coachUserID);

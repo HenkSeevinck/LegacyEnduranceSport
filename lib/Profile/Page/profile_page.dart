@@ -12,10 +12,7 @@ class UserProfile extends StatefulWidget {
   final bool isCoachView;
   final bool formEditable;
 
-  const UserProfile({super.key, 
-  required this.isCoachView,
-  required this.formEditable  
-  });
+  const UserProfile({super.key, required this.isCoachView, required this.formEditable});
 
   @override
   State<UserProfile> createState() => _UserProfileState();
@@ -49,10 +46,10 @@ class _UserProfileState extends State<UserProfile> {
   // Fetch data function
   Future<void> _fetchData(AppUserProvider appUserProvider, InternalStatusProvider internalStatusProvider) async {
     final userUIDToShow = internalStatusProvider.userUIDToShow;
-    
+
     // Load user data
     await appUserProvider.getUserProfileToShow(userUIDToShow);
-    
+
     final userProfileToShow = appUserProvider.userProfileToShow;
 
     userProfileToShow['name'] == null ? firstNameController.text = '' : firstNameController.text = userProfileToShow['name'];
@@ -74,6 +71,694 @@ class _UserProfileState extends State<UserProfile> {
     emailController.dispose();
     disciplineOtherController.dispose();
     super.dispose();
+  }
+
+  //----------------------------------------------------
+  // Workout Days Widget
+  Widget _workoutDaysWidget(Map<String, dynamic> userProfileToShow) {
+    final localAppTheme = ResponsiveTheme(context).theme;
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
+    final workoutTypes = internalStatusProvider.workoutTypes;
+
+    // Initialize workoutDays if missing
+    if (userProfileToShow['workoutDays'] == null) {
+      userProfileToShow['workoutDays'] = {
+        'mondayBool': false,
+        'mondayPreference': null,
+        'tuesdayBool': false,
+        'tuesdayPreference': null,
+        'wednesdayBool': false,
+        'wednesdayPreference': null,
+        'thursdayBool': false,
+        'thursdayPreference': null,
+        'fridayBool': false,
+        'fridayPreference': null,
+        'saturdayBool': false,
+        'saturdayPreference': null,
+        'sundayBool': false,
+        'sundayPreference': null,
+      };
+    }
+
+    return ExpansionTile(
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Icon(Icons.calendar_today, color: localAppTheme['anchorColors']['primaryColor']),
+          SizedBox(width: 10.0),
+          header1(header: 'Workout Days:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+        ],
+      ),
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0)),
+          ),
+          child: Column(
+            children: [
+              SizedBox(height: 20.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  tickBox(
+                    label: 'Monday',
+                    value: userProfileToShow['workoutDays']['mondayBool'] ?? false,
+                    enabled: formEditable,
+                    onChanged: (bool? newValue) {
+                      setState(() {
+                        userProfileToShow['workoutDays']['mondayBool'] = newValue ?? false;
+                        userProfileToShow['workoutDays']['mondayPreference'] = null;
+                      });
+                    },
+                    context: context,
+                  ),
+                  Visibility(
+                    visible: userProfileToShow['workoutDays']['mondayBool'] ?? false,
+                    child: SizedBox(
+                      width: 200,
+                      child: SearchableDropdown(
+                        labelText: 'Workout Preference:',
+                        hint: 'Select Preference',
+                        dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
+                        searchBoxVisable: false,
+                        dropDownList: workoutTypes,
+                        header: '',
+                        iconColor: localAppTheme['anchorColors']['primaryColor'],
+                        idField: 'workoutTypeID',
+                        displayField: 'workoutType',
+                        onChanged: (value) {
+                          userProfileToShow['workoutDays']['mondayPreference'] = value?['workoutTypeID'];
+                        },
+                        isEnabled: true,
+                        initialValue: userProfileToShow['workoutDays']['mondayPreference'],
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Please select a workout preference';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  tickBox(
+                    label: 'Tuesday',
+                    value: userProfileToShow['workoutDays']['tuesdayBool'] ?? false,
+                    enabled: formEditable,
+                    onChanged: (bool? newValue) {
+                      setState(() {
+                        userProfileToShow['workoutDays']['tuesdayBool'] = newValue ?? false;
+                        userProfileToShow['workoutDays']['tuesdayPreference'] = null;
+                      });
+                    },
+                    context: context,
+                  ),
+                  Visibility(
+                    visible: userProfileToShow['workoutDays']['tuesdayBool'] ?? false,
+                    child: SizedBox(
+                      width: 200,
+                      child: SearchableDropdown(
+                        labelText: 'Workout Preference:',
+                        hint: 'Select Preference',
+                        dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
+                        searchBoxVisable: false,
+                        dropDownList: workoutTypes,
+                        header: '',
+                        iconColor: localAppTheme['anchorColors']['primaryColor'],
+                        idField: 'workoutTypeID',
+                        displayField: 'workoutType',
+                        onChanged: (value) {
+                          userProfileToShow['workoutDays']['tuesdayPreference'] = value?['workoutTypeID'];
+                        },
+                        isEnabled: true,
+                        initialValue: userProfileToShow['workoutDays']['tuesdayPreference'],
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Please select a workout preference';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  tickBox(
+                    label: 'Wednesday',
+                    value: userProfileToShow['workoutDays']['wednesdayBool'] ?? false,
+                    enabled: formEditable,
+                    onChanged: (bool? newValue) {
+                      setState(() {
+                        userProfileToShow['workoutDays']['wednesdayBool'] = newValue ?? false;
+                        userProfileToShow['workoutDays']['wednesdayPreference'] = null;
+                      });
+                    },
+                    context: context,
+                  ),
+                  Visibility(
+                    visible: userProfileToShow['workoutDays']['wednesdayBool'] ?? false,
+                    child: SizedBox(
+                      width: 200,
+                      child: SearchableDropdown(
+                        labelText: 'Workout Preference:',
+                        hint: 'Select Preference',
+                        dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
+                        searchBoxVisable: false,
+                        dropDownList: workoutTypes,
+                        header: '',
+                        iconColor: localAppTheme['anchorColors']['primaryColor'],
+                        idField: 'workoutTypeID',
+                        displayField: 'workoutType',
+                        onChanged: (value) {
+                          userProfileToShow['workoutDays']['wednesdayPreference'] = value?['workoutTypeID'];
+                        },
+                        isEnabled: true,
+                        initialValue: userProfileToShow['workoutDays']['wednesdayPreference'],
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Please select a workout preference';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  tickBox(
+                    label: 'Thursday',
+                    value: userProfileToShow['workoutDays']['thursdayBool'] ?? false,
+                    enabled: formEditable,
+                    onChanged: (bool? newValue) {
+                      setState(() {
+                        userProfileToShow['workoutDays']['thursdayBool'] = newValue ?? false;
+                        userProfileToShow['workoutDays']['thursdayPreference'] = null;
+                      });
+                    },
+                    context: context,
+                  ),
+                  Visibility(
+                    visible: userProfileToShow['workoutDays']['thursdayBool'] ?? false,
+                    child: SizedBox(
+                      width: 200,
+                      child: SearchableDropdown(
+                        labelText: 'Workout Preference:',
+                        hint: 'Select Preference',
+                        dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
+                        searchBoxVisable: false,
+                        dropDownList: workoutTypes,
+                        header: '',
+                        iconColor: localAppTheme['anchorColors']['primaryColor'],
+                        idField: 'workoutTypeID',
+                        displayField: 'workoutType',
+                        onChanged: (value) {
+                          userProfileToShow['workoutDays']['thursdayPreference'] = value?['workoutTypeID'];
+                        },
+                        isEnabled: true,
+                        initialValue: userProfileToShow['workoutDays']['thursdayPreference'],
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Please select a workout preference';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  tickBox(
+                    label: 'Friday',
+                    value: userProfileToShow['workoutDays']['fridayBool'] ?? false,
+                    enabled: formEditable,
+                    onChanged: (bool? newValue) {
+                      setState(() {
+                        userProfileToShow['workoutDays']['fridayBool'] = newValue ?? false;
+                        userProfileToShow['workoutDays']['fridayPreference'] = null;
+                      });
+                    },
+                    context: context,
+                  ),
+                  Visibility(
+                    visible: userProfileToShow['workoutDays']['fridayBool'] ?? false,
+                    child: SizedBox(
+                      width: 200,
+                      child: SearchableDropdown(
+                        labelText: 'Workout Preference:',
+                        hint: 'Select Preference',
+                        dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
+                        searchBoxVisable: false,
+                        dropDownList: workoutTypes,
+                        header: '',
+                        iconColor: localAppTheme['anchorColors']['primaryColor'],
+                        idField: 'workoutTypeID',
+                        displayField: 'workoutType',
+                        onChanged: (value) {
+                          userProfileToShow['workoutDays']['fridayPreference'] = value?['workoutTypeID'];
+                        },
+                        isEnabled: true,
+                        initialValue: userProfileToShow['workoutDays']['fridayPreference'],
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Please select a workout preference';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  tickBox(
+                    label: 'Saturday',
+                    value: userProfileToShow['workoutDays']['saturdayBool'] ?? false,
+                    enabled: formEditable,
+                    onChanged: (bool? newValue) {
+                      setState(() {
+                        userProfileToShow['workoutDays']['saturdayBool'] = newValue ?? false;
+                        userProfileToShow['workoutDays']['saturdayPreference'] = null;
+                      });
+                    },
+                    context: context,
+                  ),
+                  Visibility(
+                    visible: userProfileToShow['workoutDays']['saturdayBool'] ?? false,
+                    child: SizedBox(
+                      width: 200,
+                      child: SearchableDropdown(
+                        labelText: 'Workout Preference:',
+                        hint: 'Select Preference',
+                        dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
+                        searchBoxVisable: false,
+                        dropDownList: workoutTypes,
+                        header: '',
+                        iconColor: localAppTheme['anchorColors']['primaryColor'],
+                        idField: 'workoutTypeID',
+                        displayField: 'workoutType',
+                        onChanged: (value) {
+                          userProfileToShow['workoutDays']['saturdayPreference'] = value?['workoutTypeID'];
+                        },
+                        isEnabled: true,
+                        initialValue: userProfileToShow['workoutDays']['saturdayPreference'],
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Please select a workout preference';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  tickBox(
+                    label: 'Sunday',
+                    value: userProfileToShow['workoutDays']['sundayBool'] ?? false,
+                    enabled: formEditable,
+                    onChanged: (bool? newValue) {
+                      setState(() {
+                        userProfileToShow['workoutDays']['sundayBool'] = newValue ?? false;
+                        userProfileToShow['workoutDays']['sundayPreference'] = null;
+                      });
+                    },
+                    context: context,
+                  ),
+                  Visibility(
+                    visible: userProfileToShow['workoutDays']['sundayBool'] ?? false,
+                    child: SizedBox(
+                      width: 200,
+                      child: SearchableDropdown(
+                        labelText: 'Workout Preference:',
+                        hint: 'Select Preference',
+                        dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
+                        searchBoxVisable: false,
+                        dropDownList: workoutTypes,
+                        header: '',
+                        iconColor: localAppTheme['anchorColors']['primaryColor'],
+                        idField: 'workoutTypeID',
+                        displayField: 'workoutType',
+                        onChanged: (value) {
+                          userProfileToShow['workoutDays']['sundayPreference'] = value?['workoutTypeID'];
+                        },
+                        isEnabled: true,
+                        initialValue: userProfileToShow['workoutDays']['sundayPreference'],
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Please select a workout preference';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20.0),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  //----------------------------------------------------
+  // Disciplines Widget
+  Widget _disciplinesWidget(Map<String, dynamic> userProfileToShow) {
+    final localAppTheme = ResponsiveTheme(context).theme;
+
+    // Initialize athleteDisciplines if missing
+    if (userProfileToShow['athleteDisciplines'] == null) {
+      userProfileToShow['athleteDisciplines'] = {
+        'runningBool': false,
+        'ultraRunningBool': false,
+        'cyclingBool': false,
+        'swimmingBool': false,
+        'triathlonBool': false,
+        'otherBool': false,
+        'otherDiscipline': '',
+      };
+    }
+
+    return ExpansionTile(
+      collapsedShape: Border(
+        top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+        bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+      ),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Icon(Icons.fitness_center, color: localAppTheme['anchorColors']['primaryColor']),
+          SizedBox(width: 10.0),
+          header1(header: 'Disciplines:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+        ],
+      ),
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0)),
+          ),
+          child: Column(
+            children: [
+              SizedBox(height: 20.0),
+              tickBox(
+                label: 'Running',
+                value: userProfileToShow['athleteDisciplines']['runningBool'] ?? false,
+                enabled: formEditable,
+                onChanged: (bool? newValue) {
+                  setState(() {
+                    userProfileToShow['athleteDisciplines']['runningBool'] = newValue ?? false;
+                  });
+                },
+                context: context,
+              ),
+              SizedBox(height: 10.0),
+              tickBox(
+                label: 'Ultra Running',
+                value: userProfileToShow['athleteDisciplines']['ultraRunningBool'] ?? false,
+                enabled: formEditable,
+                onChanged: (bool? newValue) {
+                  setState(() {
+                    userProfileToShow['athleteDisciplines']['ultraRunningBool'] = newValue ?? false;
+                  });
+                },
+                context: context,
+              ),
+              SizedBox(height: 10.0),
+              tickBox(
+                label: 'Cycling',
+                value: userProfileToShow['athleteDisciplines']['cyclingBool'] ?? false,
+                enabled: formEditable,
+                onChanged: (bool? newValue) {
+                  setState(() {
+                    userProfileToShow['athleteDisciplines']['cyclingBool'] = newValue ?? false;
+                  });
+                },
+                context: context,
+              ),
+              SizedBox(height: 10.0),
+              tickBox(
+                label: 'Swimming',
+                value: userProfileToShow['athleteDisciplines']['swimmingBool'] ?? false,
+                enabled: formEditable,
+                onChanged: (bool? newValue) {
+                  setState(() {
+                    userProfileToShow['athleteDisciplines']['swimmingBool'] = newValue ?? false;
+                  });
+                },
+                context: context,
+              ),
+              SizedBox(height: 10.0),
+              tickBox(
+                label: 'Triathlon',
+                value: userProfileToShow['athleteDisciplines']['triathlonBool'] ?? false,
+                enabled: formEditable,
+                onChanged: (bool? newValue) {
+                  setState(() {
+                    userProfileToShow['athleteDisciplines']['triathlonBool'] = newValue ?? false;
+                  });
+                },
+                context: context,
+              ),
+              SizedBox(height: 10.0),
+              Row(
+                children: [
+                  tickBox(
+                    label: 'Other',
+                    value: userProfileToShow['athleteDisciplines']['otherBool'] ?? false,
+                    enabled: formEditable,
+                    onChanged: (bool? newValue) {
+                      setState(() {
+                        userProfileToShow['athleteDisciplines']['otherBool'] = newValue ?? false;
+                      });
+                    },
+                    context: context,
+                  ),
+                  SizedBox(width: 20.0),
+                  Visibility(
+                    visible: userProfileToShow['athleteDisciplines']['otherBool'] ?? false,
+                    child: Expanded(
+                      child: FormInputField(
+                        label: 'Please specify:',
+                        errorMessage: 'Please enter your discipline',
+                        isMultiline: false,
+                        isPassword: false,
+                        prefixIcon: null,
+                        suffixIcon: null,
+                        showLabel: true,
+                        controller: disciplineOtherController,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20.0),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  //----------------------------------------------------
+  // Clubs Widget
+  Widget _clubsWidget(Map<String, dynamic> userProfileToShow) {
+    final localAppTheme = ResponsiveTheme(context).theme;
+
+    return ExpansionTile(
+      collapsedShape: Border(
+        top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+        bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+      ),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Icon(Icons.group, color: localAppTheme['anchorColors']['primaryColor']),
+              SizedBox(width: 10.0),
+              header1(header: 'Clubs:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+            ],
+          ),
+          Visibility(
+            visible: formEditable,
+            child: iconButton(
+              label: null,
+              backgroundColor: null,
+              iconColor: localAppTheme['anchorColors']['primaryColor'],
+              icon: Icons.add,
+              size: 30,
+              toolTip: 'ADD CLUB',
+              onPressed: () {
+                _showClubSelectionPopupDialog(context);
+              },
+              context: context,
+            ),
+          ),
+        ],
+      ),
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0)),
+          ),
+          child: Column(
+            children: [
+              SizedBox(height: 20.0),
+              userProfileToShow['clubs'] != null && (userProfileToShow['clubs'] as List).isNotEmpty
+                  ? Column(
+                      children: List<Widget>.generate((userProfileToShow['clubs'] as List).length, (index) {
+                        final club = userProfileToShow['clubs'][index];
+                        return ListTile(
+                          title: body(header: club['clubName'], color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                          trailing: formEditable
+                              ? iconButton(
+                                  label: null,
+                                  backgroundColor: null,
+                                  iconColor: localAppTheme['anchorColors']['primaryColor'],
+                                  icon: Icons.delete,
+                                  size: 30,
+                                  toolTip: 'REMOVE CLUB',
+                                  onPressed: () {
+                                    setState(() {
+                                      userProfileToShow['clubs'].removeAt(index);
+                                    });
+                                  },
+                                  context: context,
+                                )
+                              : null,
+                        );
+                      }),
+                    )
+                  : Container(),
+              SizedBox(height: 20.0),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  //----------------------------------------------------
+  // My Profile Widget
+  Widget _myProfileWidget(Map<String, dynamic> userProfileToShow) {
+    final localAppTheme = ResponsiveTheme(context).theme;
+    return ExpansionTile(
+      initiallyExpanded: true,
+      collapsedShape: Border(
+        top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+        bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+      ),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Icon(Icons.person, color: localAppTheme['anchorColors']['primaryColor']),
+          SizedBox(width: 10.0),
+          !widget.isCoachView
+              ? header1(header: 'My Profile:', context: context, color: localAppTheme['anchorColors']['primaryColor'])
+              : header1(header: '${userProfileToShow['name'] ?? '-'}\'s Profile:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+        ],
+      ),
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            border: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0)),
+          ),
+          child: Column(
+            children: [
+              SizedBox(height: 20.0),
+              FormInputField(
+                label: 'First Name:',
+                errorMessage: 'Please enter your first name',
+                isMultiline: false,
+                isPassword: false,
+                prefixIcon: null,
+                suffixIcon: null,
+                showLabel: true,
+                controller: firstNameController,
+                enabled: formEditable,
+                onChanged: (value) {
+                  userProfileToShow['name'] = firstNameController.text;
+                },
+              ),
+              SizedBox(height: 10.0),
+              FormInputField(
+                label: 'Last Name:',
+                errorMessage: 'Please enter your last name',
+                isMultiline: false,
+                isPassword: false,
+                prefixIcon: null,
+                suffixIcon: null,
+                showLabel: true,
+                controller: lastNameController,
+                enabled: formEditable,
+                onChanged: (value) {
+                  userProfileToShow['surname'] = lastNameController.text;
+                },
+              ),
+              SizedBox(height: 10.0),
+              FormInputField(
+                label: 'Email Name:',
+                errorMessage: 'Please enter your first name',
+                isMultiline: false,
+                isPassword: false,
+                prefixIcon: null,
+                suffixIcon: null,
+                showLabel: true,
+                enabled: false,
+                controller: emailController,
+              ),
+              SizedBox(height: 10.0),
+              DatePicker(
+                buttonLabelColor: localAppTheme['anchorColors']['primaryColor'],
+                label: 'Date of Birth:',
+                buttonVisibility: true,
+                initialDate: null,
+                enabled: formEditable,
+                firstDate: DateTime.now().subtract(const Duration(days: 365 * 100)),
+                lastDate: DateTime.now(),
+                validator: (date) {
+                  if (date == null) {
+                    return 'Please select your date of birth';
+                  }
+                  return null;
+                },
+                controller: dateOfBirthController,
+                onChanged: (selectedDate) {
+                  userProfileToShow['dateOfBirth'] = dateOfBirthController.text;
+                },
+              ),
+              SizedBox(height: 20.0),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   //----------------------------------------------------
@@ -162,20 +847,6 @@ class _UserProfileState extends State<UserProfile> {
     final localAppTheme = ResponsiveTheme(context).theme;
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
     final userProfileToShow = appUserProvider.userProfileToShow;
-    print('Building mobile user profile: $userProfileToShow');
-
-    // Initialize athleteDisciplines if missing
-    if (userProfileToShow['athleteDisciplines'] == null) {
-      userProfileToShow['athleteDisciplines'] = {
-        'runningBool': false,
-        'ultraRunningBool': false,
-        'cyclingBool': false,
-        'swimmingBool': false,
-        'triathlonBool': false,
-        'otherBool': false,
-        'otherDiscipline': '',
-      };
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -185,18 +856,10 @@ class _UserProfileState extends State<UserProfile> {
           automaticallyImplyLeading: true,
           onPressed: () {
             if (widget.isCoachView) {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => MyAthletesPage()
-                  ),
-                );
+              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => MyAthletesPage()));
               return;
             } else {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => HomePage()
-                  ),
-                );
+              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
             }
           },
         ),
@@ -217,225 +880,10 @@ class _UserProfileState extends State<UserProfile> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  !widget.isCoachView
-                    ? header1(
-                        header: 'My Profile:', 
-                        context: context, color: 
-                        localAppTheme['anchorColors']['primaryColor'],
-                      )
-                    : header1(
-                        header: '${userProfileToShow['name'] ?? 'XXX'}\'s Profile:', 
-                        context: context, 
-                        color: localAppTheme['anchorColors']['primaryColor'],
-                      ),
-                  SizedBox(height: 20.0),
-                  FormInputField(
-                    label: 'First Name:',
-                    errorMessage: 'Please enter your first name',
-                    isMultiline: false,
-                    isPassword: false,
-                    prefixIcon: null,
-                    suffixIcon: null,
-                    showLabel: true,
-                    controller: firstNameController,
-                    enabled: formEditable,
-                    onChanged: (value) {
-                      userProfileToShow['name'] = firstNameController.text;
-                    },
-                  ),
-                  SizedBox(height: 10.0),
-                  FormInputField(
-                    label: 'Last Name:',
-                    errorMessage: 'Please enter your first name',
-                    isMultiline: false,
-                    isPassword: false,
-                    prefixIcon: null,
-                    suffixIcon: null,
-                    showLabel: true,
-                    controller: lastNameController,
-                    enabled: formEditable,
-                    onChanged: (value) {
-                      userProfileToShow['surname'] = lastNameController.text;
-                    },
-                  ),
-                  SizedBox(height: 10.0),
-                  FormInputField(
-                    label: 'Email Name:',
-                    errorMessage: 'Please enter your first name',
-                    isMultiline: false,
-                    isPassword: false,
-                    prefixIcon: null,
-                    suffixIcon: null,
-                    showLabel: true,
-                    enabled: false,
-                    controller: emailController,
-                  ),
-                  SizedBox(height: 10.0),
-                  DatePicker(
-                    buttonLabelColor: localAppTheme['anchorColors']['primaryColor'],
-                    label: 'Date of Birth:',
-                    buttonVisibility: true,
-                    initialDate: null,
-                    enabled: formEditable,
-                    firstDate: DateTime.now().subtract(const Duration(days: 365 * 100)),
-                    lastDate: DateTime.now(),
-                    validator: (date) {
-                      if (date == null) {
-                        return 'Please select your date of birth';
-                      }
-                      return null;
-                    },
-                    controller: dateOfBirthController,
-                    onChanged: (selectedDate) {
-                      userProfileToShow['dateOfBirth'] = dateOfBirthController.text;
-                    },
-                  ),
-                  SizedBox(height: 20.0),
-                  header1(header: 'Disciplines:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                  SizedBox(height: 20.0),
-                  tickBox(
-                    label: 'Running',
-                    value: userProfileToShow['athleteDisciplines']['runningBool'] ?? false,
-                    enabled: formEditable,
-                    onChanged: (bool? newValue) {
-                      setState(() {
-                        userProfileToShow['athleteDisciplines']['runningBool'] = newValue ?? false;
-                      });
-                    },
-                    context: context,
-                  ),
-                  tickBox(
-                    label: 'Ultra Running',
-                    value: userProfileToShow['athleteDisciplines']['ultraRunningBool'] ?? false,
-                    enabled: formEditable,
-                    onChanged: (bool? newValue) {
-                      setState(() {
-                        userProfileToShow['athleteDisciplines']['ultraRunningBool'] = newValue ?? false;
-                      });
-                    },
-                    context: context,
-                  ),
-                  SizedBox(height: 10.0),
-                  tickBox(
-                    label: 'Cycling',
-                    value: userProfileToShow['athleteDisciplines']['cyclingBool'] ?? false,
-                    enabled: formEditable,
-                    onChanged: (bool? newValue) {
-                      setState(() {
-                        userProfileToShow['athleteDisciplines']['cyclingBool'] = newValue ?? false;
-                      });
-                    },
-                    context: context,
-                  ),
-                  SizedBox(height: 10.0),
-                  tickBox(
-                    label: 'Swimming',
-                    value: userProfileToShow['athleteDisciplines']['swimmingBool'] ?? false,
-                    enabled: formEditable,
-                    onChanged: (bool? newValue) {
-                      setState(() {
-                        userProfileToShow['athleteDisciplines']['swimmingBool'] = newValue ?? false;
-                      });
-                    },
-                    context: context,
-                  ),
-                  SizedBox(height: 10.0),
-                  tickBox(
-                    label: 'Triathlon',
-                    value: userProfileToShow['athleteDisciplines']['triathlonBool'] ?? false,
-                    enabled: formEditable,
-                    onChanged: (bool? newValue) {
-                      setState(() {
-                        userProfileToShow['athleteDisciplines']['triathlonBool'] = newValue ?? false;
-                      });
-                    },
-                    context: context,
-                  ),
-                  SizedBox(height: 10.0),
-                  Row(
-                    children: [
-                      tickBox(
-                        label: 'Other',
-                        value: userProfileToShow['athleteDisciplines']['otherBool'] ?? false,
-                        enabled: formEditable,
-                        onChanged: (bool? newValue) {
-                          setState(() {
-                            userProfileToShow['athleteDisciplines']['otherBool'] = newValue ?? false;
-                          });
-                        },
-                        context: context,
-                      ),
-                      SizedBox(width: 20.0),
-                      Visibility(
-                        visible: userProfileToShow['athleteDisciplines']['otherBool'] ?? false,
-                        child: Expanded(
-                          child: FormInputField(
-                            label: 'Please specify:',
-                            errorMessage: 'Please enter your discipline',
-                            isMultiline: false,
-                            isPassword: false,
-                            prefixIcon: null,
-                            suffixIcon: null,
-                            showLabel: true,
-                            controller: disciplineOtherController,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20.0),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 30,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        header1(header: 'Clubs:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                        Visibility(
-                          visible: formEditable,
-                          child: iconButton(
-                            label: null,
-                            backgroundColor: null,
-                            iconColor: localAppTheme['anchorColors']['primaryColor'],
-                            icon: Icons.add,
-                            size: 30,
-                            toolTip: 'ADD CLUB',
-                            onPressed: () {
-                              _showClubSelectionPopupDialog(context);
-                            },
-                            context: context,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 10.0),
-                  userProfileToShow['clubs'] != null && (userProfileToShow['clubs'] as List).isNotEmpty
-                      ? Column(
-                          children: List<Widget>.generate((userProfileToShow['clubs'] as List).length, (index) {
-                            final club = userProfileToShow['clubs'][index];
-                            return ListTile(
-                              title: body(header: club['clubName'], color: localAppTheme['anchorColors']['primaryColor'], context: context),
-                              trailing: formEditable
-                                  ? iconButton(
-                                      label: null,
-                                      backgroundColor: null,
-                                      iconColor: localAppTheme['anchorColors']['primaryColor'],
-                                      icon: Icons.delete,
-                                      size: 30,
-                                      toolTip: 'REMOVE CLUB',
-                                      onPressed: () {
-                                        setState(() {
-                                          userProfileToShow['clubs'].removeAt(index);
-                                        });
-                                      },
-                                      context: context,
-                                    )
-                                  : null,
-                            );
-                          }),
-                        )
-                      : Container(),
+                  _myProfileWidget(userProfileToShow),
+                  _disciplinesWidget(userProfileToShow),
+                  _workoutDaysWidget(userProfileToShow),
+                  _clubsWidget(userProfileToShow),
                   SizedBox(height: 20.0),
                   Visibility(
                     visible: !formEditable && !widget.isCoachView,
@@ -457,23 +905,6 @@ class _UserProfileState extends State<UserProfile> {
                     visible: formEditable,
                     child: Row(
                       children: [
-                        // Expanded(
-                        //   child: elevatedButton(
-                        //     label: 'CANCEL',
-                        //     onPressed: () async {
-                        //       await _resetControllers(appUserProvider);
-                        //       setState(() {
-                        //         formEditable = false;
-                        //       });
-                        //     },
-                        //     backgroundColor: localAppTheme['anchorColors']['primaryColor'],
-                        //     labelColor: localAppTheme['anchorColors']['secondaryColor'],
-                        //     leadingIcon: null,
-                        //     trailingIcon: null,
-                        //     context: context,
-                        //   ),
-                        // ),
-                        // SizedBox(width: 10.0),
                         Expanded(
                           child: elevatedButton(
                             label: 'SAVE CHANGES',

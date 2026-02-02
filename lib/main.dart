@@ -1,7 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Added for session check
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:legacyendurancesport/Home/Page/homepage.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Required for 14-day check
+
+// Keep your existing provider imports here...
 import 'package:legacyendurancesport/General/Providers/ai_provider.dart';
 import 'package:legacyendurancesport/General/Providers/clubs_provided.dart';
 import 'package:legacyendurancesport/General/Providers/events_provider.dart';
@@ -16,13 +21,18 @@ import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/firebase_options.dart';
 import 'package:provider/provider.dart';
 
-// Global navigator key (useful for navigation from outside widget tree)
+
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GoogleFonts.config.allowRuntimeFetching = false;
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Set Firebase persistence for Web
+  if (kIsWeb) {
+    await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
+  }
 
   runApp(
     MultiProvider(
@@ -31,13 +41,13 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => InternalStatusProvider()),
         ChangeNotifierProvider(create: (_) => FirebaseAuthService()),
         ChangeNotifierProvider(create: (_) => AppUserProvider()),
-        ChangeNotifierProvider(create:  (_) => ClubsProvider()),
-        ChangeNotifierProvider(create:  (_) => EventsProvider()),
-        ChangeNotifierProvider(create:  (_) => WorkoutsProvider()),
-        ChangeNotifierProvider(create:  (_) => AiProvider()),
-        ChangeNotifierProvider(create:  (_) => ImageVerificationProvider()),
+        ChangeNotifierProvider(create: (_) => ClubsProvider()),
+        ChangeNotifierProvider(create: (_) => EventsProvider()),
+        ChangeNotifierProvider(create: (_) => WorkoutsProvider()),
+        ChangeNotifierProvider(create: (_) => AiProvider()),
+        ChangeNotifierProvider(create: (_) => ImageVerificationProvider()),
       ],
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
@@ -45,22 +55,17 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  //------------------------------------------------------------
-  // Determine platform and record it in InternalStatusProvider.
-  // This is synchronous and safe to call from build().
+  // Keep your existing _detectAndSetPlatform logic...
   String _detectAndSetPlatform(BuildContext context) {
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
     String platform;
-
     if (kIsWeb) {
-      // On web, use target platform to differentiate mobile web vs desktop web
       if (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.android) {
         platform = 'MobileWeb';
       } else {
         platform = 'ComputerWeb';
       }
     } else {
-      // Native platforms
       platform = 'Unknown';
       switch (defaultTargetPlatform) {
         case TargetPlatform.android:
@@ -75,24 +80,56 @@ class MyApp extends StatelessWidget {
           break;
       }
     }
-    // Defer notifying the provider until after the current build frame
-    // to avoid calling notifyListeners() during build.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       internalStatusProvider.setPlatform(platform);
     });
     return platform;
   }
 
+  /// Logic to check if the session is still valid
+  Future<bool> _isSessionValid() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return false;
+
+    final prefs = await SharedPreferences.getInstance();
+    final startTimeStr = prefs.getString('auth_session_start');
+
+    if (startTimeStr == null) return false;
+
+    final startTime = DateTime.parse(startTimeStr);
+    final expiryTime = startTime.add(const Duration(days: 14));
+
+    if (DateTime.now().isAfter(expiryTime)) {
+      await FirebaseAuth.instance.signOut();
+      await prefs.remove('auth_session_start');
+      return false;
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     _detectAndSetPlatform(context);
     return MaterialApp(
-      theme: ThemeData(
-        primaryColor: Colors.white,
-      ),
+      theme: ThemeData(primaryColor: Colors.white),
       navigatorKey: navigatorKey,
       title: 'Legacy Endurance Sport',
-      home: const LandingPage(),
+      home: FutureBuilder<bool>(
+        future: _isSessionValid(),
+        builder: (context, snapshot) {
+          // While checking storage, show a loader
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          }
+
+          // If session is valid, go Home. Otherwise, go to LandingPage (Login)
+          if (snapshot.data == true) {
+            return const HomePage();
+          } else {
+            return const LandingPage();
+          }
+        },
+      ),
     );
   }
 }
