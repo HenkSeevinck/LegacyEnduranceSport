@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:legacyendurancesport/DayOverview/Function/add_planned_workout.dart';
 import 'package:legacyendurancesport/DayOverview/Function/complete_workout_popup.dart';
 import 'package:legacyendurancesport/General/Providers/events_provider.dart';
 import 'package:legacyendurancesport/General/Providers/image_verification_provider.dart';
@@ -84,6 +85,19 @@ class _DailyOverviewState extends State<DailyOverview> {
         builder: (context) => CompleteWorkoutPopup(workoutData: workoutData, workoutStatus: 'completed', loadedWorkout: loadedWorkout),
       );
     }
+  }
+
+  //----------------------------------------------------
+  // Add Planned Workout Popup Dialog
+  Future<void> _showAddPlannedWorkoutPopupDialog() async {
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // User must tap button to dismiss
+      builder: (BuildContext context) {
+        return AddPlannedWorkout();
+      },
+    );
   }
 
   //----------------------------------------------------
@@ -475,7 +489,7 @@ class _DailyOverviewState extends State<DailyOverview> {
                     child: elevatedButton(
                       label: 'Add a Planned Workout',
                       onPressed: () {
-                        
+                        _showAddPlannedWorkoutPopupDialog();
                       },
                       backgroundColor: localAppTheme['anchorColors']['primaryColor'],
                       labelColor: localAppTheme['anchorColors']['secondaryColor'],
