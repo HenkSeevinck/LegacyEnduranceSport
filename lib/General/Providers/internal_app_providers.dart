@@ -21,12 +21,12 @@ class InternalStatusProvider with ChangeNotifier {
   ];
 
   List<Map<String, dynamic>> homePageOptions = [
-    {'selection': 'myProfile', 'pageName': 'MY PROFILE', 'icon': Icons.person, 'navigateTo': UserProfile(isCoachView: false, formEditable: true), 'coachOnly': false},
-    {'selection': 'myGoals', 'pageName': 'MY GOALS', 'icon': Icons.flag_outlined, 'navigateTo': GoalsPage(isCoachView: false), 'coachOnly': false},
-    {'selection': 'events', 'pageName': 'EVENTS', 'icon': Icons.event, 'navigateTo': EventPage(), 'coachOnly': false},
-    {'selection': 'events', 'pageName': 'STATISTICS', 'icon': Icons.bar_chart, 'navigateTo': StatisticsPage(isCoachView: false), 'coachOnly': false},
-    {'selection': 'athletes', 'pageName': 'MY ATHLETES', 'icon': Icons.people, 'navigateTo': MyAthletesPage(), 'coachOnly': true},
-    {'selection': 'workouts', 'pageName': 'MY WORKOUTS', 'icon': Icons.fitness_center, 'navigateTo': Workouts(), 'coachOnly': true},
+    {'selection': 'myProfile', 'pageName': 'MY PROFILE', 'icon': Icons.person, 'navigateTo': UserProfile(isCoachView: false, formEditable: true), 'coachOnly': false, 'image': 'images/Profile.png'},
+    {'selection': 'myGoals', 'pageName': 'MY GOALS', 'icon': Icons.flag_outlined, 'navigateTo': GoalsPage(isCoachView: false), 'coachOnly': false, 'image': 'images/Goals.png'},
+    {'selection': 'events', 'pageName': 'EVENTS', 'icon': Icons.event, 'navigateTo': EventPage(), 'coachOnly': false, 'image': 'images/Events.png'},
+    {'selection': 'events', 'pageName': 'STATISTICS', 'icon': Icons.bar_chart, 'navigateTo': StatisticsPage(isCoachView: false), 'coachOnly': false, 'image': 'images/Statistics.png'},
+    {'selection': 'athletes', 'pageName': 'MY ATHLETES', 'icon': Icons.people, 'navigateTo': MyAthletesPage(), 'coachOnly': true, 'image': 'images/Athletes.png'},
+    {'selection': 'workouts', 'pageName': 'MY WORKOUTS', 'icon': Icons.fitness_center, 'navigateTo': Workouts(), 'coachOnly': true, 'image': 'images/Workouts.png'},
   ];
 
   List<Map<String, dynamic>> longRangePlanBlocks = [

@@ -17,7 +17,7 @@ class MobileHome extends StatefulWidget {
 }
 
 class _MobileHomeState extends State<MobileHome> {
-  static const double _iconSize = 48.0;
+  static const double _iconSize = 150;
   LandingView _view = LandingView.landing;
 
   //------------------------------------------------------------------------------
@@ -50,14 +50,29 @@ class _MobileHomeState extends State<MobileHome> {
                   internalStatusProvider.setUserUIDToShow(userUid);
                   Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => options[index]['navigateTo']));
                 },
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border(bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
-                  ),
+                child: SizedBox(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(options[index]['icon'], color: localAppTheme['anchorColors']['primaryColor'], size: _iconSize),
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: Image.asset(
+                          options[index]['image'],
+                          width: _iconSize,
+                          height: _iconSize,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              options[index]['icon'],
+                              size: _iconSize,
+                              color: localAppTheme['anchorColors']['primaryColor'],
+                            );
+                          },
+                        ),
+                      ),
                       const SizedBox(height: 10),
                       Container(
                         width: 150,
@@ -169,7 +184,10 @@ class _MobileHomeState extends State<MobileHome> {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.person, color: localAppTheme['anchorColors']['secondaryColor']),
+              Icon(
+                Icons.person, 
+                color: localAppTheme['anchorColors']['secondaryColor'],
+                ),
               const SizedBox(width: 10),
               header2(header: 'ATHLETE:', context: context, color: localAppTheme['anchorColors']['secondaryColor']),
             ],
@@ -199,9 +217,38 @@ class _MobileHomeState extends State<MobileHome> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.person, color: localAppTheme['anchorColors']['primaryColor'], size: 150),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Image.asset(
+                      'images/AthleteArea.png',
+                      width: 200,
+                      height: 200,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          Icons.person,
+                          size: 150,
+                          color: localAppTheme['anchorColors']['primaryColor'],
+                        );
+                      },
+                    ),
+                  ),
                   const SizedBox(height: 10),
-                  header2(header: 'ATHLETE SECTION', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                  Container(
+                    width: 200,
+                    padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                    decoration: BoxDecoration(
+                      color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8.0),
+                      border: Border.all(color: localAppTheme['anchorColors']['primaryColor']),
+                    ),
+                    child: Center(
+                      child: header2(header: 'ATHLETE SECTION', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -219,9 +266,38 @@ class _MobileHomeState extends State<MobileHome> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.co_present, color: localAppTheme['anchorColors']['primaryColor'], size: 150),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Image.asset(
+                      'images/CoachArea.png',
+                      width: 200,
+                      height: 200,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          Icons.person,
+                          size: 150,
+                          color: localAppTheme['anchorColors']['primaryColor'],
+                        );
+                      },
+                    ),
+                  ),
                   const SizedBox(height: 10),
-                  header2(header: 'COACH SECTION', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                  Container(
+                    width: 200,
+                    padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                    decoration: BoxDecoration(
+                      color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8.0),
+                      border: Border.all(color: localAppTheme['anchorColors']['primaryColor']),
+                    ),
+                    child: Center(
+                      child: header2(header: 'COACH SECTION', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -230,8 +306,6 @@ class _MobileHomeState extends State<MobileHome> {
       ],
     );
   }
-
-  // No initState logic that depends on inherited widgets; derive UI in build()
 
   //------------------------------------------------------------------------------
   // Build Method

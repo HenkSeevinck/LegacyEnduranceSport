@@ -1084,3 +1084,20 @@ Widget appheader({
     ),
   );
 }
+
+//------------------------------------------------------------------------
+// Image Button Widget
+Widget imageButton({
+  required String imagePath,
+  required double width,
+  required double height,
+  required VoidCallback? onPressed,
+  required String? toolTip,
+  required BuildContext context,
+}) {
+  return IconButton(
+    tooltip: toolTip,
+    onPressed: onPressed,
+    icon: Image.asset(imagePath, width: width, height: height, fit: BoxFit.contain),
+  );
+}
