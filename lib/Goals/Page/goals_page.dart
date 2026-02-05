@@ -161,19 +161,35 @@ class _GoalsPageState extends State<GoalsPage> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  SizedBox(
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
+                    ),
                     width: double.infinity,
-                    height: 30,
+                    height: 60,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        !widget.isCoachView
-                            ? header1(header: 'My Goals:', context: context, color: localAppTheme['anchorColors']['primaryColor'])
-                            : header1(
-                                header: '${userProfileToShow['name'] ?? 'XXX'}\'s Goals:',
-                                context: context,
-                                color: localAppTheme['anchorColors']['primaryColor'],
-                              ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            imageDisplay(
+                              imagePath: 'images/Goals.png', 
+                              width: 40, 
+                              height: 40, 
+                              context: context,
+                              cornerRadius: 3,
+                            ),
+                            SizedBox(width: 10.0),
+                            !widget.isCoachView
+                                ? header1(header: 'My Goals:', context: context, color: localAppTheme['anchorColors']['primaryColor'])
+                                : header1(
+                                    header: '${userProfileToShow['name'] ?? 'XXX'}\'s Goals:',
+                                    context: context,
+                                    color: localAppTheme['anchorColors']['primaryColor'],
+                                  ),
+                          ],
+                        ),
                         Visibility(
                           visible: !widget.isCoachView,
                           child: iconButton(
@@ -192,7 +208,6 @@ class _GoalsPageState extends State<GoalsPage> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 20.0),
                   goals != null && goals.isNotEmpty
                       ? Column(
                           children: List<Widget>.generate(goals.length, (index) {

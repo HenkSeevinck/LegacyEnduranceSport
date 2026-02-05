@@ -50,11 +50,18 @@ class _MobileHomeState extends State<MobileHome> {
                   internalStatusProvider.setUserUIDToShow(userUid);
                   Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => options[index]['navigateTo']));
                 },
-                child: SizedBox(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                child: Container(
+                  padding: EdgeInsets.only(
+                    top: 10.0,
+                    left: index % 2 == 0 ? 0.0 : 5.0,
+                    right: index % 2 == 0 ? 5.0 : 0.0,
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
                       Container(
+                        height: double.infinity,
+                        width: double.infinity,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12.0),
                         ),
@@ -76,9 +83,10 @@ class _MobileHomeState extends State<MobileHome> {
                       const SizedBox(height: 10),
                       Container(
                         width: 150,
+                        height: 40,
                         padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
                         decoration: BoxDecoration(
-                          color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.1),
+                          color: localAppTheme['anchorColors']['secondaryColor'].withOpacity(0.7),
                           borderRadius: BorderRadius.circular(8.0),
                           border: Border.all(color: localAppTheme['anchorColors']['primaryColor']),
                         ),
@@ -212,10 +220,11 @@ class _MobileHomeState extends State<MobileHome> {
         Expanded(
           child: InkWell(
             onTap: onAthleteTap,
-            child: SizedBox(
+            child: Container(
+              padding: const EdgeInsets.only(top: 10),
               width: double.infinity,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
                   Container(
                     decoration: BoxDecoration(
@@ -224,8 +233,8 @@ class _MobileHomeState extends State<MobileHome> {
                     clipBehavior: Clip.antiAlias,
                     child: Image.asset(
                       'images/AthleteArea.png',
-                      width: 200,
-                      height: 200,
+                      width: double.infinity,
+                      height: double.infinity,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Icon(
@@ -239,9 +248,10 @@ class _MobileHomeState extends State<MobileHome> {
                   const SizedBox(height: 10),
                   Container(
                     width: 200,
+                    height: 40,
                     padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
                     decoration: BoxDecoration(
-                      color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.1),
+                      color: localAppTheme['anchorColors']['secondaryColor'].withOpacity(0.7),
                       borderRadius: BorderRadius.circular(8.0),
                       border: Border.all(color: localAppTheme['anchorColors']['primaryColor']),
                     ),
@@ -259,12 +269,13 @@ class _MobileHomeState extends State<MobileHome> {
           child: InkWell(
             onTap: onCoachTap,
             child: Container(
+              padding: const EdgeInsets.only(top: 10),
               decoration: BoxDecoration(
                 border: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
               ),
               width: double.infinity,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
                   Container(
                     decoration: BoxDecoration(
@@ -273,8 +284,8 @@ class _MobileHomeState extends State<MobileHome> {
                     clipBehavior: Clip.antiAlias,
                     child: Image.asset(
                       'images/CoachArea.png',
-                      width: 200,
-                      height: 200,
+                      width: double.infinity,
+                      height: double.infinity,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Icon(
@@ -285,12 +296,12 @@ class _MobileHomeState extends State<MobileHome> {
                       },
                     ),
                   ),
-                  const SizedBox(height: 10),
                   Container(
                     width: 200,
+                    height: 40,
                     padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
                     decoration: BoxDecoration(
-                      color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.1),
+                      color: localAppTheme['anchorColors']['secondaryColor'].withOpacity(0.7),
                       borderRadius: BorderRadius.circular(8.0),
                       border: Border.all(color: localAppTheme['anchorColors']['primaryColor']),
                     ),

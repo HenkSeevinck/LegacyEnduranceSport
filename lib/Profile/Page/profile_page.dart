@@ -685,7 +685,13 @@ class _UserProfileState extends State<UserProfile> {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Icon(Icons.person, color: localAppTheme['anchorColors']['primaryColor']),
+          imageDisplay(
+            imagePath: 'images/Profile.png', 
+            width: 40, 
+            height: 40, 
+            context: context,
+            cornerRadius: 3,
+          ),
           SizedBox(width: 10.0),
           !widget.isCoachView
               ? header1(header: 'My Profile:', context: context, color: localAppTheme['anchorColors']['primaryColor'])

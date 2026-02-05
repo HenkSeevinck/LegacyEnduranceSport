@@ -381,11 +381,8 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackbar({required Bui
   return ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Center(
-        child: header2(
-          header: header, 
-          context: context, 
-          color: localAppTheme['anchorColors']['primaryColor'])
-        ),
+        child: header2(header: header, context: context, color: localAppTheme['anchorColors']['primaryColor']),
+      ),
       backgroundColor: localAppTheme['anchorColors']['secondaryColor'],
     ),
   );
@@ -1018,7 +1015,7 @@ Widget appheader({
   bool isAdmin = false,
   bool isModerator = false,
   Function? onPressed,
-  }) {
+}) {
   final localAppTheme = ResponsiveTheme(context).theme;
   return SafeArea(
     top: true,
@@ -1061,20 +1058,20 @@ Widget appheader({
                   size: 30,
                   toolTip: 'ENABLE ADMIN',
                   context: context,
-                  onPressed: (){},
+                  onPressed: () {},
                 ),
               ),
               Visibility(
                 visible: isModerator,
-                  child: iconButton(
-                    label: null,
+                child: iconButton(
+                  label: null,
                   backgroundColor: null,
                   iconColor: localAppTheme['anchorColors']['primaryColor'],
                   icon: Icons.admin_panel_settings_outlined,
                   size: 30,
                   toolTip: 'ENABLE MODERATOR',
                   context: context,
-                  onPressed: (){},
+                  onPressed: () {},
                 ),
               ),
             ],
@@ -1094,10 +1091,43 @@ Widget imageButton({
   required VoidCallback? onPressed,
   required String? toolTip,
   required BuildContext context,
+  IconData? brokenIcon,
+  double? cornerRadius = 6.0,
 }) {
   return IconButton(
     tooltip: toolTip,
     onPressed: onPressed,
-    icon: Image.asset(imagePath, width: width, height: height, fit: BoxFit.contain),
+    icon: imageDisplay(
+      imagePath: imagePath, 
+      width: width, 
+      height: height, 
+      context: context
+    ),
+  );
+}
+
+//------------------------------------------------------------------------
+// Image Display Widget
+Widget imageDisplay({
+  required String imagePath,
+  required double width,
+  required double height,
+  required BuildContext context,
+  IconData? brokenIcon,
+  double? cornerRadius,
+}) {
+  final localAppTheme = ResponsiveTheme(context).theme;
+  return Container(
+    height: height,
+    width: width,
+    decoration: BoxDecoration(borderRadius: BorderRadius.circular(cornerRadius ?? 6.0)),
+    clipBehavior: Clip.antiAlias,
+    child: Image.asset(
+      imagePath,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Icon(brokenIcon ?? Icons.broken_image, size: width, color: localAppTheme['anchorColors']['primaryColor']);
+      },
+    ),
   );
 }

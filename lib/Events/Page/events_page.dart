@@ -133,8 +133,36 @@ class _EventPageState extends State<EventPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                header1(header: 'Upcoming Events:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                SizedBox(height: 20.0),
+                Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                        bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)
+                      ),
+                    ),
+                    width: double.infinity,
+                    height: 60,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            imageDisplay(
+                              imagePath: 'images/Events.png', 
+                              width: 40, 
+                              height: 40, 
+                              context: context,
+                              cornerRadius: 3,
+                            ),
+                            SizedBox(width: 10.0),
+                            header1(header: 'Upcoming Events:', context: context, color: localAppTheme['anchorColors']['primaryColor'])
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                SizedBox(height: 10.0),
                 filteredEvents != null && filteredEvents.isNotEmpty
                     ? Column(
                       children: [
@@ -151,7 +179,7 @@ class _EventPageState extends State<EventPage> {
                             setState(() {});
                           },
                           ),
-                        SizedBox(height: 20.0),
+                        SizedBox(height: 10.0),
                         Column(
                             children: List<Widget>.generate(filteredEvents.length, (index) {
                               final itemCount = filteredEvents.length;

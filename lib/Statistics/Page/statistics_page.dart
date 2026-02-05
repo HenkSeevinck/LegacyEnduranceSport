@@ -112,8 +112,34 @@ class _StatisticsPageState extends State<StatisticsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                header1(header: 'Statistics:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                SizedBox(height: 10),
+              Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                    ),
+                  ),
+                  width: double.infinity,
+                  height: 60,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          imageDisplay(
+                            imagePath: 'images/Statistics.png', 
+                            width: 40, 
+                            height: 40, 
+                            context: context,
+                            cornerRadius: 3,
+                          ),
+                          SizedBox(width: 10.0),
+                          header1(header: 'Statistics:', context: context, color: localAppTheme['anchorColors']['primaryColor'])
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
                 Container(
                   decoration: BoxDecoration(
                     border: Border(

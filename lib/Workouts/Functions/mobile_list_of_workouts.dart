@@ -686,13 +686,25 @@ class _MobileListOfWorkoutsState extends State<MobileListOfWorkouts> {
           return SingleChildScrollView(
             child: Column(
               children: [
-                SizedBox(
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                    ),
+                  ),
                   width: double.infinity,
-                  height: 30,
+                  height: 60,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      header1(header: 'My Workouts:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          imageDisplay(imagePath: 'images/Workouts.png', width: 40, height: 40, context: context, cornerRadius: 3),
+                          SizedBox(width: 10.0),
+                          header1(header: 'My Workouts:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                        ],
+                      ),
                       Visibility(
                         visible: !fromDayOverview,
                         child: iconButton(
@@ -711,7 +723,6 @@ class _MobileListOfWorkoutsState extends State<MobileListOfWorkouts> {
                     ],
                   ),
                 ),
-                SizedBox(height: 20.0),
                 allWorkouts.isNotEmpty
                     ? Column(
                         children: List<Widget>.generate(allWorkouts.length, (index) {
