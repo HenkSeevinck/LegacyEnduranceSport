@@ -67,6 +67,7 @@ class _StatisticsWindowState extends State<StatisticsWindow> {
   //----------------------------------------------------
   // Line graph data preparation between dates
   Widget _lineGraph(List<Map<String, dynamic>> statisticsBetweenDates) {
+    final localAppTheme = ResponsiveTheme(context).theme;
     // Aggregate distances by day and compute cumulative totals.
     //print('StartDate: ${widget.startDate}, EndDate: ${widget.endDate}, Data: $statisticsBetweenDates');
 
@@ -169,8 +170,8 @@ class _StatisticsWindowState extends State<StatisticsWindow> {
                   isCurved: true,
                   barWidth: 3,
                   dotData: FlDotData(show: true),
-                  belowBarData: BarAreaData(show: true, color: Colors.blue.withOpacity(0.2)),
-                  color: Colors.blue,
+                  belowBarData: BarAreaData(show: true, color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.2)),
+                  color: localAppTheme['anchorColors']['primaryColor'],
                 ),
               ],
               minX: 0,
@@ -183,7 +184,7 @@ class _StatisticsWindowState extends State<StatisticsWindow> {
                       final idx = t.x.toInt();
                       final date = (idx >= 0 && idx < days.length) ? days[idx] : null;
                       final dateLabel = date != null ? '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}' : '';
-                      return LineTooltipItem('$dateLabel\n${t.y.toStringAsFixed(2)} km', const TextStyle(color: Colors.white));
+                      return LineTooltipItem('$dateLabel\n${t.y.toStringAsFixed(2)} km', TextStyle(color: localAppTheme['anchorColors']['secondaryColor']));
                     }).toList();
                   },
                 ),

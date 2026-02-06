@@ -161,52 +161,15 @@ class _GoalsPageState extends State<GoalsPage> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
-                    ),
-                    width: double.infinity,
-                    height: 60,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            imageDisplay(
-                              imagePath: 'images/Goals.png', 
-                              width: 40, 
-                              height: 40, 
-                              context: context,
-                              cornerRadius: 3,
-                            ),
-                            SizedBox(width: 10.0),
-                            !widget.isCoachView
-                                ? header1(header: 'My Goals:', context: context, color: localAppTheme['anchorColors']['primaryColor'])
-                                : header1(
-                                    header: '${userProfileToShow['name'] ?? 'XXX'}\'s Goals:',
-                                    context: context,
-                                    color: localAppTheme['anchorColors']['primaryColor'],
-                                  ),
-                          ],
-                        ),
-                        Visibility(
-                          visible: !widget.isCoachView,
-                          child: iconButton(
-                            label: null,
-                            backgroundColor: null,
-                            iconColor: localAppTheme['anchorColors']['primaryColor'],
-                            icon: Icons.add,
-                            size: 30,
-                            toolTip: 'ADD GOAL',
-                            onPressed: () {
-                              _showCreateGoalPopupDialog(context, null, null);
-                            },
-                            context: context,
-                          ),
-                        ),
-                      ],
-                    ),
+                  pageHeaderImage(
+                    imagePath: 'images/Goals.png', 
+                    context: context, 
+                    toolTip: 'ADD GOAL', 
+                    userProfileToShow: userProfileToShow, 
+                    pageTitle: 'GOALS',
+                    isCoachView: widget.isCoachView,
+                    showCreateGoalPopupDialog: () => _showCreateGoalPopupDialog(context, null, null),
+                    buttonVisibility: !widget.isCoachView,
                   ),
                   goals != null && goals.isNotEmpty
                       ? Column(

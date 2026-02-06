@@ -1131,3 +1131,73 @@ Widget imageDisplay({
     ),
   );
 }
+
+
+//------------------------------------------------------------------------
+// Page Header Widget
+Widget pageHeaderImage({
+  required String imagePath,
+  required BuildContext context,
+  required String toolTip,
+  required Map<String, dynamic> userProfileToShow,
+  required String? pageTitle,
+  bool? buttonVisibility,
+  bool? isCoachView,
+  VoidCallback? showCreateGoalPopupDialog,
+}) {
+  final localAppTheme = ResponsiveTheme(context).theme;
+
+  return Container(
+    decoration: BoxDecoration(
+      border: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
+      image: DecorationImage(image: AssetImage(imagePath), fit: BoxFit.cover),
+    ),
+    width: double.infinity,
+    height: 60,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(width: 10.0),
+            Container(
+              padding: EdgeInsets.only(left: 10.0, right: 10.0),
+              decoration: BoxDecoration(
+                border: Border.all(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                borderRadius: BorderRadius.circular(5.0),
+                color: localAppTheme['anchorColors']['secondaryColor']?.withOpacity(0.5),
+              ),
+              child: !(isCoachView ?? false)
+                  ? header1(header: '$pageTitle:', context: context, color: localAppTheme['anchorColors']['primaryColor'])
+                  : header1(header: '${userProfileToShow['name'].toString().toUpperCase()}\'S $pageTitle:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+            ),
+          ],
+        ),
+        Visibility(
+          visible: buttonVisibility ?? false,
+          child: Container(
+            margin: EdgeInsets.only(right: 10.0),
+            decoration: BoxDecoration(
+              border: Border.all(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+              borderRadius: BorderRadius.circular(5.0),
+              color: localAppTheme['anchorColors']['secondaryColor']?.withOpacity(0.5),
+            ),
+            child: iconButton(
+              label: null,
+              backgroundColor: null,
+              iconColor: localAppTheme['anchorColors']['primaryColor'],
+              icon: Icons.add,
+              size: 30,
+              toolTip: toolTip,
+              onPressed: () {
+                showCreateGoalPopupDialog?.call();
+              },
+              context: context,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}

@@ -245,7 +245,6 @@ class _MobileHomeState extends State<MobileHome> {
                       },
                     ),
                   ),
-                  const SizedBox(height: 10),
                   Container(
                     width: 200,
                     height: 40,
@@ -264,15 +263,11 @@ class _MobileHomeState extends State<MobileHome> {
             ),
           ),
         ),
-        const SizedBox(height: 10),
         Expanded(
           child: InkWell(
             onTap: onCoachTap,
             child: Container(
               padding: const EdgeInsets.only(top: 10),
-              decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
-              ),
               width: double.infinity,
               child: Stack(
                 alignment: Alignment.center,

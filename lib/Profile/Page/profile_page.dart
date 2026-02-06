@@ -685,17 +685,9 @@ class _UserProfileState extends State<UserProfile> {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          imageDisplay(
-            imagePath: 'images/Profile.png', 
-            width: 40, 
-            height: 40, 
-            context: context,
-            cornerRadius: 3,
-          ),
+          Icon(Icons.person, color: localAppTheme['anchorColors']['primaryColor']),
           SizedBox(width: 10.0),
-          !widget.isCoachView
-              ? header1(header: 'My Profile:', context: context, color: localAppTheme['anchorColors']['primaryColor'])
-              : header1(header: '${userProfileToShow['name'] ?? '-'}\'s Profile:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+          header1(header: 'Details:', context: context, color: localAppTheme['anchorColors']['primaryColor'])
         ],
       ),
       children: [
@@ -907,6 +899,15 @@ class _UserProfileState extends State<UserProfile> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                    pageHeaderImage(
+                    imagePath: 'images/Profile.png', 
+                    context: context, 
+                    toolTip: '', 
+                    userProfileToShow: userProfileToShow, 
+                    pageTitle: 'PROFILE',
+                    isCoachView: widget.isCoachView,
+                    buttonVisibility: false,
+                  ),
                   _myProfileWidget(userProfileToShow),
                   _disciplinesWidget(userProfileToShow),
                   _workoutDaysWidget(userProfileToShow),

@@ -111,7 +111,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     _detectAndSetPlatform(context);
     return MaterialApp(
-      theme: ThemeData(primaryColor: Colors.white),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.white,
+          surface: Colors.white,
+        ),
+      ),
       navigatorKey: navigatorKey,
       title: 'Legacy Endurance Sport',
       home: FutureBuilder<bool>(

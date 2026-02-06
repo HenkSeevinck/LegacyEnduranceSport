@@ -686,42 +686,17 @@ class _MobileListOfWorkoutsState extends State<MobileListOfWorkouts> {
           return SingleChildScrollView(
             child: Column(
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                    ),
-                  ),
-                  width: double.infinity,
-                  height: 60,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          imageDisplay(imagePath: 'images/Workouts.png', width: 40, height: 40, context: context, cornerRadius: 3),
-                          SizedBox(width: 10.0),
-                          header1(header: 'My Workouts:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                        ],
-                      ),
-                      Visibility(
-                        visible: !fromDayOverview,
-                        child: iconButton(
-                          label: null,
-                          backgroundColor: null,
-                          iconColor: localAppTheme['anchorColors']['primaryColor'],
-                          icon: Icons.add,
-                          size: 30,
-                          toolTip: 'ADD WORKOUT',
-                          onPressed: () {
-                            _showCreateWorkoutPopupDialog(context, null, null);
-                          },
-                          context: context,
-                        ),
-                      ),
-                    ],
-                  ),
+                pageHeaderImage(
+                  imagePath: 'images/Workouts.png', 
+                  context: context, 
+                  toolTip: 'ADD WORKOUT', 
+                  userProfileToShow: {}, 
+                  pageTitle: 'MY WORKOUTS',
+                  isCoachView: false,
+                  buttonVisibility: !fromDayOverview,
+                  showCreateGoalPopupDialog: () {
+                    _showCreateWorkoutPopupDialog(context, null, null);
+                  },
                 ),
                 allWorkouts.isNotEmpty
                     ? Column(

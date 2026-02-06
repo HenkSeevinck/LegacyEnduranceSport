@@ -103,7 +103,7 @@ class _EventPageState extends State<EventPage> {
             return name.contains(searchText) || terrain.contains(searchText) || typeName.contains(searchText);
           }).toList()
         : events;
-
+      
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -133,53 +133,33 @@ class _EventPageState extends State<EventPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                    decoration: BoxDecoration(
-                      border: Border(
-                        top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                        bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)
-                      ),
-                    ),
-                    width: double.infinity,
-                    height: 60,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            imageDisplay(
-                              imagePath: 'images/Events.png', 
-                              width: 40, 
-                              height: 40, 
-                              context: context,
-                              cornerRadius: 3,
-                            ),
-                            SizedBox(width: 10.0),
-                            header1(header: 'Upcoming Events:', context: context, color: localAppTheme['anchorColors']['primaryColor'])
-                          ],
-                        ),
-                      ],
-                    ),
+                pageHeaderImage(
+                  imagePath: 'images/Events.png',
+                  context: context,
+                  toolTip: '',
+                  userProfileToShow: {},
+                  pageTitle: 'EVENTS',
+                  isCoachView: false,
+                  buttonVisibility: false,
+                ),
+                SizedBox(height: 10.0),
+                FormInputField(
+                  label: 'Search Events', 
+                  errorMessage: '', 
+                  isMultiline: false, 
+                  isPassword: false, 
+                  prefixIcon: null, 
+                  suffixIcon: null, 
+                  showLabel: true,
+                  controller: searchController,
+                  onChanged: (value) {
+                    setState(() {});
+                  },
                   ),
                 SizedBox(height: 10.0),
                 filteredEvents != null && filteredEvents.isNotEmpty
                     ? Column(
                       children: [
-                        FormInputField(
-                          label: 'Search Events', 
-                          errorMessage: '', 
-                          isMultiline: false, 
-                          isPassword: false, 
-                          prefixIcon: null, 
-                          suffixIcon: null, 
-                          showLabel: true,
-                          controller: searchController,
-                          onChanged: (value) {
-                            setState(() {});
-                          },
-                          ),
-                        SizedBox(height: 10.0),
                         Column(
                             children: List<Widget>.generate(filteredEvents.length, (index) {
                               final itemCount = filteredEvents.length;

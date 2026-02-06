@@ -74,6 +74,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
     final localAppTheme = ResponsiveTheme(context).theme;
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
     final workoutTypes = internalStatusProvider.workoutTypes;
+    final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
+    final userProfileToShow = appUserProvider.userProfileToShow;
 
     return Scaffold(
       appBar: AppBar(
@@ -112,33 +114,14 @@ class _StatisticsPageState extends State<StatisticsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              Container(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-                    ),
-                  ),
-                  width: double.infinity,
-                  height: 60,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          imageDisplay(
-                            imagePath: 'images/Statistics.png', 
-                            width: 40, 
-                            height: 40, 
-                            context: context,
-                            cornerRadius: 3,
-                          ),
-                          SizedBox(width: 10.0),
-                          header1(header: 'Statistics:', context: context, color: localAppTheme['anchorColors']['primaryColor'])
-                        ],
-                      ),
-                    ],
-                  ),
+                pageHeaderImage(
+                  imagePath: 'images/Statistics.png', 
+                  context: context, 
+                  toolTip: '', 
+                  userProfileToShow: userProfileToShow, 
+                  pageTitle: 'STATISTICS',
+                  isCoachView: widget.isCoachView,
+                  buttonVisibility: false,
                 ),
                 Container(
                   decoration: BoxDecoration(
