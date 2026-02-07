@@ -193,6 +193,7 @@ class _EventPageState extends State<EventPage> {
                                     bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: index == (itemCount - 1) ? 1.0 : 0.0),
                                   ),
                                   showTrailingIcon: false,
+                                  tilePadding: EdgeInsets.all(0),
                                   title: Column(
                                       children: [
                                         SizedBox(height: 10.0),
@@ -270,63 +271,49 @@ class _EventPageState extends State<EventPage> {
                                                 ),
                                               ],
                                             ),
-                                            Container(
-                                              width: 75,
-                                              height: 125,
-                                              padding: const EdgeInsets.only(left: 10.0),
-                                              decoration: BoxDecoration(
-                                                border: Border(left: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
-                                              ),
-                                              child: Column(
-                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                children: [
-                                                  iconButton(
-                                                    label: null,
-                                                    backgroundColor: null,
-                                                    iconColor: hasRSVPed ? Colors.green : localAppTheme['anchorColors']['primaryColor'],
-                                                    icon: Icons.rsvp_outlined,
-                                                    size: 30,
-                                                    toolTip: 'RSVP',
-                                                    context: context,
-                                                    onPressed: () async{
-                                                      try{
-                                                      // Update RSVP status
-                                                      List<dynamic> updatedAttendees = List<dynamic>.from(event['attendees'] ?? <dynamic>[]);
-                                                      if (!hasRSVPed) {
-                                                        await eventsProvider.updateEvent(event['eventID'], {
-                                                          'attendees': FieldValue.arrayUnion(appUser['uid'] != null ? [appUser['uid']] : []),
-                                                        });
-                                                        updatedAttendees.add(appUser['uid']);
-                                                      } else {
-                                                        await eventsProvider.updateEvent(event['eventID'], {
-                                                          'attendees': FieldValue.arrayRemove(appUser['uid'] != null ? [appUser['uid']] : []),
-                                                        });
-                                                        updatedAttendees.remove(appUser['uid']);
-                                                      }
-                                                      } catch (e) {
-                                                        showGeneralPopupDialog(context, 'Error', 'An error occurred while updating your RSVP. Please try again later.');
-                                                      }
-                                                                                                          
-                                                      // Load attendees if not already loaded
-                                                      if (isExpanded) {
-                                                        setState(() {
-                                                          isLoadingAthleteList = true;
-                                                        });
-                                                        eventsProvider.clearAttendees();
-                                                        await eventsProvider.fetchAttendeesForEvent(
-                                                          (!hasRSVPed)
-                                                            ? (List<dynamic>.from(event['attendees'] ?? <dynamic>[])..add(appUser['uid']))
-                                                            : (List<dynamic>.from(event['attendees'] ?? <dynamic>[])..remove(appUser['uid'])),
-                                                          appUserProvider
-                                                        );
-                                                        setState(() {
-                                                          isLoadingAthleteList = false;
-                                                        });
-                                                      }
-                                                    },
-                                                  ),
-                                                ],
-                                              ),
+                                            imageButtonWithHeader(
+                                              width: 75, 
+                                              height: 130, 
+                                              onPressed: () async{
+                                                try{
+                                                // Update RSVP status
+                                                List<dynamic> updatedAttendees = List<dynamic>.from(event['attendees'] ?? <dynamic>[]);
+                                                if (!hasRSVPed) {
+                                                  await eventsProvider.updateEvent(event['eventID'], {
+                                                    'attendees': FieldValue.arrayUnion(appUser['uid'] != null ? [appUser['uid']] : []),
+                                                  });
+                                                  updatedAttendees.add(appUser['uid']);
+                                                } else {
+                                                  await eventsProvider.updateEvent(event['eventID'], {
+                                                    'attendees': FieldValue.arrayRemove(appUser['uid'] != null ? [appUser['uid']] : []),
+                                                  });
+                                                  updatedAttendees.remove(appUser['uid']);
+                                                }
+                                                } catch (e) {
+                                                  showGeneralPopupDialog(context, 'Error', 'An error occurred while updating your RSVP. Please try again later.');
+                                                }
+                                                                                                    
+                                                // Load attendees if not already loaded
+                                                if (isExpanded) {
+                                                  setState(() {
+                                                    isLoadingAthleteList = true;
+                                                  });
+                                                  eventsProvider.clearAttendees();
+                                                  await eventsProvider.fetchAttendeesForEvent(
+                                                    (!hasRSVPed)
+                                                      ? (List<dynamic>.from(event['attendees'] ?? <dynamic>[])..add(appUser['uid']))
+                                                      : (List<dynamic>.from(event['attendees'] ?? <dynamic>[])..remove(appUser['uid'])),
+                                                    appUserProvider
+                                                  );
+                                                  setState(() {
+                                                    isLoadingAthleteList = false;
+                                                  });
+                                                }
+                                              },
+                                              toolTip: 'RSVP', 
+                                              imagePath: hasRSVPed ? 'images/RSVPed.png' : 'images/RSVP.png', 
+                                              context: context, 
+                                              headerText: 'RSVP'
                                             ),
                                           ],
                                         ),

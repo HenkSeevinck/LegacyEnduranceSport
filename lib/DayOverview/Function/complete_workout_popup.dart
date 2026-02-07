@@ -90,7 +90,7 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
 
     loadedWorkout!['completedworkoutData'] = completedworkoutData;
     try {
-      await workoutsProvider.createLoadedWorkoutRecord(loadedWorkout);
+      await workoutsProvider.createLoadedWorkoutRecord(loadedWorkout, null);
       setState(() {});
       Navigator.of(context).pop();
     } catch (e) {

@@ -219,117 +219,44 @@ class _MobileMyAthletesState extends State<MobileMyAthletes> {
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                         children: [
-                                          // Expanded(
-                                          //   child: Container(
-                                          //     decoration: BoxDecoration(
-                                          //       border: Border(
-                                          //         left: BorderSide(
-                                          //           color: localAppTheme['anchorColors']['primaryColor']!,
-                                          //           width: 1.0,
-                                          //         ),
-                                          //       ),
-                                          //     ),
-                                          //     child: iconButton(
-                                          //       label: 'PROFILE', 
-                                          //       backgroundColor: null, 
-                                          //       iconColor: localAppTheme['anchorColors']['primaryColor'], 
-                                          //       icon: Icons.person, 
-                                          //       size: 30, 
-                                          //       toolTip: 'VIEW PROFILE', 
-                                          //       onPressed: () async {
-                                          //         await _navigateToUserProfilePage(athlete['uid']);
-                                          //       },
-                                          //       context: context, 
-                                          //     ),
-                                          //   ),
-                                          // ),
                                           Expanded(
-                                            child: imageButton(
-                                              imagePath: 'images/Profile.png', 
-                                              width: 200, 
+                                            child: imageButtonWithHeader(
+                                              width: double.infinity, 
                                               height: 60, 
                                               onPressed: () async {
                                                 await _navigateToUserProfilePage(athlete['uid']);
-                                              },
+                                              }, 
                                               toolTip: 'VIEW PROFILE', 
-                                              context: context
-                                            ),
+                                              imagePath: 'images/Profile.png', 
+                                              context: context, 
+                                              headerText: 'PROFILE'
+                                              ),
                                           ),
-                                          // Expanded(
-                                          //   child: Container(
-                                          //     decoration: BoxDecoration(
-                                          //       border: Border(
-                                          //         right: BorderSide(
-                                          //           color: localAppTheme['anchorColors']['primaryColor']!,
-                                          //           width: 1.0,
-                                          //         ),
-                                          //         left: BorderSide(
-                                          //           color: localAppTheme['anchorColors']['primaryColor']!,
-                                          //           width: 1.0,
-                                          //         ),
-                                          //       ),
-                                          //     ),
-                                          //     child: iconButton(
-                                          //       label: 'GOALS', 
-                                          //       backgroundColor: null, 
-                                          //       iconColor: localAppTheme['anchorColors']['primaryColor'], 
-                                          //       icon: Icons.flag_outlined, 
-                                          //       size: 30, 
-                                          //       toolTip: 'VIEW GOALS', 
-                                          //       onPressed: () async {
-                                          //         await _navigateToAthleteGoalsPage(athlete['uid']);
-                                          //       },
-                                          //       context: context, 
-                                          //     ),
-                                          //   ),
-                                          // ),
                                           Expanded(
-                                            child: imageButton(
-                                              imagePath: 'images/Goals.png', 
-                                              width: 200, 
+                                            child: imageButtonWithHeader(
+                                              width: double.infinity, 
                                               height: 60, 
                                               onPressed: () async {
                                                 await _navigateToAthleteGoalsPage(athlete['uid']);
-                                              },
+                                              }, 
                                               toolTip: 'VIEW GOALS', 
-                                              context: context
-                                            ),
+                                              imagePath: 'images/Goals.png', 
+                                              context: context, 
+                                              headerText: 'GOALS'
+                                              ), 
                                           ),
-                                          // Expanded(
-                                          //   child: Container(
-                                          //     decoration: BoxDecoration(
-                                          //       border: Border(
-                                          //         right: BorderSide(
-                                          //           color: localAppTheme['anchorColors']['primaryColor']!,
-                                          //           width: 1.0,
-                                          //         ),
-                                          //       ),
-                                          //     ),
-                                          //     child: iconButton(
-                                          //       label: 'TRAINING PLAN', 
-                                          //       backgroundColor: null, 
-                                          //       iconColor: localAppTheme['anchorColors']['primaryColor'], 
-                                          //       icon: Icons.bar_chart, 
-                                          //       size: 30, 
-                                          //       toolTip: 'VIEW TRAINING PLAN', 
-                                          //       onPressed: () {
-                                          //         _navigateToAthleteStatisticsPage(athlete['uid']);
-                                          //       },
-                                          //       context: context, 
-                                          //     ),
-                                          //   ),
-                                          // ),
                                           Expanded(
-                                            child: imageButton(
-                                              imagePath: 'images/Statistics.png', 
-                                              width: 200, 
+                                            child: imageButtonWithHeader(
+                                              width: double.infinity, 
                                               height: 60, 
                                               onPressed: () async {
                                                 await _navigateToAthleteStatisticsPage(athlete['uid']);
-                                              },
+                                              }, 
                                               toolTip: 'VIEW STATISTICS', 
-                                              context: context
-                                            ),
+                                              imagePath: 'images/Statistics.png', 
+                                              context: context, 
+                                              headerText: 'STATISTICS'
+                                              ), 
                                           ),
                                         ],
                                       ),

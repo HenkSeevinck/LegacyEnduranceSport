@@ -8,7 +8,10 @@ import 'package:legacyendurancesport/Workouts/Functions/mobile_list_of_workouts.
 import 'package:provider/provider.dart';
 
 class AddPlannedWorkout extends StatefulWidget {
-  const AddPlannedWorkout({super.key});
+  final DateTime selectedDate;
+  final String athleteUID;
+
+  const AddPlannedWorkout({super.key, required this.selectedDate, required this.athleteUID});
 
   @override
   State<AddPlannedWorkout> createState() => _AddPlannedWorkoutState();
@@ -71,7 +74,7 @@ class _AddPlannedWorkoutState extends State<AddPlannedWorkout> {
                       border: Border.all(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
                       borderRadius: BorderRadius.circular(8.0),
                     ),
-                    child: MobileListOfWorkouts(fromDayOverview: true),
+                    child: MobileListOfWorkouts(fromDayOverview: true, selectedDate: widget.selectedDate, athleteUID: widget.athleteUID),
                   ),
                   SizedBox(height: 10),
                   iconButton(

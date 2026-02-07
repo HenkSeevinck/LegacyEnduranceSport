@@ -10,8 +10,10 @@ import 'package:provider/provider.dart';
 
 class MobileListOfWorkouts extends StatefulWidget {
   final bool fromDayOverview;
+  final DateTime? selectedDate;
+  final String? athleteUID;
 
-  const MobileListOfWorkouts({super.key, required this.fromDayOverview});
+  const MobileListOfWorkouts({super.key, required this.fromDayOverview, this.selectedDate, this.athleteUID});
 
   @override
   State<MobileListOfWorkouts> createState() => _MobileListOfWorkoutsState();
@@ -682,6 +684,8 @@ class _MobileListOfWorkoutsState extends State<MobileListOfWorkouts> {
           final workoutTypes = internalStatusProvider.workoutTypes;
           final allWorkouts = workoutsProvider.allWorkouts;
           final fromDayOverview = widget.fromDayOverview;
+          final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
+          final appUser = appUserProvider.appUser;
 
           return SingleChildScrollView(
             child: Column(
@@ -804,34 +808,43 @@ class _MobileListOfWorkoutsState extends State<MobileListOfWorkouts> {
                                         ),
                                       ],
                                     ),
-                                    SizedBox(
-                                      width: 75,
-                                      height: 75,
-                                      child: !fromDayOverview
-                                          ? iconButton(
-                                              label: null,
-                                              backgroundColor: null,
-                                              iconColor: localAppTheme['anchorColors']['primaryColor'],
-                                              icon: Icons.group_outlined,
-                                              size: 30,
-                                              toolTip: 'Assign Athletes',
-                                              context: context,
-                                              onPressed: () {
-                                                _showAssignAthletesPopupDialog(context, workout);
+                                    !fromDayOverview
+                                      ? imageButtonWithHeader(
+                                          width: 75, 
+                                          height: 100, 
+                                          onPressed: () {
+                                            _showAssignAthletesPopupDialog(context, workout);
+                                          }, 
+                                          toolTip: 'ASSIGN TO ATHLETE', 
+                                          imagePath: 'images/Athletes.png', 
+                                          context: context, 
+                                          headerText: 'ASSIGN',
+                                        )
+                                      : imageButtonWithHeader(
+                                          width: 75, 
+                                          height: 100, 
+                                          onPressed: () async{
+                                            Map<String, dynamic> workoutToLoad = {
+                                              'athleteUID': widget.athleteUID,
+                                              'coachUID': appUser['uid'],
+                                              'workout': {
+                                                'workoutUID': workout['id'],
                                               },
-                                            )
-                                          : iconButton(
-                                              label: null,
-                                              backgroundColor: null,
-                                              iconColor: localAppTheme['anchorColors']['primaryColor'],
-                                              icon: Icons.add_box,
-                                              size: 30,
-                                              toolTip: 'Assign to Athlete',
-                                              context: context,
-                                              onPressed: () {
-                                              },
-                                            ),
-                                    ),
+                                              'workoutDate': Timestamp.fromDate(widget.selectedDate ?? DateTime.now()),
+                                            };
+                                          try{
+                                            await workoutsProvider.createLoadedWorkoutRecord(workoutToLoad, workout);
+                                            Navigator.of(context).pop();
+                                            } catch(e){
+                                              Navigator.of(context).pop();
+                                              showGeneralPopupDialog(context, 'Error', 'Failed to assign workout to athlete. Please try again.');
+                                            }
+                                          }, 
+                                          toolTip: 'ASSIGN TO ATHLETE', 
+                                          imagePath: 'images/Athletes.png', 
+                                          context: context, 
+                                          headerText: 'ASSIGN',
+                                        )
                                   ],
                                 ),
                                 SizedBox(height: 10.0),

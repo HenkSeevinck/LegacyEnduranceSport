@@ -107,9 +107,12 @@ class WorkoutsProvider with ChangeNotifier {
 
   //--------------------------------------------------------------
   // Method to create a new loaded workout record in Firestore
-  Future<void> createLoadedWorkoutRecord(Map<String, dynamic> workout) async {
+  Future<void> createLoadedWorkoutRecord(Map<String, dynamic> workout, Map<String, dynamic>? workoutPlan) async {
     DocumentReference docRef = await _firestore.collection('LoadedWorkouts').add(workout);
     workout['loadedWorkoutUID'] = docRef.id;
+    if (workoutPlan != null) {
+      workout['workout'] = workoutPlan;
+    }
     _todaysWorkouts.add(workout);
     notifyListeners();
   }
@@ -137,7 +140,7 @@ class WorkoutsProvider with ChangeNotifier {
       if (workout['assinedWorkoutUID'] != null) {
         await updateLoadedWorkoutRecord(workout['assinedWorkoutUID'], workout['workoutToLoad']);
       } else {
-        await createLoadedWorkoutRecord(workout['workoutToLoad']);
+        await createLoadedWorkoutRecord(workout['workoutToLoad'], null);
       }
     }
   }

@@ -256,35 +256,22 @@ class _GoalsPageState extends State<GoalsPage> {
                                           ),
                                         ],
                                       ),
-                                      Container(
-                                        width: 75,
-                                        padding: const EdgeInsets.only(left: 10.0),
-                                        decoration: BoxDecoration(
-                                          border: Border(left: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
-                                        ),
-                                        child: Column(
+                                        Column(
                                           children: [
-                                            iconButton(
-                                              label: null,
-                                              backgroundColor: null,
-                                              iconColor: localAppTheme['anchorColors']['primaryColor'],
-                                              icon: Icons.edit_outlined,
-                                              size: 30,
-                                              toolTip: 'Edit Goal',
-                                              context: context,
-                                              onPressed: () {
-                                                _showCreateGoalPopupDialog(context, goal, index);
-                                              },
-                                            ),
-                                            SizedBox(height: 10.0),
-                                              iconButton(
-                                              label: null,
-                                              backgroundColor: null,
-                                              iconColor: localAppTheme['anchorColors']['primaryColor'],
-                                              icon: Icons.delete_outlined,
-                                              size: 30,
-                                              toolTip: 'Remove Goal',
-                                              context: context,
+                                            imageButtonWithHeader(
+                                              width: 100, 
+                                              height: 50, 
+                                              onPressed: () async {
+                                                await _showCreateGoalPopupDialog(context, goal, index);
+                                              }, 
+                                              toolTip: 'EDIT GOAL', 
+                                              imagePath: 'images/EditGoal.png', 
+                                              context: context, 
+                                              headerText: 'EDIT'
+                                            ), 
+                                            imageButtonWithHeader(
+                                              width: 100, 
+                                              height: 50, 
                                               onPressed: () async{
                                                 try {
                                                  await _deleteGoal(goal);
@@ -292,11 +279,15 @@ class _GoalsPageState extends State<GoalsPage> {
                                                 } catch (e) {
                                                   showGeneralPopupDialog(context, 'Error!', 'Failed to delete goal.');
                                                 }
-                                              },
-                                            ),
+                                              }, 
+                                              toolTip: 'REMOVE GOAL', 
+                                              imagePath: 'images/CancelGoal.png', 
+                                              context: context, 
+                                              headerText: 'REMOVE'
+                                            ), 
                                           ],  
                                         ),
-                                      ),
+                                      //),
                                     ],
                                   ),
                                   SizedBox(height: 10.0),

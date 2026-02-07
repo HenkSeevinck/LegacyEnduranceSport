@@ -19,8 +19,9 @@ import 'package:url_launcher/url_launcher.dart';
 class DailyOverview extends StatefulWidget {
   String navPath;
   DateTime selectedDate;
+  String athleteUID;
 
-  DailyOverview({super.key, required this.selectedDate, required this.navPath});
+  DailyOverview({super.key, required this.selectedDate, required this.navPath, required this.athleteUID});
 
   @override
   State<DailyOverview> createState() => _DailyOverviewState();
@@ -95,7 +96,7 @@ class _DailyOverviewState extends State<DailyOverview> {
       context: context,
       barrierDismissible: false, // User must tap button to dismiss
       builder: (BuildContext context) {
-        return AddPlannedWorkout();
+        return AddPlannedWorkout(selectedDate: widget.selectedDate, athleteUID: widget.athleteUID);
       },
     );
   }

@@ -1201,3 +1201,49 @@ Widget pageHeaderImage({
     ),
   );
 }
+
+//------------------------------------------------------------------------
+Widget imageButtonWithHeader({
+  required double width,
+  required double height,
+  required VoidCallback? onPressed,
+  required String? toolTip,
+  required String imagePath,
+  required BuildContext context,
+  double? cornerRadius = 6.0,
+  required String headerText,
+}) {
+  final localAppTheme = ResponsiveTheme(context).theme;
+  return GestureDetector(
+    onTap: onPressed,
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          width: width,
+          height: height,
+          margin: EdgeInsets.all(4.0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(cornerRadius ?? 6.0),
+            image: DecorationImage(image: AssetImage(imagePath), fit: BoxFit.cover),
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: localAppTheme['anchorColors']['secondaryColor']!.withOpacity(0.4),
+            border: Border.all(color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0),
+            borderRadius: BorderRadius.circular(cornerRadius ?? 2.0),
+          ),
+          padding: EdgeInsets.symmetric(horizontal: 4.0),
+          child: customHeader(
+            header: headerText, 
+            context: context, 
+            color: localAppTheme['anchorColors']['primaryColor'], 
+            fontWeight: FontWeight.bold, 
+            size: 16
+          ),
+        ),
+      ],
+    ),
+  );
+}
