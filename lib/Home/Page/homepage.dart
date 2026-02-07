@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/General/Providers/events_provider.dart';
 import 'package:legacyendurancesport/General/Providers/firebase_auth_service.dart';
+import 'package:legacyendurancesport/General/Providers/firebase_messaging_service.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
@@ -31,9 +33,10 @@ void initState() {
   final clubsProvider = Provider.of<ClubsProvider>(context, listen: false);
   final eventsProvider = Provider.of<EventsProvider>(context, listen: false);
   final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
+  final messagingService = Provider.of<FirebaseMessagingService>(context, listen: false);
   final sharedPreferences = SharedPreferences.getInstance();
     
-  _fetchDataFuture = _fetchData(clubsProvider, eventsProvider, appUserProvider, sharedPreferences);
+  _fetchDataFuture = _fetchData(clubsProvider, eventsProvider, appUserProvider, messagingService, sharedPreferences);
 }
 
   //----------------------------------------------------
@@ -41,7 +44,8 @@ void initState() {
   Future<void> _fetchData(
     ClubsProvider clubsProvider, 
     EventsProvider eventsProvider, 
-    AppUserProvider appUserProvider, 
+    AppUserProvider appUserProvider,
+    FirebaseMessagingService messagingService,
     Future<SharedPreferences> sharedPreferences
     ) async {
     await clubsProvider.fetchAllClubs();
@@ -68,6 +72,24 @@ void initState() {
             MaterialPageRoute(builder: (context) => const LandingPage()),
             (route) => false,
           );
+        }
+      }
+    }
+
+    // Initialize notification listeners and request permission (for PWA and mobile)
+    if (kIsWeb || true) { // Request for all platforms
+      messagingService.initializeListeners();
+      
+      // Check if user has already been asked for notifications
+      final hasAskedForNotifications = prefs.getBool('notifications_requested') ?? false;
+      
+      if (!hasAskedForNotifications) {
+        // Request notification permission and pass user ID to save token
+        final userId = appUser['uid'] ?? FirebaseAuthService().currentUser?.uid;
+        if (userId != null) {
+          await messagingService.requestPermission(userId);
+          // Mark that we've asked
+          await prefs.setBool('notifications_requested', true);
         }
       }
     }

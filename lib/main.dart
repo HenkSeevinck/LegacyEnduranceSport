@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart'; // Added for session check
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:legacyendurancesport/General/Providers/firebase_messaging_service.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Required for 14-day check
 
@@ -46,6 +47,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => WorkoutsProvider()),
         ChangeNotifierProvider(create: (_) => AiProvider()),
         ChangeNotifierProvider(create: (_) => ImageVerificationProvider()),
+        ChangeNotifierProvider(create:  (_) => FirebaseMessagingService())
       ],
       child: const MyApp(),
     ),
