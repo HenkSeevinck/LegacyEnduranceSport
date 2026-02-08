@@ -15,6 +15,19 @@ class FirebaseMessagingService with ChangeNotifier {
   // Notifications Permissions
   Future<void> requestPermission(String userId) async {
     _userId = userId;
+    
+    // First, check current permission status
+    final currentSettings = await _firebaseMessaging.getNotificationSettings();
+    
+    if (currentSettings.authorizationStatus == AuthorizationStatus.authorized ||
+        currentSettings.authorizationStatus == AuthorizationStatus.provisional) {
+      // Permission already granted, just get the token
+      print('Notification permission already granted - retrieving token');
+      await _getFCMToken();
+      return;
+    }
+    
+    // Permission not yet determined, request it
     if (kIsWeb) {
       // For web, request notification permission
       NotificationSettings settings = await _firebaseMessaging.requestPermission(
@@ -29,7 +42,6 @@ class FirebaseMessagingService with ChangeNotifier {
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
         print('User granted web notification permission');
-        // Get FCM token for web
         await _getFCMToken();
       } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
         print('User granted provisional web notification permission');
@@ -68,19 +80,39 @@ class FirebaseMessagingService with ChangeNotifier {
       if (kIsWeb) {
         // For web, you need to provide your VAPID key from Firebase Console
         _fcmToken = await _firebaseMessaging.getToken(
-          vapidKey: 'zLTrzAIC09nvz6vsX6qOQ3sndeOFd6ugKXRcmLDdG04',
+          vapidKey: 'BE9cG17QN3y2jHAVX7IwCTZph4veyinXo_Y9ncFQhexBUNFXEQoDm__WhNqXKPUW1laajjFiai24nR5V85xpzJU',
         );
       } else {
         _fcmToken = await _firebaseMessaging.getToken();
       }
       
       if (_fcmToken != null && _userId != null) {
-        // Save FCM token to user's AppUser profile
-        await _firestore.collection('AppUsers').doc(_userId).update({
-          'fcmToken': _fcmToken,
-          'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
-        });
-        print('FCM Token saved to user profile: $_fcmToken');
+        // First, check if this token already exists for the user
+        final userDoc = await _firestore.collection('AppUsers').doc(_userId).get();
+        final existingTokens = List<Map<String, dynamic>>.from(
+          (userDoc.data()?['fcmTokens'] ?? []) as List
+        );
+        
+        // Check if token already exists
+        final tokenExists = existingTokens.any((t) => t['token'] == _fcmToken);
+        
+        if (!tokenExists) {
+          // Token doesn't exist, add it
+          await _firestore.collection('AppUsers').doc(_userId).update({
+            'fcmTokens': FieldValue.arrayUnion([
+              {
+                'token': _fcmToken,
+                'device': kIsWeb ? 'web' : 'mobile',
+                'platform': _getPlatformName(),
+                'addedAt': Timestamp.now(),
+              }
+            ]),
+          });
+          print('FCM Token saved to user profile: $_fcmToken (Platform: ${_getPlatformName()})');
+        } else {
+          // Token already exists, just log it
+          print('FCM Token already exists for this device: $_fcmToken');
+        }
       } else {
         print('FCM Token: $_fcmToken (User ID: $_userId)');
       }
@@ -88,6 +120,14 @@ class FirebaseMessagingService with ChangeNotifier {
     } catch (e) {
       print('Error getting FCM token: $e');
     }
+  }
+
+  //------------------------------------------------------
+  // Get platform name for identification
+  String _getPlatformName() {
+    if (kIsWeb) return 'Web';
+    // For native, you'd need to import dart:io and check
+    return 'Mobile';
   }
 
   //------------------------------------------------------

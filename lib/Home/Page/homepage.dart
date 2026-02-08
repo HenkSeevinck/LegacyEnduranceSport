@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
@@ -80,16 +81,23 @@ void initState() {
     if (kIsWeb || true) { // Request for all platforms
       messagingService.initializeListeners();
       
-      // Check if user has already been asked for notifications
-      final hasAskedForNotifications = prefs.getBool('notifications_requested') ?? false;
-      
-      if (!hasAskedForNotifications) {
-        // Request notification permission and pass user ID to save token
-        final userId = appUser['uid'] ?? FirebaseAuthService().currentUser?.uid;
-        if (userId != null) {
+      final userId = appUser['uid'] ?? FirebaseAuthService().currentUser?.uid;
+      if (userId != null) {
+        // Check current notification permission status
+        final settings = await FirebaseMessaging.instance.getNotificationSettings();
+        final hasAskedForNotifications = prefs.getBool('notifications_requested') ?? false;
+        
+        // If permission is already granted, retrieve token even if we've asked before
+        if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+          print('Notifications already authorized - retrieving FCM token');
           await messagingService.requestPermission(userId);
-          // Mark that we've asked
+        } else if (!hasAskedForNotifications) {
+          // If not granted yet and haven't asked, request permission
+          print('Requesting notification permission');
+          await messagingService.requestPermission(userId);
           await prefs.setBool('notifications_requested', true);
+        } else {
+          print('User declined or has not accepted notification permission');
         }
       }
     }
