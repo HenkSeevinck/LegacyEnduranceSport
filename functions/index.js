@@ -51,40 +51,52 @@ exports.notifyAthleteWorkoutLoaded = onDocumentCreated(
         return;
       }
 
-      // Fetch the athlete's FCM token from AppUsers/{athleteUID}/fsmTokens/token
-      const tokenDocRef = admin
+      // Fetch the athlete's FCM tokens from AppUsers/{athleteUID}
+      const appUserDoc = await admin
         .firestore()
         .collection("AppUsers")
         .doc(athleteUID)
-        .collection("fsmTokens")
-        .doc("token");
+        .get();
 
-      const tokenDoc = await tokenDocRef.get();
-
-      if (!tokenDoc.exists) {
-        logger.warn(`No FCM token found for athlete ${athleteUID}`);
+      if (!appUserDoc.exists) {
+        logger.warn(`AppUser document not found for athlete ${athleteUID}`);
         return;
       }
 
-      const fcmToken = tokenDoc.data().token;
+      const fcmTokens = appUserDoc.data()?.fcmTokens;
 
-      if (!fcmToken) {
-        logger.warn(`Empty FCM token for athlete ${athleteUID}`);
+      if (!Array.isArray(fcmTokens) || fcmTokens.length === 0) {
+        logger.warn(`No FCM tokens found for athlete ${athleteUID}`);
         return;
       }
 
-      // Build the notification message
-      const message = {
-        notification: {
-          title: "New Workout",
-          body: "New workout loaded",
-        },
-        token: fcmToken,
-      };
+      // Send notification to all FCM tokens (all devices)
+      const sendPromises = fcmTokens.map(async (tokenObj) => {
+        const token = tokenObj.token;
+        if (!token) {
+          logger.warn(`Empty FCM token found for athlete ${athleteUID}`);
+          return null;
+        }
 
-      // Send the notification
-      const response = await admin.messaging().send(message);
-      logger.info(`Notification sent to athlete ${athleteUID}:`, response);
+        const message = {
+          notification: {
+            title: "New Workout",
+            body: "New workout loaded",
+          },
+          token: token,
+        };
+
+        try {
+          const response = await admin.messaging().send(message);
+          logger.info(`Notification sent to athlete ${athleteUID} on device ${tokenObj.device}:`, response);
+          return response;
+        } catch (error) {
+          logger.warn(`Failed to send notification to device ${tokenObj.device} for athlete ${athleteUID}:`, error);
+          return null;
+        }
+      });
+
+      await Promise.all(sendPromises);
     } catch (error) {
       logger.error("Error sending notification:", error);
       throw error;
