@@ -5,9 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:legacyendurancesport/General/Providers/firebase_messaging_service.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Required for 14-day check
-
-// Keep your existing provider imports here...
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:legacyendurancesport/General/Providers/ai_provider.dart';
 import 'package:legacyendurancesport/General/Providers/clubs_provided.dart';
 import 'package:legacyendurancesport/General/Providers/events_provider.dart';
