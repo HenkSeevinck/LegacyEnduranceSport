@@ -809,37 +809,49 @@ class _UserProfileState extends State<UserProfile> {
                                   },
                                 ),
                               )
-                            : Image.asset('images/PlaceholderUserImage.png', fit: BoxFit.cover),
+                            : ClipRRect(
+                                borderRadius: BorderRadius.circular(7.0),
+                                child: Image.asset(
+                                  'images/PlaceholderUserImage.png',
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Image.asset('images/PlaceholderUserImage.png', fit: BoxFit.cover);
+                                  },
+                                ),
+                              ),
                       ),
-                        Positioned(
-                          bottom: 5,
-                          left: 5,
-                          child: Container(
-                            height: 40,
-                            width: 40,
-                            decoration: BoxDecoration(
-                            color: localAppTheme['anchorColors']['primaryColor'],
-                            shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                            onPressed: () async {
-                              try {
+                        Visibility(
+                          visible: !widget.isCoachView,
+                          child: Positioned(
+                            bottom: 5,
+                            left: 5,
+                            child: Container(
+                              height: 40,
+                              width: 40,
+                              decoration: BoxDecoration(
+                              color: localAppTheme['anchorColors']['primaryColor'],
+                              shape: BoxShape.circle,
+                              ),
+                              child: IconButton(
+                              onPressed: () async {
+                                try {
+                                  setState(() {
+                                    isLoadingImage = true;
+                                  });
+                                  await _selectProfilePicture(userProfileToShow['uid']);
+                                } catch (e) {
+                                  showGeneralPopupDialog(context, 'Error', 'An error occurred while selecting your profile picture. Please try again.');
+                                }
                                 setState(() {
-                                  isLoadingImage = true;
+                                  isLoadingImage = false;
                                 });
-                                await _selectProfilePicture(userProfileToShow['uid']);
-                              } catch (e) {
-                                showGeneralPopupDialog(context, 'Error', 'An error occurred while selecting your profile picture. Please try again.');
-                              }
-                              setState(() {
-                                isLoadingImage = false;
-                              });
-                            }, 
-                            icon: Icon(
-                              size: 20,
-                              Icons.photo, 
-                              color: localAppTheme['anchorColors']['secondaryColor'],
-                            ),
+                              }, 
+                              icon: Icon(
+                                size: 20,
+                                Icons.photo, 
+                                color: localAppTheme['anchorColors']['secondaryColor'],
+                              ),
+                              ),
                             ),
                           ),
                         ),
