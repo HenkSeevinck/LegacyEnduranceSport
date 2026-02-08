@@ -255,7 +255,7 @@ class _MobileMyAthletesState extends State<MobileMyAthletes> {
                                               toolTip: 'VIEW STATISTICS', 
                                               imagePath: 'images/Statistics.png', 
                                               context: context, 
-                                              headerText: 'STATISTICS'
+                                              headerText: 'STATS'
                                               ), 
                                           ),
                                         ],

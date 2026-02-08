@@ -80,8 +80,9 @@ exports.notifyAthleteWorkoutLoaded = onDocumentCreated(
 
         const message = {
           notification: {
-            title: "New Workout",
-            body: "New workout loaded",
+            title: "Time to Move! 🏃‍♂️",
+            body: "Your new workout is ready. Tap to see the details and get started!",
+            image: "https://firebasestorage.googleapis.com/v0/b/legacyendurancesport.firebasestorage.app/o/logos%2Ffavicon.png?alt=media&token=75944005-8223-4fd5-b661-02b8eef52113"
           },
           token: token,
         };
