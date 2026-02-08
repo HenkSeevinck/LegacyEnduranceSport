@@ -693,7 +693,7 @@ class _UserProfileState extends State<UserProfile> {
         final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
         await appUserProvider.updateUserProfileImage(uid, fileBytes, fileName);
       } catch (e) {
-        print("Upload failed: $e");
+        rethrow;
       }
     }
   }
@@ -829,7 +829,6 @@ class _UserProfileState extends State<UserProfile> {
                                 });
                                 await _selectProfilePicture(userProfileToShow['uid']);
                               } catch (e) {
-                                print(e);
                                 showGeneralPopupDialog(context, 'Error', 'An error occurred while selecting your profile picture. Please try again.');
                               }
                               setState(() {

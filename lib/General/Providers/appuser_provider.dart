@@ -396,7 +396,6 @@ class AppUserProvider with ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      print('Error: $e');
       rethrow;
     }
   }

@@ -181,8 +181,6 @@ class _EventPageState extends State<EventPage> {
                                 }
                               }
 
-
-                             
                               return ExpansionTile(
                                   shape: Border(
                                     top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
@@ -351,10 +349,28 @@ class _EventPageState extends State<EventPage> {
                                                           final attendeeId = attendeesExpanded[attendeeIndex];
                                                           return Padding(
                                                             padding: const EdgeInsets.symmetric(vertical: 5.0),
-                                                            child: body(
-                                                              header: '${attendeeId['name'] ?? ''} ${attendeeId['surname'] ?? ''}',
-                                                              color: localAppTheme['anchorColors']['primaryColor'],
-                                                              context: context,
+                                                            child: Row(
+                                                              children: [
+                                                                Container(
+                                                                  width: 50,
+                                                                  height: 50,
+                                                                  decoration: BoxDecoration(
+                                                                    shape: BoxShape.circle,
+                                                                    image: DecorationImage(
+                                                                      image: attendeeId['profileImageUrl'] != null
+                                                                          ? NetworkImage(attendeeId['profileImageUrl'])
+                                                                          : AssetImage('images/PlaceholderUserImage.png') as ImageProvider,
+                                                                      fit: BoxFit.cover,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                SizedBox(width: 20.0),
+                                                                body(
+                                                                  header: '${attendeeId['name'] ?? ''} ${attendeeId['surname'] ?? ''}',
+                                                                  color: localAppTheme['anchorColors']['primaryColor'],
+                                                                  context: context,
+                                                                ),
+                                                              ],
                                                             ),
                                                           );
                                                         }),
