@@ -13,7 +13,7 @@ class FirebaseMessagingService with ChangeNotifier {
 
   //------------------------------------------------------
   // Notifications Permissions
-  Future<void> requestPermission(String userId) async {
+  Future<void> requestPermission(String userId, String platform) async {
     _userId = userId;
     
     // First, check current permission status
@@ -23,7 +23,7 @@ class FirebaseMessagingService with ChangeNotifier {
         currentSettings.authorizationStatus == AuthorizationStatus.provisional) {
       // Permission already granted, just get the token
       print('Notification permission already granted - retrieving token');
-      await _getFCMToken();
+      await _getFCMToken(platform);
       return;
     }
     
@@ -42,10 +42,10 @@ class FirebaseMessagingService with ChangeNotifier {
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
         print('User granted web notification permission');
-        await _getFCMToken();
+        await _getFCMToken(platform);
       } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
         print('User granted provisional web notification permission');
-        await _getFCMToken();
+        await _getFCMToken(platform);
       } else {
         print('User declined or has not accepted web notification permission');
       }
@@ -63,10 +63,10 @@ class FirebaseMessagingService with ChangeNotifier {
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
         print('User granted notification permission');
-        await _getFCMToken();
+        await _getFCMToken(platform);
       } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
         print('User granted provisional notification permission');
-        await _getFCMToken();
+        await _getFCMToken(platform);
       } else {
         print('User declined or has not accepted notification permission');
       }
@@ -75,7 +75,7 @@ class FirebaseMessagingService with ChangeNotifier {
 
   //------------------------------------------------------
   // Get FCM Token and save to user's profile
-  Future<void> _getFCMToken() async {
+  Future<void> _getFCMToken(String platform) async {
     try {
       if (kIsWeb) {
         // For web, you need to provide your VAPID key from Firebase Console
@@ -103,12 +103,13 @@ class FirebaseMessagingService with ChangeNotifier {
               {
                 'token': _fcmToken,
                 'device': kIsWeb ? 'web' : 'mobile',
-                'platform': _getPlatformName(),
+                'platform': platform,
                 'addedAt': Timestamp.now(),
               }
             ]),
           });
-          print('FCM Token saved to user profile: $_fcmToken (Platform: ${_getPlatformName()})');
+          //print('FCM Token saved to user profile: $_fcmToken (Platform: ${_getPlatformName()})');
+          print('FCM Token saved to user profile: $_fcmToken (Platform: $platform)');
         } else {
           // Token already exists, just log it
           print('FCM Token already exists for this device: $_fcmToken');
@@ -120,14 +121,6 @@ class FirebaseMessagingService with ChangeNotifier {
     } catch (e) {
       print('Error getting FCM token: $e');
     }
-  }
-
-  //------------------------------------------------------
-  // Get platform name for identification
-  String _getPlatformName() {
-    if (kIsWeb) return 'Web';
-    // For native, you'd need to import dart:io and check
-    return 'Mobile';
   }
 
   //------------------------------------------------------

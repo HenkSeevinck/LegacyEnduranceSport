@@ -35,9 +35,10 @@ void initState() {
   final eventsProvider = Provider.of<EventsProvider>(context, listen: false);
   final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
   final messagingService = Provider.of<FirebaseMessagingService>(context, listen: false);
+  final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
   final sharedPreferences = SharedPreferences.getInstance();
     
-  _fetchDataFuture = _fetchData(clubsProvider, eventsProvider, appUserProvider, messagingService, sharedPreferences);
+  _fetchDataFuture = _fetchData(clubsProvider, eventsProvider, appUserProvider, messagingService, sharedPreferences, internalStatusProvider);
 }
 
   //----------------------------------------------------
@@ -47,37 +48,34 @@ void initState() {
     EventsProvider eventsProvider, 
     AppUserProvider appUserProvider,
     FirebaseMessagingService messagingService,
-    Future<SharedPreferences> sharedPreferences
+    Future<SharedPreferences> sharedPreferences,
+    InternalStatusProvider internalStatusProvider
     ) async {
     await clubsProvider.fetchAllClubs();
     await eventsProvider.fetchAllEvents();
     final appUser = appUserProvider.appUser;
-    final prefs = await sharedPreferences;
-    final startTimeStr = prefs.getString('auth_session_start');
-    final expiryDate = startTimeStr != null ? DateTime.parse(startTimeStr).add(const Duration(days: 14)) : null;
 
     if (appUser.isEmpty) {
       await appUserProvider.getUserRecord(FirebaseAuthService().currentUser?.uid ?? ''); 
     }
 
-    // Check for 14-day session expiry
-    if (startTimeStr != null && expiryDate != null) {
-      if (DateTime.now().isAfter(expiryDate)) {
-      
-        // Sign out of Firebase
-        await FirebaseAuthService().forceLogout(); 
-        
-        // Navigate back to Landing/Login page
-        if (mounted) {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => const LandingPage()),
-            (route) => false,
-          );
-        }
-      }
-    }
+    await _checkExpiryDateOfSession(sharedPreferences);
+    await _initializeNotifications(appUserProvider, messagingService, sharedPreferences, internalStatusProvider);
 
-    // Initialize notification listeners and request permission (for PWA and mobile)
+  }
+
+  //----------------------------------------------------
+  // Initialize notification listeners and request permission (for PWA and mobile)
+  Future<void> _initializeNotifications(
+    AppUserProvider appUserProvider, 
+    FirebaseMessagingService messagingService, 
+    Future<SharedPreferences> sharedPreferences,
+    InternalStatusProvider internalStatusProvider
+    ) async {
+    final appUser = appUserProvider.appUser;
+    final prefs = await sharedPreferences;
+    final platform = internalStatusProvider.platform;
+
     if (kIsWeb || true) { // Request for all platforms
       messagingService.initializeListeners();
       
@@ -90,14 +88,38 @@ void initState() {
         // If permission is already granted, retrieve token even if we've asked before
         if (settings.authorizationStatus == AuthorizationStatus.authorized) {
           print('Notifications already authorized - retrieving FCM token');
-          await messagingService.requestPermission(userId);
+          await messagingService.requestPermission(userId, platform);
         } else if (!hasAskedForNotifications) {
           // If not granted yet and haven't asked, request permission
           print('Requesting notification permission');
-          await messagingService.requestPermission(userId);
+          await messagingService.requestPermission(userId, platform);
           await prefs.setBool('notifications_requested', true);
         } else {
           print('User declined or has not accepted notification permission');
+        }
+      }
+    }
+  }
+
+  //----------------------------------------------------
+  // 14-day session check and platform detection logic moved to MyApp for better app flow control
+  Future<void> _checkExpiryDateOfSession(Future<SharedPreferences> sharedPreferences) async {
+    final prefs = await sharedPreferences;
+    final startTimeStr = prefs.getString('auth_session_start');
+    final expiryDate = startTimeStr != null ? DateTime.parse(startTimeStr).add(const Duration(days: 14)) : null;
+    
+    if (startTimeStr != null && expiryDate != null) {
+      if (DateTime.now().isAfter(expiryDate)) {
+      
+        // Sign out of Firebase
+        await FirebaseAuthService().forceLogout(); 
+        
+        // Navigate back to Landing/Login page
+        if (mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const LandingPage()),
+            (route) => false,
+          );
         }
       }
     }
