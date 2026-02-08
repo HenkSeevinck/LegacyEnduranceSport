@@ -9,7 +9,11 @@
 
 const {setGlobalOptions} = require("firebase-functions");
 const {onRequest} = require("firebase-functions/https");
+const {onDocumentCreated} = require("firebase-functions/v2/firestore");
 const logger = require("firebase-functions/logger");
+const admin = require("firebase-admin");
+
+admin.initializeApp();
 
 // For cost control, you can set the maximum number of containers that can be
 // running at the same time. This helps mitigate the impact of unexpected
@@ -30,3 +34,60 @@ setGlobalOptions({ maxInstances: 10 });
 //   logger.info("Hello logs!", {structuredData: true});
 //   response.send("Hello from Firebase!");
 // });
+
+/**
+ * Send notification to athlete when a new workout is loaded
+ * Triggers when a new document is created in LoadedWorkouts collection
+ */
+exports.notifyAthleteWorkoutLoaded = onDocumentCreated(
+  "LoadedWorkouts/{docId}",
+  async (event) => {
+    try {
+      const loadedWorkout = event.data.data();
+      const athleteUID = loadedWorkout.athleteUID;
+
+      if (!athleteUID) {
+        logger.warn("No athleteUID found in LoadedWorkout document");
+        return;
+      }
+
+      // Fetch the athlete's FCM token from AppUsers/{athleteUID}/fsmTokens/token
+      const tokenDocRef = admin
+        .firestore()
+        .collection("AppUsers")
+        .doc(athleteUID)
+        .collection("fsmTokens")
+        .doc("token");
+
+      const tokenDoc = await tokenDocRef.get();
+
+      if (!tokenDoc.exists) {
+        logger.warn(`No FCM token found for athlete ${athleteUID}`);
+        return;
+      }
+
+      const fcmToken = tokenDoc.data().token;
+
+      if (!fcmToken) {
+        logger.warn(`Empty FCM token for athlete ${athleteUID}`);
+        return;
+      }
+
+      // Build the notification message
+      const message = {
+        notification: {
+          title: "New Workout",
+          body: "New workout loaded",
+        },
+        token: fcmToken,
+      };
+
+      // Send the notification
+      const response = await admin.messaging().send(message);
+      logger.info(`Notification sent to athlete ${athleteUID}:`, response);
+    } catch (error) {
+      logger.error("Error sending notification:", error);
+      throw error;
+    }
+  }
+);
