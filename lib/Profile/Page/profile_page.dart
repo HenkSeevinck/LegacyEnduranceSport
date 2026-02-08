@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
@@ -31,6 +33,7 @@ class _UserProfileState extends State<UserProfile> {
   Map<String, dynamic>? selectedClub;
   late bool formEditable = widget.formEditable;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool isLoadingImage = false;
 
   //----------------------------------------------------
   // initState load data when form is built
@@ -673,6 +676,29 @@ class _UserProfileState extends State<UserProfile> {
   }
 
   //----------------------------------------------------
+  // Profile picture selection widget
+  Future<void> _selectProfilePicture(String uid) async {
+    // Use FilePicker specifically for Web stability
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      withData: true,
+      allowedExtensions: ['jpg'],
+    );
+
+    if (result != null && result.files.first.bytes != null) {
+      final Uint8List fileBytes = result.files.first.bytes!;
+      final String fileName = result.files.first.name;
+
+      try {
+        final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
+        await appUserProvider.updateUserProfileImage(uid, fileBytes, fileName);
+      } catch (e) {
+        print("Upload failed: $e");
+      }
+    }
+  }
+
+  //----------------------------------------------------
   // My Profile Widget
   Widget _myProfileWidget(Map<String, dynamic> userProfileToShow) {
     final localAppTheme = ResponsiveTheme(context).theme;
@@ -698,58 +724,129 @@ class _UserProfileState extends State<UserProfile> {
             child: Column(
               children: [
                 SizedBox(height: 20.0),
-                FormInputField(
-                  label: 'First Name:',
-                  errorMessage: 'Please enter your first name',
-                  isMultiline: false,
-                  isPassword: false,
-                  prefixIcon: null,
-                  suffixIcon: null,
-                  showLabel: true,
-                  controller: firstNameController,
-                  enabled: formEditable,
-                  onChanged: (value) {
-                    userProfileToShow['name'] = firstNameController.text;
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your first name';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 10.0),
-                FormInputField(
-                  label: 'Last Name:',
-                  errorMessage: 'Please enter your last name',
-                  isMultiline: false,
-                  isPassword: false,
-                  prefixIcon: null,
-                  suffixIcon: null,
-                  showLabel: true,
-                  controller: lastNameController,
-                  enabled: formEditable,
-                  onChanged: (value) {
-                    userProfileToShow['surname'] = lastNameController.text;
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your last name';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 10.0),
-                FormInputField(
-                  label: 'Email Name:',
-                  errorMessage: 'Please enter your first name',
-                  isMultiline: false,
-                  isPassword: false,
-                  prefixIcon: null,
-                  suffixIcon: null,
-                  showLabel: true,
-                  enabled: false,
-                  controller: emailController,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          FormInputField(
+                            label: 'First Name:',
+                            errorMessage: 'Please enter your first name',
+                            isMultiline: false,
+                            isPassword: false,
+                            prefixIcon: null,
+                            suffixIcon: null,
+                            showLabel: true,
+                            controller: firstNameController,
+                            enabled: formEditable,
+                            onChanged: (value) {
+                              userProfileToShow['name'] = firstNameController.text;
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your first name';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 10.0),
+                          FormInputField(
+                            label: 'Last Name:',
+                            errorMessage: 'Please enter your last name',
+                            isMultiline: false,
+                            isPassword: false,
+                            prefixIcon: null,
+                            suffixIcon: null,
+                            showLabel: true,
+                            controller: lastNameController,
+                            enabled: formEditable,
+                            onChanged: (value) {
+                              userProfileToShow['surname'] = lastNameController.text;
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your last name';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 10.0),
+                          FormInputField(
+                            label: 'Email Name:',
+                            errorMessage: 'Please enter your first name',
+                            isMultiline: false,
+                            isPassword: false,
+                            prefixIcon: null,
+                            suffixIcon: null,
+                            showLabel: true,
+                            enabled: false,
+                            controller: emailController,
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Stack(
+                        children: [
+                        Container(
+                          width: 100,
+                          height: 164,
+                          decoration: BoxDecoration(
+                          border: Border.all(color: localAppTheme['anchorColors']['primaryColor']!, width: 1.0),
+                          borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: isLoadingImage
+                            ? Center(child: CircularProgressIndicator(color: localAppTheme['anchorColors']['primaryColor']))
+                            : userProfileToShow['profileImageUrl'] != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(7.0),
+                                child: Image.network(
+                                  userProfileToShow['profileImageUrl'],
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Image.asset('images/PlaceholderUserImage.png', fit: BoxFit.cover);
+                                  },
+                                ),
+                              )
+                            : Image.asset('images/PlaceholderUserImage.png', fit: BoxFit.cover),
+                      ),
+                        Positioned(
+                          bottom: 5,
+                          left: 5,
+                          child: Container(
+                            height: 40,
+                            width: 40,
+                            decoration: BoxDecoration(
+                            color: localAppTheme['anchorColors']['primaryColor'],
+                            shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                            onPressed: () async {
+                              try {
+                                setState(() {
+                                  isLoadingImage = true;
+                                });
+                                await _selectProfilePicture(userProfileToShow['uid']);
+                              } catch (e) {
+                                print(e);
+                                showGeneralPopupDialog(context, 'Error', 'An error occurred while selecting your profile picture. Please try again.');
+                              }
+                              setState(() {
+                                isLoadingImage = false;
+                              });
+                            }, 
+                            icon: Icon(
+                              size: 20,
+                              Icons.photo, 
+                              color: localAppTheme['anchorColors']['secondaryColor'],
+                            ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
                 ),
                 SizedBox(height: 10.0),
                 DatePicker(

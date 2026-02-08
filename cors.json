@@ -1,0 +1,11 @@
+[
+  {
+    "origin": [
+      "http://localhost",
+      "https://legacyendurance.seevinckserver.com"
+    ],
+    "method": ["GET", "HEAD", "PUT", "POST", "DELETE"],
+    "responseHeader": ["Content-Type", "Cache-Control", "Authorization"],
+    "maxAgeSeconds": 3600
+  }
+]

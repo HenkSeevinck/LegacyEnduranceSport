@@ -1,7 +1,8 @@
 import 'dart:convert';
-
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 class AppUserProvider with ChangeNotifier {
@@ -363,6 +364,39 @@ class AppUserProvider with ChangeNotifier {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
     } catch (e) {
       Exception('Error sending password reset email: $e');
+      rethrow;
+    }
+  }
+
+  //--------------------------------------------------------------
+  // Store image in Firestore Storage and updat 'profileImageUrl' field in user record
+  Future<void> updateUserProfileImage(String uid, Uint8List bytes, String fileName) async {
+    try {
+      // Extract extension from the filename provided
+      final extension = fileName.split('.').last.toLowerCase();
+      
+      // Set metadata so the browser knows it's an image when downloading later
+      final metadata = SettableMetadata(contentType: 'image/$extension');
+
+      Reference reference = FirebaseStorage.instance
+          .ref()
+          .child('userimages/$uid.$extension');
+
+      // Use putData since we already have the bytes
+      UploadTask uploadTask = reference.putData(bytes, metadata);
+
+      TaskSnapshot snapshot = await uploadTask;
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+
+      // Update Firestore & Local State
+      await _firestore.collection('AppUsers').doc(uid).update({'profileImageUrl': downloadUrl});
+      
+      _appUser['profileImageUrl'] = downloadUrl;
+      _userProfileToShow['profileImageUrl'] = downloadUrl;
+
+      notifyListeners();
+    } catch (e) {
+      print('Error: $e');
       rethrow;
     }
   }
