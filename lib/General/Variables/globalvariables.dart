@@ -28,7 +28,7 @@ Map<String, dynamic> appInfo = {
   'description': '''
 TBA
 ''',
-  'version': 0.0,
+  'version': 0.0001,
   'applicationID': 9,
 };
 

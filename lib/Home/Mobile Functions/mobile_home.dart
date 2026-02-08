@@ -333,6 +333,26 @@ class _MobileHomeState extends State<MobileHome> {
         automaticallyImplyLeading: false,
         title: appheader(context: context, automaticallyImplyLeading: false, onPressed: null, isAdmin: isAdmin, isModerator: isModerator),
       ),
+      bottomNavigationBar: SizedBox(
+        height: 60,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              body(
+                header: '© ${DateTime.now().year} Legacy Endurance Sport', 
+                color: localAppTheme['anchorColors']['primaryColor'], 
+                context: context
+              ),
+              body(
+                header: appInfo['version'] != null ? 'v${appInfo['version']}' : '', 
+                color: localAppTheme['anchorColors']['primaryColor'], 
+                context: context
+              ),
+            ],
+          ),
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Column(
