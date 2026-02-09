@@ -3,6 +3,7 @@ import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
+import 'package:legacyendurancesport/Home/General%20Functions/activity_carousel.dart';
 import 'package:legacyendurancesport/Home/General%20Functions/weekdays_table.dart';
 import 'package:provider/provider.dart';
 
@@ -367,25 +368,34 @@ class _MobileHomeState extends State<MobileHome> {
               ),
               child: WeekDaysTable(athleteUID: appUser['uid'], navPath: 'HomePage'),
             ),
+            ActivityCarousel(),
             Expanded(
-              child: isCoach
-                  ? Builder(
-                      builder: (_) {
-                        switch (_view) {
-                          case LandingView.landing:
-                            return _coachLanding(
-                              context,
-                              onAthleteTap: () => setState(() => _view = LandingView.athleteGrid),
-                              onCoachTap: () => setState(() => _view = LandingView.coachGrid),
-                            );
-                          case LandingView.athleteGrid:
-                            return _athleteSection(context, athleteOptions, appUser['uid'], isCoach);
-                          case LandingView.coachGrid:
-                            return _coachSection(context, coachOptions, appUser['uid']);
-                        }
-                      },
-                    )
-                  : _athleteSection(context, athleteOptions, appUser['uid'], isCoach),
+              child: Container(
+                padding: const EdgeInsets.only(bottom: 10.0),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                  ),
+                ),
+                child: isCoach
+                    ? Builder(
+                        builder: (_) {
+                          switch (_view) {
+                            case LandingView.landing:
+                              return _coachLanding(
+                                context,
+                                onAthleteTap: () => setState(() => _view = LandingView.athleteGrid),
+                                onCoachTap: () => setState(() => _view = LandingView.coachGrid),
+                              );
+                            case LandingView.athleteGrid:
+                              return _athleteSection(context, athleteOptions, appUser['uid'], isCoach);
+                            case LandingView.coachGrid:
+                              return _coachSection(context, coachOptions, appUser['uid']);
+                          }
+                        },
+                      )
+                    : _athleteSection(context, athleteOptions, appUser['uid'], isCoach),
+              ),
             )
           ],
         ),

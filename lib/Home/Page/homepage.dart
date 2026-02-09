@@ -8,6 +8,7 @@ import 'package:legacyendurancesport/General/Providers/events_provider.dart';
 import 'package:legacyendurancesport/General/Providers/firebase_auth_service.dart';
 import 'package:legacyendurancesport/General/Providers/firebase_messaging_service.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
+import 'package:legacyendurancesport/General/Providers/workouts_provider.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/Mobile%20Functions/mobile_home.dart';
@@ -36,9 +37,10 @@ void initState() {
   final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
   final messagingService = Provider.of<FirebaseMessagingService>(context, listen: false);
   final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
+  final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
   final sharedPreferences = SharedPreferences.getInstance();
     
-  _fetchDataFuture = _fetchData(clubsProvider, eventsProvider, appUserProvider, messagingService, sharedPreferences, internalStatusProvider);
+  _fetchDataFuture = _fetchData(clubsProvider, eventsProvider, appUserProvider, messagingService, sharedPreferences, internalStatusProvider, workoutsProvider);
 }
 
   //----------------------------------------------------
@@ -49,7 +51,8 @@ void initState() {
     AppUserProvider appUserProvider,
     FirebaseMessagingService messagingService,
     Future<SharedPreferences> sharedPreferences,
-    InternalStatusProvider internalStatusProvider
+    InternalStatusProvider internalStatusProvider,
+    WorkoutsProvider workoutsProvider
     ) async {
     await clubsProvider.fetchAllClubs();
     await eventsProvider.fetchAllEvents();
@@ -61,7 +64,8 @@ void initState() {
 
     await _checkExpiryDateOfSession(sharedPreferences);
     await _initializeNotifications(appUserProvider, messagingService, sharedPreferences, internalStatusProvider);
-
+    await appUserProvider.getAllUserRecords();
+    await workoutsProvider.fetchCompletedWorkoutsForAllAthletesLast7Days(appUserProvider.allUsers);
   }
 
   //----------------------------------------------------
