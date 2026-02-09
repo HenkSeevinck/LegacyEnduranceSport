@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Providers/workouts_provider.dart';
 import 'dart:async';
@@ -65,7 +66,7 @@ class _ActivityCarouselState extends State<ActivityCarousel> {
           bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
         ),
       ),
-      height: 50,
+      height: 57,
       child: PageView.builder(
         controller: _pageController,
         itemBuilder: (context, index) {
@@ -96,10 +97,22 @@ class _ActivityCarouselState extends State<ActivityCarousel> {
                       ),
                     ),
                   ),
-                  body(
-                    header: '${athlete['name']} ${athlete['surname'] ?? 'Unknown Athlete'}', 
-                    color: localAppTheme['anchorColors']['primaryColor'], 
-                    context: context
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      body(
+                        header: '${athlete['name']} ${athlete['surname'] ?? 'Unknown Athlete'}', 
+                        color: localAppTheme['anchorColors']['primaryColor'], 
+                        context: context
+                      ),
+                      body(
+                        header: completedWorkouts[actualIndex]['workoutDate'] != null
+                            ? (completedWorkouts[actualIndex]['workoutDate'] as Timestamp).toDate().toLocal().toString().split(' ')[0]
+                            : 'Unknown Date', 
+                        color: localAppTheme['anchorColors']['primaryColor'], 
+                        context: context
+                      ),
+                    ],
                   ),
                   Icon( workoutIcon, color: localAppTheme['anchorColors']['primaryColor']),
                   body(
