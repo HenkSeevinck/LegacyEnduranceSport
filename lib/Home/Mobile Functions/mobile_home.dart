@@ -110,6 +110,7 @@ class _MobileHomeState extends State<MobileHome> {
   //Coach Section
   Widget _coachSection(BuildContext context, List<Map<String, dynamic>> coachOptions, String userUid) {
     final localAppTheme = ResponsiveTheme(context).theme;
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
 
     return Column(
       children: [
@@ -120,6 +121,7 @@ class _MobileHomeState extends State<MobileHome> {
             icon: const Icon(Icons.arrow_back),
             color: localAppTheme['anchorColors']['secondaryColor'],
             onPressed: () {
+              internalStatusProvider.sethomePageSelectedOption(null);
               setState(() {
                 _view = LandingView.landing;
               });
@@ -159,6 +161,7 @@ class _MobileHomeState extends State<MobileHome> {
   //Athlete Section
   Widget _athleteSection(BuildContext context, List<Map<String, dynamic>> athleteOptions, String userUid, bool isCoach) {
     final localAppTheme = ResponsiveTheme(context).theme;
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
 
     return Column(
       children: [
@@ -170,6 +173,7 @@ class _MobileHomeState extends State<MobileHome> {
                   icon: const Icon(Icons.arrow_back),
                   color: localAppTheme['anchorColors']['secondaryColor'],
                   onPressed: () {
+                    internalStatusProvider.sethomePageSelectedOption(null);
                     setState(() {
                       _view = LandingView.landing;
                     });
@@ -328,6 +332,7 @@ class _MobileHomeState extends State<MobileHome> {
     final coachOptions = homePageOptions.where((option) => option['coachOnly'] == true).toList();
     final isAdmin = appUser['isAdmin'];
     final isModerator = appUser['isModerator'];
+    final homePageSelectedOption = internalStatusProvider.homePageSelectedOption;
 
     return Scaffold(
       appBar: AppBar(
@@ -378,22 +383,32 @@ class _MobileHomeState extends State<MobileHome> {
                   ),
                 ),
                 child: isCoach
-                    ? Builder(
-                        builder: (_) {
-                          switch (_view) {
-                            case LandingView.landing:
-                              return _coachLanding(
-                                context,
-                                onAthleteTap: () => setState(() => _view = LandingView.athleteGrid),
-                                onCoachTap: () => setState(() => _view = LandingView.coachGrid),
-                              );
-                            case LandingView.athleteGrid:
-                              return _athleteSection(context, athleteOptions, appUser['uid'], isCoach);
-                            case LandingView.coachGrid:
-                              return _coachSection(context, coachOptions, appUser['uid']);
-                          }
-                        },
-                      )
+                    ? (homePageSelectedOption == 'Coach'
+                        ? _coachSection(context, coachOptions, appUser['uid'])
+                        : homePageSelectedOption == 'Athlete'
+                            ? _athleteSection(context, athleteOptions, appUser['uid'], isCoach)
+                            : Builder(
+                                builder: (_) {
+                                  switch (_view) {
+                                    case LandingView.landing:
+                                      return _coachLanding(
+                                        context,
+                                        onAthleteTap: () => setState(() {
+                                          _view = LandingView.athleteGrid;
+                                          internalStatusProvider.sethomePageSelectedOption('Athlete');
+                                        }),
+                                        onCoachTap: () => setState(() {
+                                          _view = LandingView.coachGrid;
+                                          internalStatusProvider.sethomePageSelectedOption('Coach');
+                                        }),
+                                      );
+                                    case LandingView.athleteGrid:
+                                      return _athleteSection(context, athleteOptions, appUser['uid'], isCoach);
+                                    case LandingView.coachGrid:
+                                      return _coachSection(context, coachOptions, appUser['uid']);
+                                  }
+                                },
+                              ))
                     : _athleteSection(context, athleteOptions, appUser['uid'], isCoach),
               ),
             )

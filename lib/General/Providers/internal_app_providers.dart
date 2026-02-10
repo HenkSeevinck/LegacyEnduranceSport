@@ -11,6 +11,9 @@ class InternalStatusProvider with ChangeNotifier {
   String signInsignUpStatus = 'SignIn';
   String platform = '';
   String userUIDToShow = '';
+  DateTime? weekStartDate;
+  DateTime? selectedDate;
+  String? homePageSelectedOption;
 
   List<Map<String, dynamic>> eventTypes = [
     {'id': 1, 'eventType': 'Run'},
@@ -83,6 +86,21 @@ class InternalStatusProvider with ChangeNotifier {
 
   Future<void> setPlatform(String value) async {
     platform = value;
+    notifyListeners();
+  }
+
+  Future<void> sethomePageSelectedOption(String? homePageSelection) async {
+    homePageSelectedOption = homePageSelection;
+    notifyListeners();
+  }
+
+  Future<void> setWeekStartDate(DateTime startDate) async {
+    weekStartDate = startDate;
+    notifyListeners();
+  }
+
+  Future<void> setSelectedDate(DateTime selectedDate) async {
+    this.selectedDate = selectedDate;
     notifyListeners();
   }
 
