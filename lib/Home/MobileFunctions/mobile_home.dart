@@ -4,6 +4,7 @@ import 'package:legacyendurancesport/General/Providers/internal_app_providers.da
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/GeneralFunctions/activity_carousel.dart';
+import 'package:legacyendurancesport/Home/GeneralFunctions/notification_media.dart';
 import 'package:legacyendurancesport/Home/GeneralFunctions/weekdays_table.dart';
 import 'package:provider/provider.dart';
 
@@ -142,11 +143,15 @@ class _MobileHomeState extends State<MobileHome> {
           actions: [
             SizedBox(
               width: 60,
-              child: IconButton(
+                child: IconButton(
                 tooltip: 'NOTIFICATIONS',
                 icon: const Icon(Icons.notifications),
                 color: localAppTheme['anchorColors']['secondaryColor'],
                 onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => const NotificationMedia(),
+                  );
                 },
               ),
             ),
@@ -188,6 +193,10 @@ class _MobileHomeState extends State<MobileHome> {
                 icon: const Icon(Icons.notifications),
                 color: localAppTheme['anchorColors']['secondaryColor'],
                 onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => const NotificationMedia(),
+                  );
                 },
               ),
             ),

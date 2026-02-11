@@ -104,3 +104,79 @@ exports.notifyAthleteWorkoutLoaded = onDocumentCreated(
     }
   }
 );
+
+/**
+ * When a new AppUsers document is created, generate a unique 5-character
+ * alphanumeric referral code and atomically claim it by creating a document
+ * in `ReferralCodes/{code}`. This prevents race conditions under concurrency.
+ */
+exports.assignReferralCodeOnSignup = onDocumentCreated(
+  "AppUsers/{docId}",
+  async (event) => {
+    try {
+      const userDoc = event.data.data();
+      const userUid = (userDoc && userDoc.uid) ? userDoc.uid : (event.data && event.data.ref ? event.data.ref.id : null);
+
+      if (!userUid) {
+        logger.warn('AppUsers document created but no UID found; skipping referral assignment.');
+        return;
+      }
+
+      // If the client already provided a referralCode, respect it and do nothing.
+      if (userDoc && userDoc.referralCode) {
+        logger.info(`User ${userUid} already has referralCode; skipping server assignment.`);
+        return;
+      }
+
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // avoid I,O,1,0
+      const maxAttempts = 8;
+      const db = admin.firestore();
+
+      function generateCode() {
+        let out = '';
+        for (let i = 0; i < 5; i++) {
+          out += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return out;
+      }
+
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const code = generateCode();
+        const codeRef = db.collection('ReferralCodes').doc(code);
+        const userRef = db.collection('AppUsers').doc(userUid);
+
+        try {
+          await db.runTransaction(async (tx) => {
+            const codeSnap = await tx.get(codeRef);
+            if (codeSnap.exists) {
+              throw new Error('code-exists');
+            }
+            tx.set(codeRef, { uid: userUid, createdAt: admin.firestore.FieldValue.serverTimestamp() });
+            tx.update(userRef, { referralCode: code });
+          });
+          logger.info(`Assigned referral code ${code} to user ${userUid}`);
+          return; // success
+        } catch (err) {
+          if (err.message === 'code-exists') {
+            // collision: try again
+            logger.warn(`Referral code collision for ${code}, retrying...`);
+            continue;
+          }
+          // Other errors: rethrow
+          throw err;
+        }
+      }
+
+      // Fallback: use a timestamp-derived code (last 5 chars)
+      const fallback = Date.now().toString();
+      const fallbackCode = fallback.substring(fallback.length - 5);
+      await db.collection('ReferralCodes').doc(fallbackCode).set({ uid: userUid, createdAt: admin.firestore.FieldValue.serverTimestamp() });
+      await db.collection('AppUsers').doc(userUid).update({ referralCode: fallbackCode });
+      logger.info(`Assigned fallback referral code ${fallbackCode} to user ${userUid}`);
+
+    } catch (error) {
+      logger.error('Error assigning referral code:', error);
+      throw error;
+    }
+  }
+);

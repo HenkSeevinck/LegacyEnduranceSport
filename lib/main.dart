@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:legacyendurancesport/General/Providers/firebase_messaging_service.dart';
+import 'package:legacyendurancesport/General/Providers/notification_provider.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:legacyendurancesport/General/Providers/ai_provider.dart';
@@ -45,7 +46,8 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => WorkoutsProvider()),
         ChangeNotifierProvider(create: (_) => AiProvider()),
         ChangeNotifierProvider(create: (_) => ImageVerificationProvider()),
-        ChangeNotifierProvider(create:  (_) => FirebaseMessagingService())
+        ChangeNotifierProvider(create:  (_) => FirebaseMessagingService()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
       child: const MyApp(),
     ),
