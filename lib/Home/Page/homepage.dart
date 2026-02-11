@@ -11,7 +11,7 @@ import 'package:legacyendurancesport/General/Providers/internal_app_providers.da
 import 'package:legacyendurancesport/General/Providers/workouts_provider.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
-import 'package:legacyendurancesport/Home/Mobile%20Functions/mobile_home.dart';
+import 'package:legacyendurancesport/Home/MobileFunctions/mobile_home.dart';
 import 'package:legacyendurancesport/General/Providers/clubs_provided.dart';
 import 'package:legacyendurancesport/Landing/Page/landing_page.dart';
 import 'package:provider/provider.dart';

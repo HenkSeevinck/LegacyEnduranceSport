@@ -3,7 +3,7 @@ import 'package:legacyendurancesport/General/Providers/internal_app_providers.da
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
-import 'package:legacyendurancesport/SignInSignUp/Functions/validators.dart';
+import 'package:legacyendurancesport/SignInSignUp/GeneralFunctions/validators.dart';
 import 'package:provider/provider.dart';
 
 class ResetPassword extends StatefulWidget {

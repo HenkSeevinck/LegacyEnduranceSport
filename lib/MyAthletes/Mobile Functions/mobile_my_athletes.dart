@@ -4,7 +4,7 @@ import 'package:legacyendurancesport/General/Providers/internal_app_providers.da
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Goals/Page/goals_page.dart';
-import 'package:legacyendurancesport/Home/General%20Functions/weekdays_table.dart';
+import 'package:legacyendurancesport/Home/GeneralFunctions/weekdays_table.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:legacyendurancesport/MyAthletes/Mobile%20Functions/Sub%20Mobile%20Functions/athlete_selection_popup.dart';
 import 'package:legacyendurancesport/Profile/Page/profile_page.dart';
