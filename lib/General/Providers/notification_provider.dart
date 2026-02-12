@@ -8,7 +8,7 @@ class NotificationProvider with ChangeNotifier {
 //---------------------------------------------------------
 // Get url's of all Images in /notifications/Current folder in Firebase Storage
   Future<List<String>> fetchNotificationMedia() async {
-    final Reference reference = FirebaseStorage.instance.ref().child('notifications/Current');
+    final Reference reference = FirebaseStorage.instance.ref().child('notifications');
     final ListResult result = await reference.listAll();
 
     final List<String> urls = [];

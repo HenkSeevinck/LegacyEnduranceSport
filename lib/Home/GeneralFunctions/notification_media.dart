@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
-//import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
-//import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:provider/provider.dart';
 import 'package:legacyendurancesport/General/Providers/notification_provider.dart';
 

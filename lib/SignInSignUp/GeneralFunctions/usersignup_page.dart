@@ -134,7 +134,11 @@ class _UserSignUpState extends State<UserSignUp> {
                               isLoading = true;
                             });
                             try {
-                              final userCredential = await _authService.signUp(emailController.text.trim(), passwordController.text, context);
+                              final userCredential = await _authService.signUp(
+                                emailController.text.trim(), 
+                                passwordController.text, 
+                                context,
+                              );
                               if (userCredential != null) {
                                 await appUserProvider.createUserRecord(userCredential.user!, appUser);
                                 await signInUser(
