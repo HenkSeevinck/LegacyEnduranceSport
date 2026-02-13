@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
+import 'package:legacyendurancesport/SignInSignUp/Page/signin_signup.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 //import 'package:provider/provider.dart';
 
 //------------------------------------------------------------------------
@@ -1017,6 +1019,7 @@ Widget appheader({
   Function? onPressed,
 }) {
   final localAppTheme = ResponsiveTheme(context).theme;
+
   return SafeArea(
     top: true,
     child: Stack(
@@ -1074,6 +1077,24 @@ Widget appheader({
                   onPressed: () {},
                 ),
               ),
+              iconButton(
+                label: null,
+                backgroundColor: null,
+                iconColor: localAppTheme['anchorColors']['primaryColor'],
+                icon: Icons.logout,
+                size: 30,
+                toolTip: 'LOGOUT',
+                context: context,
+                onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance(); 
+                  await prefs.clear();
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => const SigninPage(),
+                      ),
+                    );
+                  },
+                )
             ],
           ),
         ),
@@ -1242,6 +1263,32 @@ Widget imageButtonWithHeader({
             fontWeight: FontWeight.bold, 
             size: 16
           ),
+        ),
+      ],
+    ),
+  );
+}
+
+//----------------------------------------------------
+//Appbar with logo and login button
+PreferredSizeWidget landingPageAppBar(BuildContext context) {
+  final localAppTheme = ResponsiveTheme(context).theme;
+  return AppBar(
+    backgroundColor: Color(0xFF081807),
+    title: Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        iconButton(
+          label: null,
+          backgroundColor: null,
+          iconColor: localAppTheme['anchorColors']['secondaryColor'],
+          icon: Icons.person,
+          size: 30,
+          toolTip: 'User Login',
+          context: context,
+          onPressed: () {
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const SigninPage()));
+          },
         ),
       ],
     ),

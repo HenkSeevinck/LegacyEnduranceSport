@@ -110,13 +110,14 @@ void initState() {
   Future<void> _checkExpiryDateOfSession(Future<SharedPreferences> sharedPreferences) async {
     final prefs = await sharedPreferences;
     final startTimeStr = prefs.getString('auth_session_start');
-    final expiryDate = startTimeStr != null ? DateTime.parse(startTimeStr).add(const Duration(days: 14)) : null;
+    final expiryDate = startTimeStr != null ? DateTime.parse(startTimeStr).add(const Duration(days: 3)) : null;
     
     if (startTimeStr != null && expiryDate != null) {
       if (DateTime.now().isAfter(expiryDate)) {
       
         // Sign out of Firebase
-        await FirebaseAuthService().forceLogout(); 
+        await prefs.clear();
+        await FirebaseAuthService().forceLogout();
         
         // Navigate back to Landing/Login page
         if (mounted) {

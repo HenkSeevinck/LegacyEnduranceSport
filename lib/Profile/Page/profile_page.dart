@@ -26,6 +26,7 @@ class _UserProfileState extends State<UserProfile> {
   TextEditingController lastNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController disciplineOtherController = TextEditingController();
+  TextEditingController referralCodeController = TextEditingController();
   bool showsearch = false;
   String? searchPrase;
   Future<void>? _fetchDataFuture;
@@ -63,6 +64,7 @@ class _UserProfileState extends State<UserProfile> {
     userProfileToShow['athleteDisciplines'] == null || userProfileToShow['athleteDisciplines']['otherDiscipline'] == null
         ? disciplineOtherController.text = ''
         : disciplineOtherController.text = userProfileToShow['athleteDisciplines']['otherDiscipline'];
+    userProfileToShow['referralCode'] == null ? referralCodeController.text = '' : referralCodeController.text = userProfileToShow['referralCode'];
   }
 
   //----------------------------------------------------
@@ -74,6 +76,7 @@ class _UserProfileState extends State<UserProfile> {
     lastNameController.dispose();
     emailController.dispose();
     disciplineOtherController.dispose();
+    referralCodeController.dispose();
     super.dispose();
   }
 
@@ -773,15 +776,15 @@ class _UserProfileState extends State<UserProfile> {
                           ),
                           SizedBox(height: 10.0),
                           FormInputField(
-                            label: 'Email Name:',
-                            errorMessage: 'Please enter your first name',
+                            label: 'My Referral Code:',
+                            errorMessage: 'Please enter your referral code',
                             isMultiline: false,
                             isPassword: false,
                             prefixIcon: null,
                             suffixIcon: null,
                             showLabel: true,
                             enabled: false,
-                            controller: emailController,
+                            controller: referralCodeController,
                           ),
                         ],
                       ),
@@ -858,6 +861,18 @@ class _UserProfileState extends State<UserProfile> {
                       ],
                     )
                   ],
+                ),
+                SizedBox(height: 10.0),
+                FormInputField(
+                  label: 'Email:',
+                  errorMessage: 'Please enter your email',
+                  isMultiline: false,
+                  isPassword: false,
+                  prefixIcon: null,
+                  suffixIcon: null,
+                  showLabel: true,
+                  enabled: false,
+                  controller: emailController,
                 ),
                 SizedBox(height: 10.0),
                 DatePicker(

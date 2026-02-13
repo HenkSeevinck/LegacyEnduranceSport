@@ -26,6 +26,7 @@ class _UserSignUpState extends State<UserSignUp> {
   final TextEditingController reEnterPasswordController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController surnameController = TextEditingController();
+  final TextEditingController referralCodeController = TextEditingController();
   final FirebaseAuthService _authService = FirebaseAuthService();
   Map<String, String> appUser = {};
   bool isLoading = false;
@@ -37,6 +38,7 @@ class _UserSignUpState extends State<UserSignUp> {
     reEnterPasswordController.clear();
     nameController.clear();
     surnameController.clear();
+    referralCodeController.clear();
     appUser.clear();
   }
 
@@ -47,6 +49,7 @@ class _UserSignUpState extends State<UserSignUp> {
     reEnterPasswordController.dispose();
     nameController.dispose();
     surnameController.dispose();
+    referralCodeController.dispose();
     super.dispose();
   }
 
@@ -99,6 +102,19 @@ class _UserSignUpState extends State<UserSignUp> {
                       },
                       validator: (value) {
                         return value == null || value.isEmpty ? 'Please enter your surname' : null;
+                      },
+                    ),
+                    FormInputField(
+                      label: 'Referral Code (Optional)',
+                      errorMessage: 'Please enter a valid referral code',
+                      isMultiline: false,
+                      isPassword: false,
+                      prefixIcon: null,
+                      suffixIcon: null,
+                      showLabel: true,
+                      controller: referralCodeController,
+                      onChanged: (value) {
+                        appUser['referredByCode'] = value;
                       },
                     ),
                     FormInputField(
