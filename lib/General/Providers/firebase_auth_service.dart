@@ -17,6 +17,14 @@ class FirebaseAuthService with ChangeNotifier {
       final credential = await _auth.signInWithEmailAndPassword(email: email, password: password);
       _user = credential.user;
       notifyListeners();
+
+      // Require email verification before allowing sign-in
+      if (_user != null && !_user!.emailVerified) {
+        await _auth.signOut();
+        snackbar(context: context, header: 'Please verify your email. A verification link has been sent to ${_user!.email}.');
+        return null;
+      }
+
       return credential;
     } on FirebaseAuthException catch (e) {
       snackbar(context: context, header: e.message.toString());
@@ -37,6 +45,13 @@ class FirebaseAuthService with ChangeNotifier {
       final credential = await _auth.createUserWithEmailAndPassword(email: email, password: password);
       _user = credential.user;
       notifyListeners();
+      // Send email verification to the newly created user
+      try {
+        await _user?.sendEmailVerification();
+        snackbar(context: context, header: 'Verification email sent to ${_user?.email}');
+      } catch (e) {
+        snackbar(context: context, header: 'Failed to send verification email: ${e.toString()}');
+      }
       return credential;
     } on FirebaseAuthException catch (e) {
       snackbar(context: context, header: e.message.toString());
@@ -47,6 +62,22 @@ class FirebaseAuthService with ChangeNotifier {
     } catch (e) {
       snackbar(context: context, header: e.toString());
       return null;
+    }
+  }
+
+  //--------------------------------------------------------------
+  // Resend verification email for the current user (if not verified)
+  Future<void> resendVerificationEmail(context) async {
+    final user = _auth.currentUser;
+    if (user != null && !user.emailVerified) {
+      try {
+        await user.sendEmailVerification();
+        snackbar(context: context, header: 'Verification email resent to ${user.email}');
+      } catch (e) {
+        snackbar(context: context, header: e.toString());
+      }
+    } else {
+      snackbar(context: context, header: 'No unverified user found.');
     }
   }
 

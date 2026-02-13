@@ -5,7 +5,7 @@ import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 //import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/General/Providers/firebase_auth_service.dart';
-import 'package:legacyendurancesport/SignInSignUp/GeneralFunctions/SubFunctions/usersignin.dart';
+//import 'package:legacyendurancesport/SignInSignUp/GeneralFunctions/SubFunctions/usersignin.dart';
 //import 'package:legacyendurancesport/SignInSignUp/Functions/usersignin_page.dart';
 import 'package:legacyendurancesport/SignInSignUp/GeneralFunctions/validators.dart';
 import 'package:provider/provider.dart';
@@ -29,6 +29,16 @@ class _UserSignUpState extends State<UserSignUp> {
   final FirebaseAuthService _authService = FirebaseAuthService();
   Map<String, String> appUser = {};
   bool isLoading = false;
+
+  Future<void> _clearForm() async {
+    _formKey.currentState?.reset();
+    emailController.clear();
+    passwordController.clear();
+    reEnterPasswordController.clear();
+    nameController.clear();
+    surnameController.clear();
+    appUser.clear();
+  }
 
   @override
   void dispose() {
@@ -141,12 +151,8 @@ class _UserSignUpState extends State<UserSignUp> {
                               );
                               if (userCredential != null) {
                                 await appUserProvider.createUserRecord(userCredential.user!, appUser);
-                                await signInUser(
-                                  context, 
-                                  appUserProvider, 
-                                  emailController.text.trim(), 
-                                  passwordController.text
-                                );
+                                await _clearForm();
+                                internalStatusProvider.setSignInSignUpStatus('SignIn');
                               }
                             } catch (e) {
                               snackbar(
