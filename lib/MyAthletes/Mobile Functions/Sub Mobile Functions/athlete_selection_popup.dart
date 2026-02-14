@@ -57,8 +57,12 @@ class _AthleteSelectionPopupState extends State<AthleteSelectionPopup> {
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
     final appUser = appUserProvider.appUser;
     final String currentUserUID = appUser['uid'];
+    final List<dynamic> couchAthletes = appUser['athletes'] as List<dynamic>;
     final allUsers = appUserProvider.allUsers.where((user) => user['uid'] != currentUserUID).toList();
-    final dropdownUsers = allUsers.map((user) => {...user, 'fullName': '${user['name']} ${user['surname']}'}).toList();
+    final dropdownUsers = allUsers
+      .where((user) => !couchAthletes.any((athlete) => athlete['uid'] == user['uid']))
+      .map((user) => {...user, 'fullName': '${user['name']} ${user['surname']}'})
+      .toList();
 
     return AlertDialog(
       backgroundColor: localAppTheme['anchorColors']['secondaryColor'],

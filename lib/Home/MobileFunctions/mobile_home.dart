@@ -346,7 +346,13 @@ class _MobileHomeState extends State<MobileHome> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: appheader(context: context, automaticallyImplyLeading: false, onPressed: null, isAdmin: isAdmin, isModerator: isModerator),
+        title: appheader(
+          context: context, 
+          automaticallyImplyLeading: false, 
+          onPressed: null, 
+          isAdmin: isAdmin, 
+          isModerator: isModerator,
+        ),
       ),
       bottomNavigationBar: SizedBox(
         height: 60,

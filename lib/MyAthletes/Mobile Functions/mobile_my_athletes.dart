@@ -104,6 +104,7 @@ class _MobileMyAthletesState extends State<MobileMyAthletes> {
     final localAppTheme = ResponsiveTheme(context).theme;
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
     final appUser = appUserProvider.appUser;
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,

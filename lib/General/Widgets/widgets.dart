@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
+import 'package:legacyendurancesport/Landing/Page/landing_page.dart';
 import 'package:legacyendurancesport/SignInSignUp/Page/signin_signup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 //import 'package:provider/provider.dart';
@@ -1046,56 +1047,65 @@ Widget appheader({
             ),
           ),
         Positioned(
-          right: 0,
+          //right: 0,
+          left: 0,
           top: 0,
           bottom: 0,
-          child: Row(
-            children: [
-              Visibility(
-                visible: isAdmin,
-                child: iconButton(
-                  label: null,
-                  backgroundColor: null,
-                  iconColor: localAppTheme['anchorColors']['primaryColor'],
-                  icon: Icons.admin_panel_settings,
-                  size: 30,
-                  toolTip: 'ENABLE ADMIN',
-                  context: context,
-                  onPressed: () {},
-                ),
-              ),
-              Visibility(
-                visible: isModerator,
-                child: iconButton(
-                  label: null,
-                  backgroundColor: null,
-                  iconColor: localAppTheme['anchorColors']['primaryColor'],
-                  icon: Icons.admin_panel_settings_outlined,
-                  size: 30,
-                  toolTip: 'ENABLE MODERATOR',
-                  context: context,
-                  onPressed: () {},
-                ),
-              ),
-              iconButton(
-                label: null,
-                backgroundColor: null,
-                iconColor: localAppTheme['anchorColors']['primaryColor'],
-                icon: Icons.logout,
-                size: 30,
-                toolTip: 'LOGOUT',
-                context: context,
-                onPressed: () async {
-                  final prefs = await SharedPreferences.getInstance(); 
-                  await prefs.clear();
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) => const SigninPage(),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width-20,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Visibility(
+                      visible: isAdmin,
+                      child: iconButton(
+                        label: null,
+                        backgroundColor: null,
+                        iconColor: localAppTheme['anchorColors']['primaryColor'],
+                        icon: Icons.admin_panel_settings,
+                        size: 30,
+                        toolTip: 'ENABLE ADMIN',
+                        context: context,
+                        onPressed: () {},
                       ),
-                    );
-                  },
-                )
-            ],
+                    ),
+                    Visibility(
+                      visible: isModerator,
+                      child: iconButton(
+                        label: null,
+                        backgroundColor: null,
+                        iconColor: localAppTheme['anchorColors']['primaryColor'],
+                        icon: Icons.admin_panel_settings_outlined,
+                        size: 30,
+                        toolTip: 'ENABLE MODERATOR',
+                        context: context,
+                        onPressed: () {},
+                      ),
+                    ),
+                  ],
+                ),
+                iconButton(
+                  label: null,
+                  backgroundColor: null,
+                  iconColor: localAppTheme['anchorColors']['primaryColor'],
+                  icon: Icons.logout,
+                  size: 30,
+                  toolTip: 'LOGOUT',
+                  context: context,
+                  onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance(); 
+                    await prefs.clear();
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const LandingPage(),
+                        ),
+                      );
+                    },
+                  )
+              ],
+            ),
           ),
         ),
       ],

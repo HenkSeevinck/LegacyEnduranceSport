@@ -42,7 +42,7 @@ class _MobileSigninSignupState extends State<MobileSigninSignup> {
                   child: signInsignUpStatus == 'SignIn' 
                   ? UserSignIn(width: 0.8, height: 0.4) 
                   : signInsignUpStatus == 'SignUp' 
-                  ? UserSignUp(width: 0.8, height: 0.6) 
+                  ? UserSignUp(width: 0.8, height: 0.8) 
                   : ResetPassword(width: 0.8, height: 0.27),
                 ),
               ),
