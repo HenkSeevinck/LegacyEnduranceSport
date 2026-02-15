@@ -81,7 +81,7 @@ class _MobileListOfWorkoutsState extends State<MobileListOfWorkouts> {
 
   //----------------------------------------------------
   // Add Workout Context Menus and Dialogs Here
-  _showCreateWorkoutPopupDialog(BuildContext context, Map<String, dynamic>? workout, int? index) async {
+  Future<dynamic> _showCreateWorkoutPopupDialog(BuildContext context, Map<String, dynamic>? workout, int? index) async {
     final localAppTheme = ResponsiveTheme(context).theme;
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
@@ -430,7 +430,7 @@ class _MobileListOfWorkoutsState extends State<MobileListOfWorkouts> {
 
   //----------------------------------------------------
   // Show athelete assignment dialog
-  _showAssignAthletesPopupDialog(BuildContext context, Map<String, dynamic> workout) async {
+  Future<dynamic> _showAssignAthletesPopupDialog(BuildContext context, Map<String, dynamic> workout) async {
     final localAppTheme = ResponsiveTheme(context).theme;
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);

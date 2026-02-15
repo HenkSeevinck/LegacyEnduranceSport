@@ -48,98 +48,103 @@ class _UserSignInState extends State<UserSignIn> {
               height: MediaQuery.of(context).size.height * (widget.height ?? 0.6),
               child: Form(
                 key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    header1(header: 'SIGN-IN:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                    FormInputField(
-                      label: 'EMAIL',
-                      errorMessage: 'Please enter a valid email address',
-                      isMultiline: false,
-                      isPassword: false,
-                      prefixIcon: Icons.email,
-                      suffixIcon: null,
-                      showLabel: true,
-                      controller: emailController,
-                      validator: emailValidator,
-                    ),
-                    FormInputField(
-                      label: 'PASSWORD',
-                      errorMessage: 'Please enter a valid password',
-                      isMultiline: false,
-                      isPassword: true,
-                      prefixIcon: Icons.lock,
-                      suffixIcon: Icons.visibility,
-                      showLabel: true,
-                      controller: passwordController,
-                      validator: passwordValidator,
-                    ),
-                    SizedBox(
-                      height: 20,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          body(header: 'FORGOT YOUR PASSWORD?', color: localAppTheme['anchorColors']['primaryColor'], context: context),
-                          GestureDetector(
-                            child: body(header: 'RESET PASSWORD', color: localAppTheme['utilityColorPair2']['color1'], context: context),
-                            onTap: () {
-                              internalStatusProvider.setSignInSignUpStatus('ResetPassword');
-                            },
-                          ),
-                        ],
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      header1(header: 'SIGN-IN:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                      SizedBox(height: 20),
+                      FormInputField(
+                        label: 'EMAIL',
+                        errorMessage: 'Please enter a valid email address',
+                        isMultiline: false,
+                        isPassword: false,
+                        prefixIcon: Icons.email,
+                        suffixIcon: null,
+                        showLabel: true,
+                        controller: emailController,
+                        validator: emailValidator,
                       ),
-                    ),
-                    SizedBox(
-                      height: 50,
-                      child: elevatedButton(
-                        label: 'SIGN-IN',
-                        onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
-                            setState(() {
-                              isLoading = true;
-                            });
-                            try {
-                              await signInUser(
-                                context, 
-                                appUserProvider, 
-                                emailController.text.trim(), 
-                                passwordController.text,
-                              );
-                            } catch (e) {
-                              snackbar(context: context, header: e.toString());
-                            } finally {
+                      SizedBox(height: 10),
+                      FormInputField(
+                        label: 'PASSWORD',
+                        errorMessage: 'Please enter a valid password',
+                        isMultiline: false,
+                        isPassword: true,
+                        prefixIcon: Icons.lock,
+                        suffixIcon: Icons.visibility,
+                        showLabel: true,
+                        controller: passwordController,
+                        validator: passwordValidator,
+                      ),
+                      SizedBox(height: 20),
+                      SizedBox(
+                        height: 20,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            body(header: 'FORGOT YOUR PASSWORD?', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                            GestureDetector(
+                              child: body(header: 'RESET PASSWORD', color: localAppTheme['utilityColorPair2']['color1'], context: context),
+                              onTap: () {
+                                internalStatusProvider.setSignInSignUpStatus('ResetPassword');
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 50,
+                        child: elevatedButton(
+                          label: 'SIGN-IN',
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
                               setState(() {
-                                isLoading = false;
+                                isLoading = true;
                               });
+                              try {
+                                await signInUser(
+                                  context, 
+                                  appUserProvider, 
+                                  emailController.text.trim(), 
+                                  passwordController.text,
+                                );
+                              } catch (e) {
+                                snackbar(context: context, header: e.toString());
+                              } finally {
+                                setState(() {
+                                  isLoading = false;
+                                });
+                              }
                             }
-                          }
-                        },
-                        backgroundColor: localAppTheme['anchorColors']['primaryColor'],
-                        labelColor: localAppTheme['anchorColors']['secondaryColor'],
-                        leadingIcon: Icons.login,
-                        trailingIcon: null,
-                        context: context,
+                          },
+                          backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                          labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                          leadingIcon: Icons.login,
+                          trailingIcon: null,
+                          context: context,
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                      height: 20,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          body(header: 'DONT\'T HAVE AN ACCOUNT?', color: localAppTheme['anchorColors']['primaryColor'], context: context),
-                          GestureDetector(
-                            child: body(header: 'SIGN-UP', color: localAppTheme['utilityColorPair2']['color1'], context: context),
-                            onTap: () {
-                              internalStatusProvider.setSignInSignUpStatus('SignUp');
-                            },
-                          ),
-                        ],
+                      SizedBox(
+                        height: 20,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            body(header: 'DONT\'T HAVE AN ACCOUNT?', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                            GestureDetector(
+                              child: body(header: 'SIGN-UP', color: localAppTheme['utilityColorPair2']['color1'], context: context),
+                              onTap: () {
+                                internalStatusProvider.setSignInSignUpStatus('SignUp');
+                              },
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

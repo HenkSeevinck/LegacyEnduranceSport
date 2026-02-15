@@ -6,6 +6,7 @@ import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Home/GeneralFunctions/activity_carousel.dart';
 import 'package:legacyendurancesport/Home/GeneralFunctions/notification_media.dart';
 import 'package:legacyendurancesport/Home/GeneralFunctions/weekdays_table.dart';
+import 'package:legacyendurancesport/Store/Page/store_page.dart';
 import 'package:provider/provider.dart';
 
 // Simple view state used by coach users to switch screens
@@ -197,6 +198,21 @@ class _MobileHomeState extends State<MobileHome> {
                     context: context,
                     builder: (context) => const NotificationMedia(),
                   );
+                },
+              ),
+            ),
+            SizedBox(
+              width: 60,
+              child: IconButton(
+                tooltip: 'STORE',
+                icon: const Icon(Icons.store),
+                color: localAppTheme['anchorColors']['secondaryColor'],
+                onPressed: () {
+                  Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const StorePage(),
+                        ),
+                      );
                 },
               ),
             ),

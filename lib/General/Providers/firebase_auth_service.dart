@@ -7,7 +7,7 @@ class FirebaseAuthService with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   User? _user;
   User? get user => _user;
-  get _firebaseAuth => _auth;
+  FirebaseAuth get _firebaseAuth => _auth;
   User? get currentUser => _auth.currentUser;
 
   //--------------------------------------------------------------

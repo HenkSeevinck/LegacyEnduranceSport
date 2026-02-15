@@ -22,7 +22,7 @@ class FirebaseMessagingService with ChangeNotifier {
     if (currentSettings.authorizationStatus == AuthorizationStatus.authorized ||
         currentSettings.authorizationStatus == AuthorizationStatus.provisional) {
       // Permission already granted, just get the token
-      print('Notification permission already granted - retrieving token');
+      //print('Notification permission already granted - retrieving token');
       await _getFCMToken(platform);
       return;
     }
@@ -41,13 +41,13 @@ class FirebaseMessagingService with ChangeNotifier {
       );
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-        print('User granted web notification permission');
+        //print('User granted web notification permission');
         await _getFCMToken(platform);
       } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
-        print('User granted provisional web notification permission');
+        //('User granted provisional web notification permission');
         await _getFCMToken(platform);
       } else {
-        print('User declined or has not accepted web notification permission');
+        //print('User declined or has not accepted web notification permission');
       }
     } else {
       // For mobile platforms
@@ -62,13 +62,13 @@ class FirebaseMessagingService with ChangeNotifier {
       );
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-        print('User granted notification permission');
+        //print('User granted notification permission');
         await _getFCMToken(platform);
       } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
-        print('User granted provisional notification permission');
+        //print('User granted provisional notification permission');
         await _getFCMToken(platform);
       } else {
-        print('User declined or has not accepted notification permission');
+        //print('User declined or has not accepted notification permission');
       }
     }
   }
@@ -109,17 +109,17 @@ class FirebaseMessagingService with ChangeNotifier {
             ]),
           });
           //print('FCM Token saved to user profile: $_fcmToken (Platform: ${_getPlatformName()})');
-          print('FCM Token saved to user profile: $_fcmToken (Platform: $platform)');
+          //print('FCM Token saved to user profile: $_fcmToken (Platform: $platform)');
         } else {
           // Token already exists, just log it
-          print('FCM Token already exists for this device: $_fcmToken');
+          //print('FCM Token already exists for this device: $_fcmToken');
         }
       } else {
-        print('FCM Token: $_fcmToken (User ID: $_userId)');
+        //print('FCM Token: $_fcmToken (User ID: $_userId)');
       }
       notifyListeners();
     } catch (e) {
-      print('Error getting FCM token: $e');
+      //print('Error getting FCM token: $e');
     }
   }
 
@@ -128,13 +128,13 @@ class FirebaseMessagingService with ChangeNotifier {
   void initializeListeners() {
     // Handle foreground messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Received foreground message: ${message.notification?.title}');
+      //print('Received foreground message: ${message.notification?.title}');
       // Handle the message (show notification, update UI, etc.)
     });
 
     // Handle when user taps on notification
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('Notification tapped: ${message.notification?.title}');
+      //print('Notification tapped: ${message.notification?.title}');
       // Navigate to specific screen based on message data
     });
   }

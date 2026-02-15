@@ -91,15 +91,15 @@ void initState() {
         
         // If permission is already granted, retrieve token even if we've asked before
         if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-          print('Notifications already authorized - retrieving FCM token');
+          //print('Notifications already authorized - retrieving FCM token');
           await messagingService.requestPermission(userId, platform);
         } else if (!hasAskedForNotifications) {
           // If not granted yet and haven't asked, request permission
-          print('Requesting notification permission');
+          //print('Requesting notification permission');
           await messagingService.requestPermission(userId, platform);
           await prefs.setBool('notifications_requested', true);
         } else {
-          print('User declined or has not accepted notification permission');
+          //print('User declined or has not accepted notification permission');
         }
       }
     }

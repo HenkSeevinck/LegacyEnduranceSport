@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:legacyendurancesport/General/Providers/firebase_messaging_service.dart';
 import 'package:legacyendurancesport/General/Providers/notification_provider.dart';
+import 'package:legacyendurancesport/General/Providers/woocommerce_store_provider.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:legacyendurancesport/General/Providers/ai_provider.dart';
@@ -48,6 +49,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => ImageVerificationProvider()),
         ChangeNotifierProvider(create:  (_) => FirebaseMessagingService()),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create:  (_) => WoocommerceStore())
       ],
       child: const MyApp(),
     ),

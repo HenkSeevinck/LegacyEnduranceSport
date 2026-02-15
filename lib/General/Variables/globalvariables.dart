@@ -38,7 +38,7 @@ class ResponsiveTheme {
   final BuildContext context;
 
   InternalStatusProvider get internalStatusProvider => Provider.of<InternalStatusProvider>(context, listen: false);
-  get platform => internalStatusProvider.platform;
+  String get platform => internalStatusProvider.platform;
   ResponsiveTheme(this.context);
 
   double get header1Size => platform == 'DesktopWeb' || platform == 'Desktop'
