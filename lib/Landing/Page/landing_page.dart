@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
-import 'package:legacyendurancesport/Landing/Functions/mobile_landing.dart';
+import 'package:legacyendurancesport/Landing/DesktopFunctions/desktop_landing.dart';
+import 'package:legacyendurancesport/Landing/MobileFunctions/mobile_landing.dart';
 import 'package:provider/provider.dart';
 
 class LandingPage extends StatefulWidget {
@@ -35,12 +36,6 @@ class _LandingPageState extends State<LandingPage> {
   }
 
   //----------------------------------------------------
-  // Desktop Layout
-  Widget _buildDesktopLayout() {
-    return Scaffold(body: const Center(child: Text('Landing Page - Desktop Layout Coming Soon')));
-  }
-
-  //----------------------------------------------------
   // Fallback Layout
   Widget _buildFallbackLayout() {
     return Scaffold(body: const Center(child: Text('Landing Page - Fallback Layout Coming Soon')));
@@ -66,7 +61,7 @@ class _LandingPageState extends State<LandingPage> {
           if (platform == 'MobileWeb' || platform == 'Mobile') {
             return MobileLanding();
           } else if (platform == 'ComputerWeb' || platform == 'Computer') {
-            return _buildDesktopLayout();
+            return DesktopLanding();
           } else {
             return _buildFallbackLayout();
           }

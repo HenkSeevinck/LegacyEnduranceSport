@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:legacyendurancesport/DayOverview/Page/daily_overview.dart';
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/General/Providers/events_provider.dart';
+import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Providers/workouts_provider.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
@@ -19,7 +20,15 @@ class WeekDaysTable extends StatefulWidget {
   final double minTileHeight;
   final String navPath;
 
-  const WeekDaysTable({super.key, required this.athleteUID, required this.navPath, this.initialDate, this.onDaySelected, this.minTileHeight = 64});
+  const WeekDaysTable({
+    super.key, 
+    required this.athleteUID, 
+    required this.navPath, 
+    this.initialDate, 
+    this.onDaySelected, 
+    this.minTileHeight = 64
+  });
+
   @override
   State<WeekDaysTable> createState() => _WeekDaysTableState();
 }
@@ -36,21 +45,26 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
   void initState() {
     super.initState();
     _athleteWorkouts = []; // Initialize empty
-    final now = widget.initialDate ?? DateTime.now();
-    _weekStart = _startOfWeek(now);
-    _selectedDate = now;
+    //final now = widget.initialDate ?? DateTime.now();
+    //_weekStart = _startOfWeek(now);
+    //_selectedDate = now;
 
     final eventsProvider = Provider.of<EventsProvider>(context, listen: false);
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
 
-    _fetchDataFuture = _fetchData(eventsProvider, workoutsProvider, appUserProvider);
+    _fetchDataFuture = _fetchData(eventsProvider, workoutsProvider, appUserProvider, internalStatusProvider);
   }
 
   //----------------------------------------------------
   // Fetch data for the week
-  Future<void> _fetchData(EventsProvider eventsProvider, WorkoutsProvider workoutsProvider, AppUserProvider appUserProvider) async {
+  Future<void> _fetchData(EventsProvider eventsProvider, WorkoutsProvider workoutsProvider, AppUserProvider appUserProvider, InternalStatusProvider internalStatusProvider) async {
     appUserProvider.appUser;
+    
+    _weekStart = _startOfWeek(internalStatusProvider.weekStartDate ?? widget.initialDate ?? DateTime.now());
+    _selectedDate = internalStatusProvider.selectedDate ?? widget.initialDate ?? DateTime.now();
+
     await eventsProvider.fetchEventsBetweenDates(_weekStart, _weekStart.add(const Duration(days: 6)));
     await workoutsProvider.fetchLoadedWorkoutsBetweenDates(widget.athleteUID, _weekStart, _weekStart.add(const Duration(days: 6)));
     
@@ -76,11 +90,13 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
     final eventsProvider = Provider.of<EventsProvider>(context, listen: false);
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
     final athleteUID = widget.athleteUID;
     
+    _weekStart = _weekStart.subtract(const Duration(days: 7));
+    await internalStatusProvider.setWeekStartDate(_weekStart);
     setState(() {
-      _weekStart = _weekStart.subtract(const Duration(days: 7));
-      _fetchDataFuture = _fetchData(eventsProvider, workoutsProvider, appUserProvider);
+      _fetchDataFuture = _fetchData(eventsProvider, workoutsProvider, appUserProvider, internalStatusProvider);
     });
     await eventsProvider.fetchEventsBetweenDates(_weekStart, _weekStart.add(const Duration(days: 6)));
     await workoutsProvider.fetchLoadedWorkoutsBetweenDates(
@@ -106,11 +122,13 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
     final eventsProvider = Provider.of<EventsProvider>(context, listen: false);
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
     final athleteUID = widget.athleteUID;
     
+    _weekStart = _weekStart.add(const Duration(days: 7));
+    await internalStatusProvider.setWeekStartDate(_weekStart);
     setState(() {
-      _weekStart = _weekStart.add(const Duration(days: 7));
-      _fetchDataFuture = _fetchData(eventsProvider, workoutsProvider, appUserProvider);
+      _fetchDataFuture = _fetchData(eventsProvider, workoutsProvider, appUserProvider, internalStatusProvider);
     });
     await eventsProvider.fetchEventsBetweenDates(_weekStart, _weekStart.add(const Duration(days: 6)));
     await workoutsProvider.fetchLoadedWorkoutsBetweenDates(
@@ -136,6 +154,7 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
     final eventsProvider = Provider.of<EventsProvider>(context, listen: false);
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
 
     // Filter goals and events from provider
     await appUserProvider.filterTodaysGoals(d);
@@ -145,6 +164,7 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
     await workoutsProvider.filterTodaysWorkoutsFromList(_athleteWorkouts, d);
 
     setState(() {
+      internalStatusProvider.setSelectedDate(d);
       _selectedDate = d;
     });
     widget.onDaySelected?.call(d);

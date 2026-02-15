@@ -1,13 +1,17 @@
 import 'dart:async';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/General/Providers/events_provider.dart';
 import 'package:legacyendurancesport/General/Providers/firebase_auth_service.dart';
+import 'package:legacyendurancesport/General/Providers/firebase_messaging_service.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
+import 'package:legacyendurancesport/General/Providers/workouts_provider.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
-import 'package:legacyendurancesport/Home/Mobile%20Functions/mobile_home.dart';
+import 'package:legacyendurancesport/Home/MobileFunctions/mobile_home.dart';
 import 'package:legacyendurancesport/General/Providers/clubs_provided.dart';
 import 'package:legacyendurancesport/Landing/Page/landing_page.dart';
 import 'package:provider/provider.dart';
@@ -31,9 +35,12 @@ void initState() {
   final clubsProvider = Provider.of<ClubsProvider>(context, listen: false);
   final eventsProvider = Provider.of<EventsProvider>(context, listen: false);
   final appUserProvider = Provider.of<AppUserProvider>(context, listen: false);
+  final messagingService = Provider.of<FirebaseMessagingService>(context, listen: false);
+  final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
+  final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
   final sharedPreferences = SharedPreferences.getInstance();
     
-  _fetchDataFuture = _fetchData(clubsProvider, eventsProvider, appUserProvider, sharedPreferences);
+  _fetchDataFuture = _fetchData(clubsProvider, eventsProvider, appUserProvider, messagingService, sharedPreferences, internalStatusProvider, workoutsProvider);
 }
 
   //----------------------------------------------------
@@ -41,26 +48,76 @@ void initState() {
   Future<void> _fetchData(
     ClubsProvider clubsProvider, 
     EventsProvider eventsProvider, 
-    AppUserProvider appUserProvider, 
-    Future<SharedPreferences> sharedPreferences
+    AppUserProvider appUserProvider,
+    FirebaseMessagingService messagingService,
+    Future<SharedPreferences> sharedPreferences,
+    InternalStatusProvider internalStatusProvider,
+    WorkoutsProvider workoutsProvider
     ) async {
     await clubsProvider.fetchAllClubs();
     await eventsProvider.fetchAllEvents();
     final appUser = appUserProvider.appUser;
-    final prefs = await sharedPreferences;
-    final startTimeStr = prefs.getString('auth_session_start');
-    final expiryDate = startTimeStr != null ? DateTime.parse(startTimeStr).add(const Duration(days: 14)) : null;
 
     if (appUser.isEmpty) {
       await appUserProvider.getUserRecord(FirebaseAuthService().currentUser?.uid ?? ''); 
     }
 
-    // Check for 14-day session expiry
+    await _checkExpiryDateOfSession(sharedPreferences);
+    await _initializeNotifications(appUserProvider, messagingService, sharedPreferences, internalStatusProvider);
+    await appUserProvider.getAllUserRecords();
+    await workoutsProvider.fetchCompletedWorkoutsForAllAthletesLast7Days(appUserProvider.allUsers);
+  }
+
+  //----------------------------------------------------
+  // Initialize notification listeners and request permission (for PWA and mobile)
+  Future<void> _initializeNotifications(
+    AppUserProvider appUserProvider, 
+    FirebaseMessagingService messagingService, 
+    Future<SharedPreferences> sharedPreferences,
+    InternalStatusProvider internalStatusProvider
+    ) async {
+    final appUser = appUserProvider.appUser;
+    final prefs = await sharedPreferences;
+    final platform = internalStatusProvider.platform;
+
+    if (kIsWeb || true) { // Request for all platforms
+      messagingService.initializeListeners();
+      
+      final userId = appUser['uid'] ?? FirebaseAuthService().currentUser?.uid;
+      if (userId != null) {
+        // Check current notification permission status
+        final settings = await FirebaseMessaging.instance.getNotificationSettings();
+        final hasAskedForNotifications = prefs.getBool('notifications_requested') ?? false;
+        
+        // If permission is already granted, retrieve token even if we've asked before
+        if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+          print('Notifications already authorized - retrieving FCM token');
+          await messagingService.requestPermission(userId, platform);
+        } else if (!hasAskedForNotifications) {
+          // If not granted yet and haven't asked, request permission
+          print('Requesting notification permission');
+          await messagingService.requestPermission(userId, platform);
+          await prefs.setBool('notifications_requested', true);
+        } else {
+          print('User declined or has not accepted notification permission');
+        }
+      }
+    }
+  }
+
+  //----------------------------------------------------
+  // 14-day session check and platform detection logic moved to MyApp for better app flow control
+  Future<void> _checkExpiryDateOfSession(Future<SharedPreferences> sharedPreferences) async {
+    final prefs = await sharedPreferences;
+    final startTimeStr = prefs.getString('auth_session_start');
+    final expiryDate = startTimeStr != null ? DateTime.parse(startTimeStr).add(const Duration(days: 3)) : null;
+    
     if (startTimeStr != null && expiryDate != null) {
       if (DateTime.now().isAfter(expiryDate)) {
       
         // Sign out of Firebase
-        await FirebaseAuthService().forceLogout(); 
+        await prefs.clear();
+        await FirebaseAuthService().forceLogout();
         
         // Navigate back to Landing/Login page
         if (mounted) {

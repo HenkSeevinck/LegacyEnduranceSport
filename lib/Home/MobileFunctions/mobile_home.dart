@@ -3,7 +3,9 @@ import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
-import 'package:legacyendurancesport/Home/General%20Functions/weekdays_table.dart';
+import 'package:legacyendurancesport/Home/GeneralFunctions/activity_carousel.dart';
+import 'package:legacyendurancesport/Home/GeneralFunctions/notification_media.dart';
+import 'package:legacyendurancesport/Home/GeneralFunctions/weekdays_table.dart';
 import 'package:provider/provider.dart';
 
 // Simple view state used by coach users to switch screens
@@ -109,6 +111,7 @@ class _MobileHomeState extends State<MobileHome> {
   //Coach Section
   Widget _coachSection(BuildContext context, List<Map<String, dynamic>> coachOptions, String userUid) {
     final localAppTheme = ResponsiveTheme(context).theme;
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
 
     return Column(
       children: [
@@ -119,6 +122,7 @@ class _MobileHomeState extends State<MobileHome> {
             icon: const Icon(Icons.arrow_back),
             color: localAppTheme['anchorColors']['secondaryColor'],
             onPressed: () {
+              internalStatusProvider.sethomePageSelectedOption(null);
               setState(() {
                 _view = LandingView.landing;
               });
@@ -139,11 +143,15 @@ class _MobileHomeState extends State<MobileHome> {
           actions: [
             SizedBox(
               width: 60,
-              child: IconButton(
+                child: IconButton(
                 tooltip: 'NOTIFICATIONS',
                 icon: const Icon(Icons.notifications),
                 color: localAppTheme['anchorColors']['secondaryColor'],
                 onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => const NotificationMedia(),
+                  );
                 },
               ),
             ),
@@ -158,6 +166,7 @@ class _MobileHomeState extends State<MobileHome> {
   //Athlete Section
   Widget _athleteSection(BuildContext context, List<Map<String, dynamic>> athleteOptions, String userUid, bool isCoach) {
     final localAppTheme = ResponsiveTheme(context).theme;
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
 
     return Column(
       children: [
@@ -169,6 +178,7 @@ class _MobileHomeState extends State<MobileHome> {
                   icon: const Icon(Icons.arrow_back),
                   color: localAppTheme['anchorColors']['secondaryColor'],
                   onPressed: () {
+                    internalStatusProvider.sethomePageSelectedOption(null);
                     setState(() {
                       _view = LandingView.landing;
                     });
@@ -183,6 +193,10 @@ class _MobileHomeState extends State<MobileHome> {
                 icon: const Icon(Icons.notifications),
                 color: localAppTheme['anchorColors']['secondaryColor'],
                 onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => const NotificationMedia(),
+                  );
                 },
               ),
             ),
@@ -327,11 +341,38 @@ class _MobileHomeState extends State<MobileHome> {
     final coachOptions = homePageOptions.where((option) => option['coachOnly'] == true).toList();
     final isAdmin = appUser['isAdmin'];
     final isModerator = appUser['isModerator'];
+    final homePageSelectedOption = internalStatusProvider.homePageSelectedOption;
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: appheader(context: context, automaticallyImplyLeading: false, onPressed: null, isAdmin: isAdmin, isModerator: isModerator),
+        title: appheader(
+          context: context, 
+          automaticallyImplyLeading: false, 
+          onPressed: null, 
+          isAdmin: isAdmin, 
+          isModerator: isModerator,
+        ),
+      ),
+      bottomNavigationBar: SizedBox(
+        height: 60,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              body(
+                header: '© ${DateTime.now().year} Legacy Endurance Sport', 
+                color: localAppTheme['anchorColors']['primaryColor'], 
+                context: context
+              ),
+              body(
+                header: appInfo['version'] != null ? 'v${appInfo['version']}' : '', 
+                color: localAppTheme['anchorColors']['primaryColor'], 
+                context: context
+              ),
+            ],
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
@@ -347,25 +388,44 @@ class _MobileHomeState extends State<MobileHome> {
               ),
               child: WeekDaysTable(athleteUID: appUser['uid'], navPath: 'HomePage'),
             ),
+            ActivityCarousel(),
             Expanded(
-              child: isCoach
-                  ? Builder(
-                      builder: (_) {
-                        switch (_view) {
-                          case LandingView.landing:
-                            return _coachLanding(
-                              context,
-                              onAthleteTap: () => setState(() => _view = LandingView.athleteGrid),
-                              onCoachTap: () => setState(() => _view = LandingView.coachGrid),
-                            );
-                          case LandingView.athleteGrid:
-                            return _athleteSection(context, athleteOptions, appUser['uid'], isCoach);
-                          case LandingView.coachGrid:
-                            return _coachSection(context, coachOptions, appUser['uid']);
-                        }
-                      },
-                    )
-                  : _athleteSection(context, athleteOptions, appUser['uid'], isCoach),
+              child: Container(
+                padding: const EdgeInsets.only(bottom: 10.0),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                  ),
+                ),
+                child: isCoach
+                    ? (homePageSelectedOption == 'Coach'
+                        ? _coachSection(context, coachOptions, appUser['uid'])
+                        : homePageSelectedOption == 'Athlete'
+                            ? _athleteSection(context, athleteOptions, appUser['uid'], isCoach)
+                            : Builder(
+                                builder: (_) {
+                                  switch (_view) {
+                                    case LandingView.landing:
+                                      return _coachLanding(
+                                        context,
+                                        onAthleteTap: () => setState(() {
+                                          _view = LandingView.athleteGrid;
+                                          internalStatusProvider.sethomePageSelectedOption('Athlete');
+                                        }),
+                                        onCoachTap: () => setState(() {
+                                          _view = LandingView.coachGrid;
+                                          internalStatusProvider.sethomePageSelectedOption('Coach');
+                                        }),
+                                      );
+                                    case LandingView.athleteGrid:
+                                      return _athleteSection(context, athleteOptions, appUser['uid'], isCoach);
+                                    case LandingView.coachGrid:
+                                      return _coachSection(context, coachOptions, appUser['uid']);
+                                  }
+                                },
+                              ))
+                    : _athleteSection(context, athleteOptions, appUser['uid'], isCoach),
+              ),
             )
           ],
         ),

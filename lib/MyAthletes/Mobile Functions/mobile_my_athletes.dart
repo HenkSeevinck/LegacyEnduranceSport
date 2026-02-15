@@ -4,7 +4,7 @@ import 'package:legacyendurancesport/General/Providers/internal_app_providers.da
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/Goals/Page/goals_page.dart';
-import 'package:legacyendurancesport/Home/General%20Functions/weekdays_table.dart';
+import 'package:legacyendurancesport/Home/GeneralFunctions/weekdays_table.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:legacyendurancesport/MyAthletes/Mobile%20Functions/Sub%20Mobile%20Functions/athlete_selection_popup.dart';
 import 'package:legacyendurancesport/Profile/Page/profile_page.dart';
@@ -104,6 +104,7 @@ class _MobileMyAthletesState extends State<MobileMyAthletes> {
     final localAppTheme = ResponsiveTheme(context).theme;
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
     final appUser = appUserProvider.appUser;
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -255,7 +256,7 @@ class _MobileMyAthletesState extends State<MobileMyAthletes> {
                                               toolTip: 'VIEW STATISTICS', 
                                               imagePath: 'images/Statistics.png', 
                                               context: context, 
-                                              headerText: 'STATISTICS'
+                                              headerText: 'STATS'
                                               ), 
                                           ),
                                         ],

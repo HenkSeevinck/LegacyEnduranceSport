@@ -6,8 +6,8 @@ import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 //import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 //import 'package:legacyendurancesport/General/Providers/firebase_auth_service.dart';
-import 'package:legacyendurancesport/SignInSignUp/Functions/SubFunctions/usersignin.dart';
-import 'package:legacyendurancesport/SignInSignUp/Functions/validators.dart';
+import 'package:legacyendurancesport/SignInSignUp/GeneralFunctions/SubFunctions/usersignin.dart';
+import 'package:legacyendurancesport/SignInSignUp/GeneralFunctions/validators.dart';
 import 'package:provider/provider.dart';
 
 class UserSignIn extends StatefulWidget {

@@ -15,6 +15,9 @@ class WorkoutsProvider with ChangeNotifier {
 
   List<Map<String, dynamic>> _todaysWorkouts = [];
   List<Map<String, dynamic>> get todaysWorkouts => _todaysWorkouts;
+
+  List<Map<String, dynamic>> _completedWorkoutsLast7Days = [];
+  List<Map<String, dynamic>> get completedWorkoutsLast7Days => _completedWorkoutsLast7Days;
   
   //--------------------------------------------------------------
   // Method to create a new workout record in Firestore
@@ -233,4 +236,43 @@ class WorkoutsProvider with ChangeNotifier {
     _todaysWorkouts = todays;
     notifyListeners();
   }  
+
+  //---------------------------------------------------------------
+  // Method to get all completed workouts for all athletes for the last 7 days
+  Future<void> fetchCompletedWorkoutsForAllAthletesLast7Days(allUsers) async {
+    final now = DateTime.now();
+    final sevenDaysAgo = now.subtract(const Duration(days: 7));
+    final startTs = Timestamp.fromDate(sevenDaysAgo);
+    final endTs = Timestamp.fromDate(now);
+
+    try {
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('LoadedWorkouts')
+          .where('workoutDate', isGreaterThanOrEqualTo: startTs)
+          .where('workoutDate', isLessThanOrEqualTo: endTs)
+          .where('completedworkoutData', isNotEqualTo: null)
+          .get();
+
+      _completedWorkoutsLast7Days = querySnapshot.docs
+          .where((doc) {
+            // Client-side filter: ensure completedworkoutData exists and is not null
+            final data = doc.data() as Map<String, dynamic>;
+            return data.containsKey('completedworkoutData') && data['completedworkoutData'] != null;
+          })
+          .map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            data['loadedWorkoutUID'] = doc.id; // Add the document ID
+            data['athelete'] = allUsers.firstWhere(
+              (user) => user['uid'] == data['athleteUID'],
+              orElse: () => {'name': 'Unknown Athlete'},
+            );
+            return data;
+          })
+          .toList(); 
+      notifyListeners();
+    } catch (e) {
+      Exception('Error fetching completed workouts for last 7 days: $e');
+      rethrow;
+    }
+  }
 }

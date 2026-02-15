@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
-import 'package:legacyendurancesport/SignInSignUp/Functions/resetpassword.dart';
-import 'package:legacyendurancesport/SignInSignUp/Functions/usersignin_page.dart';
-import 'package:legacyendurancesport/SignInSignUp/Functions/usersignup_page.dart';
+import 'package:legacyendurancesport/SignInSignUp/DesktopFunctions/desktop_signin_signup.dart';
+import 'package:legacyendurancesport/SignInSignUp/MobileFunctions/mobile_signin_signup.dart';
 import 'package:provider/provider.dart';
 
 class SigninPage extends StatefulWidget {
@@ -13,54 +12,6 @@ class SigninPage extends StatefulWidget {
 }
 
 class _SigninPageState extends State<SigninPage> {
-
-  //----------------------------------------------------
-  // Mobile Layout
-  Widget _buildMobileLayout() {
-    //final localAppTheme = ResponsiveTheme(context).theme;
-    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
-    final signInsignUpStatus = internalStatusProvider.signInsignUpStatus;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: SafeArea(
-          top: true,
-          child: Center(
-            child: Image.asset('images/Legacy-Endurance-Logo.png', 
-              height: 70, 
-              width: 70, 
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            flex: 1,
-            child: Container(
-              decoration: BoxDecoration(),
-              child: Center(
-                child: SizedBox(
-                  child: signInsignUpStatus == 'SignIn' 
-                  ? UserSignIn(width: 0.8, height: 0.4) 
-                  : signInsignUpStatus == 'SignUp' 
-                  ? UserSignUp(width: 0.8, height: 0.6) 
-                  : ResetPassword(width: 0.8, height: 0.27),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  //----------------------------------------------------
-  // Desktop Layout
-  Widget _buildDesktopLayout() {
-    return Scaffold(body: const Center(child: Text('Desktop Layout Coming Soon')));
-  }
 
   //----------------------------------------------------
   // Fallback Layout
@@ -76,9 +27,9 @@ class _SigninPageState extends State<SigninPage> {
     final platform = internalStatusProvider.platform;
 
     if (platform == 'MobileWeb' || platform == 'Mobile') {
-      return _buildMobileLayout();
+      return MobileSigninSignup();
     } else if (platform == 'ComputerWeb' || platform == 'Computer') {
-      return _buildDesktopLayout();
+      return DesktopSigninSignup();
     } else {
       return _buildFallbackLayout();
     }

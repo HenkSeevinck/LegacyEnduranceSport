@@ -5,9 +5,9 @@ import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 //import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/General/Providers/firebase_auth_service.dart';
-import 'package:legacyendurancesport/SignInSignUp/Functions/SubFunctions/usersignin.dart';
+//import 'package:legacyendurancesport/SignInSignUp/GeneralFunctions/SubFunctions/usersignin.dart';
 //import 'package:legacyendurancesport/SignInSignUp/Functions/usersignin_page.dart';
-import 'package:legacyendurancesport/SignInSignUp/Functions/validators.dart';
+import 'package:legacyendurancesport/SignInSignUp/GeneralFunctions/validators.dart';
 import 'package:provider/provider.dart';
 
 class UserSignUp extends StatefulWidget {
@@ -26,9 +26,21 @@ class _UserSignUpState extends State<UserSignUp> {
   final TextEditingController reEnterPasswordController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController surnameController = TextEditingController();
+  final TextEditingController referralCodeController = TextEditingController();
   final FirebaseAuthService _authService = FirebaseAuthService();
   Map<String, String> appUser = {};
   bool isLoading = false;
+
+  Future<void> _clearForm() async {
+    _formKey.currentState?.reset();
+    emailController.clear();
+    passwordController.clear();
+    reEnterPasswordController.clear();
+    nameController.clear();
+    surnameController.clear();
+    referralCodeController.clear();
+    appUser.clear();
+  }
 
   @override
   void dispose() {
@@ -37,6 +49,7 @@ class _UserSignUpState extends State<UserSignUp> {
     reEnterPasswordController.dispose();
     nameController.dispose();
     surnameController.dispose();
+    referralCodeController.dispose();
     super.dispose();
   }
 
@@ -92,6 +105,19 @@ class _UserSignUpState extends State<UserSignUp> {
                       },
                     ),
                     FormInputField(
+                      label: 'Referral Code (Optional)',
+                      errorMessage: 'Please enter a valid referral code',
+                      isMultiline: false,
+                      isPassword: false,
+                      prefixIcon: null,
+                      suffixIcon: null,
+                      showLabel: true,
+                      controller: referralCodeController,
+                      onChanged: (value) {
+                        appUser['referredByCode'] = value;
+                      },
+                    ),
+                    FormInputField(
                       label: 'Email',
                       errorMessage: 'Please enter a valid email address',
                       isMultiline: false,
@@ -134,15 +160,15 @@ class _UserSignUpState extends State<UserSignUp> {
                               isLoading = true;
                             });
                             try {
-                              final userCredential = await _authService.signUp(emailController.text.trim(), passwordController.text, context);
+                              final userCredential = await _authService.signUp(
+                                emailController.text.trim(), 
+                                passwordController.text, 
+                                context,
+                              );
                               if (userCredential != null) {
                                 await appUserProvider.createUserRecord(userCredential.user!, appUser);
-                                await signInUser(
-                                  context, 
-                                  appUserProvider, 
-                                  emailController.text.trim(), 
-                                  passwordController.text
-                                );
+                                await _clearForm();
+                                internalStatusProvider.setSignInSignUpStatus('SignIn');
                               }
                             } catch (e) {
                               snackbar(
