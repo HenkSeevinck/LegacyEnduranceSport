@@ -18,10 +18,13 @@ class WoocommerceStore with ChangeNotifier {
 
   bool isLoading = false;
 
-  // Function to fetch your real products
   Future<void> fetchProducts() async {
-    isLoading = true;
-    notifyListeners();
+    // FIX: Schedule the state change for the next microtask 
+    // to avoid "setState() called during build" errors.
+    Future.microtask(() {
+      isLoading = true;
+      notifyListeners();
+    });
 
     try {
       _products = await woocommerce.getProducts();
