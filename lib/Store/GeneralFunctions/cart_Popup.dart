@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/General/Providers/woocommerce_store_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class CartPopup extends StatefulWidget {
   const CartPopup({super.key});
@@ -140,7 +142,7 @@ class _CartPopupState extends State<CartPopup> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 10.0),
+                    //const SizedBox(height: 10.0),
                     if (_loading)
                       const Center(child: CircularProgressIndicator())
                     else if (_cartItems.isEmpty)
@@ -154,11 +156,12 @@ class _CartPopupState extends State<CartPopup> {
                         child: ListView.separated(
                           shrinkWrap: true,
                           itemCount: _cartItems.length,
-                          separatorBuilder: (_, __) => const Divider(),
+                          separatorBuilder: (_, _) => const Divider(),
                           itemBuilder: (context, index) {
                             final item = _cartItems[index];
                             final img = (item['image'] ?? '').toString();
                             return ListTile(
+                              contentPadding: EdgeInsets.all(0),
                               leading: img.isNotEmpty
                                   ? ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
@@ -187,7 +190,7 @@ class _CartPopupState extends State<CartPopup> {
                                       child: Icon(Icons.shopping_bag, color: localAppTheme['anchorColors']['primaryColor']),
                                     ),
                               title: body(header: item['title'] ?? item['id'], color: localAppTheme['anchorColors']['primaryColor'], context: context),
-                              subtitle: body(header: 'Quantity: ${item['quantity']}', color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.8), context: context),
+                              subtitle: body(header: 'Quantity: ${item['quantity']}', color: localAppTheme['anchorColors']['primaryColor'], context: context),
                               trailing: IconButton(
                                 icon: Icon(Icons.delete, color: localAppTheme['anchorColors']['primaryColor']),
                                 onPressed: () async {
@@ -203,15 +206,18 @@ class _CartPopupState extends State<CartPopup> {
 
                     Row(
                       children: [
-                        Expanded(
-                          child: elevatedButton(
-                            label: 'CLEAR CART',
-                            onPressed: _cartItems.isEmpty ? null : () async => await _clearCart(),
-                            backgroundColor: localAppTheme['anchorColors']['primaryColor'],
-                            labelColor: localAppTheme['anchorColors']['secondaryColor'],
-                            leadingIcon: null,
-                            trailingIcon: null,
-                            context: context,
+                        Visibility(
+                          visible: _cartItems.isNotEmpty,
+                          child: Expanded(
+                            child: elevatedButton(
+                              label: 'CLEAR CART',
+                              onPressed: _cartItems.isEmpty ? null : () async => await _clearCart(),
+                              backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                              labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                              leadingIcon: null,
+                              trailingIcon: null,
+                              context: context,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -233,36 +239,70 @@ class _CartPopupState extends State<CartPopup> {
                     const SizedBox(height: 12.0),
 
                     // Total and Payment
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              body(header: 'Total', color: localAppTheme['anchorColors']['primaryColor'], context: context),
-                              Text('R ${_total.toStringAsFixed(2)}', style: TextStyle(color: localAppTheme['anchorColors']['primaryColor'], fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                          const SizedBox(height: 8.0),
-                          elevatedButton(
-                            label: _processingPayment ? 'PROCESSING...' : 'PROCESS PAYMENT',
-                            onPressed: _cartItems.isEmpty || _processingPayment
+                    Visibility(
+                      visible: _cartItems.isNotEmpty,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                body(header: 'Total', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                                Text('R ${_total.toStringAsFixed(2)}', style: TextStyle(color: localAppTheme['anchorColors']['primaryColor'], fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                            const SizedBox(height: 8.0),
+                            elevatedButton(
+                              label: _processingPayment ? 'PROCESSING...' : 'PROCEED TO CHECKOUT',
+                              onPressed: _cartItems.isEmpty || _processingPayment
                                 ? null
                                 : () async {
                                     setState(() => _processingPayment = true);
-                                    await Future.delayed(const Duration(seconds: 1));
-                                    setState(() => _processingPayment = false);
-                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payment processing (placeholder)')));
+                                    try {
+                                      // Build line_items for WooCommerce
+                                      final lineItems = _cartItems.map((item) {
+                                        return {
+                                          'product_id': int.tryParse(item['id'].toString()) ?? 0,
+                                          'quantity': item['quantity'] ?? 1,
+                                        };
+                                      }).toList();
+
+                                      // Minimal order payload — expand with billing/shipping as needed
+                                      final orderData = {
+                                        'payment_method': 'payfast',
+                                        'payment_method_title': 'PayFast',
+                                        'set_paid': false,
+                                        'line_items': lineItems,
+                                        'meta_data': [
+                                          {'key': 'source', 'value': 'legacyendurancesport_flutter_app'}
+                                        ],
+                                      };
+
+                                      final woocommerceStore = Provider.of<WoocommerceStore>(context, listen: false);
+                                      final paymentUrl = await woocommerceStore.createOrder(orderData);
+
+                                      if (paymentUrl != null && paymentUrl.isNotEmpty) {
+                                        // Open external browser (or use WebView)
+                                        await launchUrlString(paymentUrl, mode: LaunchMode.externalApplication);
+                                      } else {
+                                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to create order or payment URL not returned.')));
+                                      }
+                                    } catch (e) {
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                                    } finally {
+                                      setState(() => _processingPayment = false);
+                                    }
                                   },
-                            backgroundColor: localAppTheme['anchorColors']['primaryColor'],
-                            labelColor: localAppTheme['anchorColors']['secondaryColor'],
-                            leadingIcon: null,
-                            trailingIcon: null,
-                            context: context,
-                          ),
-                        ],
+                              backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                              labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                              leadingIcon: null,
+                              trailingIcon: null,
+                              context: context,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
