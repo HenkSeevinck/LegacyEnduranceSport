@@ -40,10 +40,10 @@ class _MobileHomeState extends State<MobileHome> {
         final tileHeight = height / rowsToShow;
         final aspectRatio = tileWidth / tileHeight;
 
-        return Container(
-          decoration: BoxDecoration(
-            border: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
-          ),
+        return SizedBox(
+          // decoration: BoxDecoration(
+          //   border: Border(top: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0)),
+          // ),
           child: GridView.builder(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: crossAxisCount, childAspectRatio: aspectRatio),
             itemCount: options.length,
@@ -164,6 +164,63 @@ class _MobileHomeState extends State<MobileHome> {
   }
 
   //------------------------------------------------------------------------------
+  // Store Widget
+  Widget _storeWidget(BuildContext context) {
+    final localAppTheme = ResponsiveTheme(context).theme;
+
+    return InkWell(
+      onTap: () {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const StorePage(),
+          ),
+        );
+      },
+      child: SizedBox(
+        //padding: const EdgeInsets.only(top: 10),
+        width: double.infinity,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Image.asset(
+                'images/Shop.png',
+                width: double.infinity,
+                height: MediaQuery.of(context).size.height * 0.10,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(
+                    Icons.store,
+                    size: MediaQuery.of(context).size.height * 0.10,
+                    color: localAppTheme['anchorColors']['primaryColor'],
+                  );
+                },
+              ),
+            ),
+            Container(
+              width: 200,
+              height: 40,
+              padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+              decoration: BoxDecoration(
+                color: localAppTheme['anchorColors']['secondaryColor'].withOpacity(0.7),
+                borderRadius: BorderRadius.circular(8.0),
+                border: Border.all(color: localAppTheme['anchorColors']['primaryColor']),
+              ),
+              child: Center(
+                child: header2(header: 'ONLINE STORE', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  //------------------------------------------------------------------------------
   //Athlete Section
   Widget _athleteSection(BuildContext context, List<Map<String, dynamic>> athleteOptions, String userUid, bool isCoach) {
     final localAppTheme = ResponsiveTheme(context).theme;
@@ -201,21 +258,6 @@ class _MobileHomeState extends State<MobileHome> {
                 },
               ),
             ),
-            SizedBox(
-              width: 60,
-              child: IconButton(
-                tooltip: 'STORE',
-                icon: const Icon(Icons.store),
-                color: localAppTheme['anchorColors']['secondaryColor'],
-                onPressed: () {
-                  Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => const StorePage(),
-                        ),
-                      );
-                },
-              ),
-            ),
           ],
           centerTitle: true,
           title: Row(
@@ -233,6 +275,8 @@ class _MobileHomeState extends State<MobileHome> {
           backgroundColor: localAppTheme['anchorColors']['primaryColor'],
           elevation: 0,
         ),
+        SizedBox(height: 10),
+        _storeWidget(context),
         Expanded(child: _buildSectionGrid(context: context, options: athleteOptions, userUid: userUid))
       ],
     );
