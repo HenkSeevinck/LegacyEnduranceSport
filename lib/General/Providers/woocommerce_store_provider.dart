@@ -47,7 +47,9 @@ class WoocommerceStore with ChangeNotifier {
   /// The method will POST `orderData` to the WooCommerce REST API `/wp-json/wc/v3/orders`.
   /// It returns a `String?` which is the payment/redirect URL provided by the gateway (e.g. Payfast),
   /// or `null` if none is returned by the server.
-  Future<String?> createOrder(Map<String, dynamic> orderData) async {
+  /// Creates an order and returns a map containing the `id` and optional `payment_url`.
+  /// Example return: `{ 'id': 123, 'payment_url': 'https://...' }`
+  Future<Map<String, dynamic>?> createOrder(Map<String, dynamic> orderData) async {
     isLoading = true;
     notifyListeners();
 
@@ -74,10 +76,15 @@ class WoocommerceStore with ChangeNotifier {
 
       final Map<String, dynamic> data = jsonDecode(resp.body) as Map<String, dynamic>;
 
-      // Common places that gateways/plugins expose a payment/redirect URL:
-      // - data['payment_url']
-      // - data['meta_data'] entries
-      // - data['redirect'] or data['meta']['redirect']
+      // Extract order id if present
+      int? orderId;
+      try {
+        final idVal = data['id'];
+        if (idVal is int) orderId = idVal;
+        else if (idVal is String) orderId = int.tryParse(idVal);
+      } catch (_) {}
+
+      // Extract payment URL from common locations
       String? paymentUrl;
       if (data.containsKey('payment_url')) paymentUrl = data['payment_url']?.toString();
 
@@ -99,7 +106,6 @@ class WoocommerceStore with ChangeNotifier {
       }
 
       if (paymentUrl == null) {
-        // Some gateways attach data to the response under different keys
         if (data.containsKey('redirect')) paymentUrl = data['redirect']?.toString();
         if (paymentUrl == null && data.containsKey('meta')) {
           try {
@@ -109,13 +115,42 @@ class WoocommerceStore with ChangeNotifier {
         }
       }
 
-      return paymentUrl;
+      final result = <String, dynamic>{
+        'id': orderId,
+        'payment_url': paymentUrl,
+        'raw': data,
+      };
+
+      return result;
     } catch (e) {
       debugPrint('createOrder exception: $e');
       return null;
     } finally {
       isLoading = false;
       notifyListeners();
+    }
+  }
+
+  /// Fetches an order and returns the `status` string (or null on error).
+  Future<String?> getOrderStatus(int orderId) async {
+    try {
+      final uri = Uri.parse('${woocommerce.baseUrl}wp-json/wc/v3/orders/$orderId')
+          .replace(queryParameters: {
+        'consumer_key': woocommerce.username,
+        'consumer_secret': woocommerce.password,
+      });
+
+      final resp = await http.get(uri);
+      if (resp.statusCode < 200 || resp.statusCode >= 300) {
+        debugPrint('getOrderStatus failed: ${resp.statusCode} ${resp.body}');
+        return null;
+      }
+
+      final Map<String, dynamic> data = jsonDecode(resp.body) as Map<String, dynamic>;
+      return (data['status'] ?? '').toString();
+    } catch (e) {
+      debugPrint('getOrderStatus exception: $e');
+      return null;
     }
   }
 }

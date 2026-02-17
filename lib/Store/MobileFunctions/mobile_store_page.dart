@@ -115,158 +115,172 @@ class _MobileStorePageState extends State<MobileStorePage> {
     final stockStatus = (productToView['stock_status'] ?? 'instock').toString();
 
     return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: imageSrc.isNotEmpty
-                ? Image.network(imageSrc, height: 220, width: double.infinity, fit: BoxFit.contain)
-                : Container(
-                    height: 220,
-                    color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.08),
-                    alignment: Alignment.center,
-                    child: const Icon(Icons.fitness_center, size: 56),
-                  ),
-          ),
-
-          const SizedBox(height: 10),
-
-          // Title + Price
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                header2(header: name, context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                const SizedBox(height: 10),
-                header2(header: priceString, context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                const SizedBox(height: 10),
-
-                // Badges: categories + tags
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 10,
-                  children: [
-                    for (final c in categories)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(color: localAppTheme['anchorColors']['primaryColor'], borderRadius: BorderRadius.circular(20)),
-                        child: body(
-                          header: (c['name'] ?? '').toString().toUpperCase(),
-                          color: localAppTheme['anchorColors']['secondaryColor'],
-                          context: context,
-                        ),
-                      ),
-                    for (final t in tags)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: body(header: (t['name'] ?? '').toString().toUpperCase(), color: localAppTheme['anchorColors']['primaryColor'], context: context),
-                      ),
-                  ],
-                ),
-              ],
+      child: ExpansionTile(
+        showTrailingIcon: false,
+        tilePadding: EdgeInsets.all(0),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: imageSrc.isNotEmpty
+                  ? Image.network(imageSrc, height: 220, width: double.infinity, fit: BoxFit.contain)
+                  : Container(
+                      height: 220,
+                      color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.08),
+                      alignment: Alignment.center,
+                      child: const Icon(Icons.fitness_center, size: 56),
+                    ),
             ),
-          ),
-
-          const SizedBox(height: 10),
-
-          // Short description
-          if (shortDesc.isNotEmpty)
+        
+            const SizedBox(height: 10),
+        
+            // Title + Price
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  header2(header: name, context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                  const SizedBox(height: 10),
+                  header2(header: priceString, context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                  const SizedBox(height: 10),
+        
+                  // Badges: categories + tags
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 10,
+                    children: [
+                      for (final c in categories)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(color: localAppTheme['anchorColors']['primaryColor'], borderRadius: BorderRadius.circular(20)),
+                          child: body(
+                            header: (c['name'] ?? '').toString().toUpperCase(),
+                            color: localAppTheme['anchorColors']['secondaryColor'],
+                            context: context,
+                          ),
+                        ),
+                      for (final t in tags)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: body(header: (t['name'] ?? '').toString().toUpperCase(), color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+        
+            const SizedBox(height: 10),
+        
+            // Short description
+            if (shortDesc.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: Text(shortDesc, style: TextStyle(color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.9), fontSize: 14)),
+              ),
+          
+            const SizedBox(height: 10),
+        
+            // Stock and Quantity + Actions
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Text(shortDesc, style: TextStyle(color: localAppTheme['anchorColors']['primaryColor'].withOpacity(0.9), fontSize: 14)),
-            ),
-
-          if (description.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-              child: body(header: description, color: localAppTheme['anchorColors']['primaryColor'], context: context),
-            ),
-
-          const SizedBox(height: 16),
-
-          // Stock and Quantity + Actions
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      header3(header: 'Availability', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                      const SizedBox(height: 4),
-                      body(
-                        header: stockStatus == 'instock' ? 'In stock (${stockQty.toString()})' : stockStatus,
-                        color: localAppTheme['anchorColors']['primaryColor'],
-                        context: context,
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Quantity selector (simple)
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: localAppTheme['anchorColors']['primaryColor']),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.remove, color: localAppTheme['anchorColors']['primaryColor']),
-                        onPressed: _selectedQuantity > 1 ? () => setState(() => _selectedQuantity = (_selectedQuantity - 1)) : null,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: body(header: '$_selectedQuantity', color: localAppTheme['anchorColors']['primaryColor'], context: context),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.add, color: localAppTheme['anchorColors']['primaryColor']),
-                        onPressed: () => setState(() => _selectedQuantity = (_selectedQuantity + 1)),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          // CTA Buttons
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 50,
-                    child: elevatedButton(
-                      label: 'ADD TO CART',
-                      onPressed: () async {
-                        await _addToCart(productToView, quantity: _selectedQuantity);
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Added to cart')));
-                      },
-                      backgroundColor: localAppTheme['anchorColors']['primaryColor'],
-                      labelColor: localAppTheme['anchorColors']['secondaryColor'],
-                      leadingIcon: null,
-                      trailingIcon: null,
-                      context: context,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        header3(header: 'Availability', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                        const SizedBox(height: 4),
+                        body(
+                          header: stockStatus == 'instock' ? 'In stock (${stockQty.toString()})' : stockStatus,
+                          color: localAppTheme['anchorColors']['primaryColor'],
+                          context: context,
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
+        
+                  // Quantity selector (simple)
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: localAppTheme['anchorColors']['primaryColor']),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.remove, color: localAppTheme['anchorColors']['primaryColor']),
+                          onPressed: _selectedQuantity > 1 ? () => setState(() => _selectedQuantity = (_selectedQuantity - 1)) : null,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: body(header: '$_selectedQuantity', color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.add, color: localAppTheme['anchorColors']['primaryColor']),
+                          onPressed: () => setState(() => _selectedQuantity = (_selectedQuantity + 1)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-
-          const SizedBox(height: 20),
+        
+            const SizedBox(height: 10),
+        
+            // CTA Buttons
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 50,
+                      child: elevatedButton(
+                        label: 'ADD TO CART',
+                        onPressed: () async {
+                          await _addToCart(productToView, quantity: _selectedQuantity);
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Added to cart')));
+                        },
+                        backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                        labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                        leadingIcon: null,
+                        trailingIcon: null,
+                        context: context,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        
+            const SizedBox(height: 10),
+          ],
+        ),
+        children: [
+          description.isNotEmpty
+              ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 10),
+                  header2(header: 'Description:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                    child: body(header: description, color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                  ),
+                ],
+              )
+              : body(header: 'No description available.', color: localAppTheme['anchorColors']['primaryColor'], context: context),
         ],
       ),
     );
@@ -396,8 +410,6 @@ class _MobileStorePageState extends State<MobileStorePage> {
           );
         } else {
           final localAppTheme = ResponsiveTheme(context).theme;
-          //final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
-          //final appUser = appUserProvider.appUser;
 
           // Listen for changes so the UI rebuilds when products are fetched
           final woocommerceStore = Provider.of<WoocommerceStore>(context, listen: true);
@@ -420,10 +432,9 @@ class _MobileStorePageState extends State<MobileStorePage> {
             ),
             body: Padding(
               padding: const EdgeInsets.all(10.0),
-              child: Container(
+                child: Container(
                 padding: const EdgeInsets.all(10.0),
                 width: double.infinity,
-                height: double.infinity,
                 decoration: BoxDecoration(
                   border: Border.all(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
                   borderRadius: BorderRadius.circular(8.0),
@@ -433,33 +444,61 @@ class _MobileStorePageState extends State<MobileStorePage> {
                     ? const Center(child: CircularProgressIndicator())
                     : products.isEmpty
                     ? const Center(child: Text("Products not found"))
-                    : SingleChildScrollView(
-                      child: Column(
-                          children: [
-                            shopPageHeaderImage(
-                              imagePath: 'images/Shop.png',
-                              context: context,
-                              pageTitle: 'ONLINE STORE',
+                    : LayoutBuilder(
+                        builder: (context, constraints) {
+                          final availableHeight = constraints.maxHeight.isFinite && constraints.maxHeight > 0
+                              ? constraints.maxHeight
+                              : MediaQuery.of(context).size.height;
+
+                          return SingleChildScrollView(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(minHeight: availableHeight),
+                              child: Column(
+                                children: [
+                                  shopPageHeaderImage(
+                                    imagePath: 'images/Shop.png',
+                                    context: context,
+                                    pageTitle: 'ONLINE STORE',
+                                    cartItemCount: 10, //TODO: pass real cart count here
+                                  ),
+                                  SizedBox(height: 10),
+                                  productToView.isEmpty
+                                      ? LayoutBuilder(
+                                          builder: (context, constraints) {
+                                            final width = constraints.maxWidth;
+                                            const crossAxisCount = 1;
+
+                                            // Use a fixed tile height to avoid depending on the incoming
+                                            // available height (which may be unbounded inside a scrollable).
+                                            // This keeps tile sizing stable and avoids tiny RenderFlex
+                                            // overflows due to rounding.
+                                            const double tileHeight = 360.0; // tuned to tile content (image + paddings)
+
+                                            // childAspectRatio expects width / height (must be > 0)
+                                            final childAspectRatio = (width > 0 && tileHeight > 0) ? width / tileHeight : 1.0;
+
+                                            return GridView.builder(
+                                              shrinkWrap: true,
+                                              physics: const NeverScrollableScrollPhysics(),
+                                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: crossAxisCount, // Full width tiles look best for coaching plans
+                                                childAspectRatio: childAspectRatio,
+                                                mainAxisSpacing: 10,
+                                              ),
+                                              itemCount: products.length,
+                                              itemBuilder: (context, index) {
+                                                return _buildProductTile(products[index]);
+                                              },
+                                            );
+                                          },
+                                        )
+                                      : _buildProductDetail(),
+                                ],
+                              ),
                             ),
-                            SizedBox(height: 10),
-                            productToView.isEmpty
-                                ? GridView.builder(
-                                    shrinkWrap: true,
-                                    physics: const NeverScrollableScrollPhysics(),
-                                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 1, // Full width tiles look best for coaching plans
-                                      childAspectRatio: 1.1,
-                                      mainAxisSpacing: 10,
-                                    ),
-                                    itemCount: products.length,
-                                    itemBuilder: (context, index) {
-                                      return _buildProductTile(products[index]);
-                                    },
-                                  )
-                                : _buildProductDetail(),
-                          ],
-                        ),
-                    ),
+                          );
+                        },
+                      ),
               ),
             ),
           );

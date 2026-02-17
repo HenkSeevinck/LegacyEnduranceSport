@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:legacyendurancesport/Store/GeneralFunctions/web_view_checkout.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
 import 'package:legacyendurancesport/General/Providers/woocommerce_store_provider.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class CartPopup extends StatefulWidget {
   const CartPopup({super.key});
@@ -21,12 +20,16 @@ class _CartPopupState extends State<CartPopup> {
   double _total = 0.0;
   bool _processingPayment = false;
 
+//-----------------------------------------------
+// initState to load cart items from SharedPreferences when the popup is shown
   @override
   void initState() {
     super.initState();
     _loadCart();
   }
 
+//-----------------------------------------------
+// Load cart items from SharedPreferences, parse them, and calculate total
   Future<void> _loadCart() async {
     setState(() => _loading = true);
     final prefs = await SharedPreferences.getInstance();
@@ -105,6 +108,8 @@ class _CartPopupState extends State<CartPopup> {
     });
   }
 
+//-----------------------------------------------
+// Remove an item from the cart by its ID, update SharedPreferences, and reload cart
   Future<void> _removeItem(String id) async {
     final prefs = await SharedPreferences.getInstance();
     final list = prefs.getStringList('cartItems') ?? [];
@@ -120,12 +125,67 @@ class _CartPopupState extends State<CartPopup> {
     await _loadCart();
   }
 
+//-----------------------------------------------
+// Clear the entire cart, update SharedPreferences, and reload cart
   Future<void> _clearCart() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('cartItems');
     await _loadCart();
   }
 
+//-----------------------------------------------
+// Create an order and proceed to checkout by opening a WebView with the payment URL
+  Future<void> _proceedToCheckout() async {
+    setState(() => _processingPayment = true);
+    try {
+      // Build line_items for WooCommerce
+      final lineItems = _cartItems.map((item) {
+        return {
+          'product_id': int.tryParse(item['id'].toString()) ?? 0,
+          'quantity': item['quantity'] ?? 1,
+        };
+      }).toList();
+
+      // Minimal order payload — expand with billing/shipping as needed
+      final orderData = {
+        'payment_method': 'payfast',
+        'payment_method_title': 'PayFast',
+        'set_paid': false,
+        'line_items': lineItems,
+        'meta_data': [
+          {'key': 'source', 'value': 'legacyendurancesport_flutter_app'}
+        ],
+      };
+
+      final woocommerceStore = Provider.of<WoocommerceStore>(context, listen: false);
+      final result = await woocommerceStore.createOrder(orderData);
+
+      if (result == null) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to create order.')));
+        return;
+      }
+
+      final orderId = (result['id'] is int) ? result['id'] as int : int.tryParse((result['id'] ?? '').toString());
+      final paymentUrl = (result['payment_url'] ?? '').toString();
+
+      if (paymentUrl.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Payment URL not returned.')));
+        return;
+      }
+
+      // Open WebView for payment
+      if (orderId != null) {
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => WebViewCheckout(initialUrl: paymentUrl, orderId: orderId),
+        ));
+      }
+    } finally {
+      setState(() => _processingPayment = false);
+    }
+  }
+
+//-----------------------------------------------
+// Build the AlertDialog UI for the cart popup, showing cart items, total, and actions
   @override
   Widget build(BuildContext context) {
     final localAppTheme = ResponsiveTheme(context).theme;
@@ -254,52 +314,18 @@ class _CartPopupState extends State<CartPopup> {
                               ],
                             ),
                             const SizedBox(height: 8.0),
-                            elevatedButton(
-                              label: _processingPayment ? 'PROCESSING...' : 'PROCEED TO CHECKOUT',
-                              onPressed: _cartItems.isEmpty || _processingPayment
-                                ? null
-                                : () async {
-                                    setState(() => _processingPayment = true);
-                                    try {
-                                      // Build line_items for WooCommerce
-                                      final lineItems = _cartItems.map((item) {
-                                        return {
-                                          'product_id': int.tryParse(item['id'].toString()) ?? 0,
-                                          'quantity': item['quantity'] ?? 1,
-                                        };
-                                      }).toList();
-
-                                      // Minimal order payload — expand with billing/shipping as needed
-                                      final orderData = {
-                                        'payment_method': 'payfast',
-                                        'payment_method_title': 'PayFast',
-                                        'set_paid': false,
-                                        'line_items': lineItems,
-                                        'meta_data': [
-                                          {'key': 'source', 'value': 'legacyendurancesport_flutter_app'}
-                                        ],
-                                      };
-
-                                      final woocommerceStore = Provider.of<WoocommerceStore>(context, listen: false);
-                                      final paymentUrl = await woocommerceStore.createOrder(orderData);
-
-                                      if (paymentUrl != null && paymentUrl.isNotEmpty) {
-                                        // Open external browser (or use WebView)
-                                        await launchUrlString(paymentUrl, mode: LaunchMode.externalApplication);
-                                      } else {
-                                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to create order or payment URL not returned.')));
-                                      }
-                                    } catch (e) {
-                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
-                                    } finally {
-                                      setState(() => _processingPayment = false);
-                                    }
-                                  },
-                              backgroundColor: localAppTheme['anchorColors']['primaryColor'],
-                              labelColor: localAppTheme['anchorColors']['secondaryColor'],
-                              leadingIcon: null,
-                              trailingIcon: null,
-                              context: context,
+                                elevatedButton(
+                                  label: _processingPayment ? 'PROCESSING...' : 'PROCEED TO CHECKOUT',
+                                  onPressed: _cartItems.isEmpty || _processingPayment
+                                    ? null
+                                    : () async {
+                                        _proceedToCheckout();
+                                      },
+                                  backgroundColor: localAppTheme['anchorColors']['primaryColor'],
+                                  labelColor: localAppTheme['anchorColors']['secondaryColor'],
+                                  leadingIcon: null,
+                                  trailingIcon: null,
+                                  context: context,
                             ),
                           ],
                         ),

@@ -1053,7 +1053,7 @@ Widget appheader({
           top: 0,
           bottom: 0,
           child: SizedBox(
-            width: MediaQuery.of(context).size.width-20,
+            width: MediaQuery.of(context).size.width - 20,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -1096,15 +1096,11 @@ Widget appheader({
                   toolTip: 'LOGOUT',
                   context: context,
                   onPressed: () async {
-                    final prefs = await SharedPreferences.getInstance(); 
+                    final prefs = await SharedPreferences.getInstance();
                     await prefs.clear();
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => const LandingPage(),
-                        ),
-                      );
-                    },
-                  )
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const LandingPage()));
+                  },
+                ),
               ],
             ),
           ),
@@ -1129,12 +1125,7 @@ Widget imageButton({
   return IconButton(
     tooltip: toolTip,
     onPressed: onPressed,
-    icon: imageDisplay(
-      imagePath: imagePath, 
-      width: width, 
-      height: height, 
-      context: context
-    ),
+    icon: imageDisplay(imagePath: imagePath, width: width, height: height, context: context),
   );
 }
 
@@ -1163,7 +1154,6 @@ Widget imageDisplay({
     ),
   );
 }
-
 
 //------------------------------------------------------------------------
 // Page Header Widget
@@ -1202,7 +1192,11 @@ Widget pageHeaderImage({
               ),
               child: !(isCoachView ?? false)
                   ? header1(header: '$pageTitle:', context: context, color: localAppTheme['anchorColors']['primaryColor'])
-                  : header1(header: '${userProfileToShow['name'].toString().toUpperCase()}\'S $pageTitle:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                  : header1(
+                      header: '${userProfileToShow['name'].toString().toUpperCase()}\'S $pageTitle:',
+                      context: context,
+                      color: localAppTheme['anchorColors']['primaryColor'],
+                    ),
             ),
           ],
         ),
@@ -1236,11 +1230,7 @@ Widget pageHeaderImage({
 
 //------------------------------------------------------------------------
 // Shop Page Header Widget
-Widget shopPageHeaderImage({
-  required String imagePath,
-  required BuildContext context,
-  required String? pageTitle,
-}) {
+Widget shopPageHeaderImage({required String imagePath, required BuildContext context, required String? pageTitle, required int cartItemCount}) {
   final localAppTheme = ResponsiveTheme(context).theme;
 
   return Container(
@@ -1268,31 +1258,50 @@ Widget shopPageHeaderImage({
             ),
           ],
         ),
-        Container(
-          margin: EdgeInsets.only(right: 10.0),
-          decoration: BoxDecoration(
-            border: Border.all(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
-            borderRadius: BorderRadius.circular(5.0),
-            color: localAppTheme['anchorColors']['secondaryColor']?.withOpacity(0.5),
-          ),
-          child: iconButton(
-            label: null,
-            backgroundColor: null,
-            iconColor: localAppTheme['anchorColors']['primaryColor'],
-            icon: Icons.shopping_cart,
-            size: 20,
-            toolTip: 'VIEW CART',
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return const CartPopup();
+        Stack(
+          children: [
+            Container(
+              margin: EdgeInsets.only(right: 10.0),
+              decoration: BoxDecoration(
+                border: Border.all(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+                borderRadius: BorderRadius.circular(5.0),
+                color: localAppTheme['anchorColors']['secondaryColor']?.withOpacity(0.5),
+              ),
+              child: iconButton(
+                label: null,
+                backgroundColor: null,
+                iconColor: localAppTheme['anchorColors']['primaryColor'],
+                icon: Icons.shopping_cart,
+                size: 20,
+                toolTip: 'VIEW CART',
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return const CartPopup();
+                    },
+                  );
                 },
-              );
-            },
-            context: context,
-          ),
-        )
+                context: context,
+              ),
+            ),
+            if (cartItemCount > 0)
+              Positioned(
+                right: 0,
+                top: 0,
+                child: Container(
+                  padding: EdgeInsets.all(2),
+                  decoration: BoxDecoration(color: localAppTheme['anchorColors']['primaryColor'], shape: BoxShape.circle),
+                  constraints: BoxConstraints(minWidth: 16, minHeight: 16),
+                  child: Text(
+                    '$cartItemCount',
+                    style: TextStyle(color: localAppTheme['anchorColors']['secondaryColor'], fontSize: 10),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ],
     ),
   );
@@ -1332,11 +1341,11 @@ Widget imageButtonWithHeader({
           ),
           padding: EdgeInsets.symmetric(horizontal: 4.0),
           child: customHeader(
-            header: headerText, 
-            context: context, 
-            color: localAppTheme['anchorColors']['primaryColor'], 
-            fontWeight: FontWeight.bold, 
-            size: 16
+            header: headerText,
+            context: context,
+            color: localAppTheme['anchorColors']['primaryColor'],
+            fontWeight: FontWeight.bold,
+            size: 16,
           ),
         ),
       ],
