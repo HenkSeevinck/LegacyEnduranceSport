@@ -331,7 +331,7 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
                 builder: (context, constraints) {
                   final tileWidth = (constraints.maxWidth) / 7;
                   final tileHeight = tileWidth * 1.0;
-                  final effectiveHeight = (tileHeight < widget.minTileHeight ? widget.minTileHeight : tileHeight) + 75;
+                  final effectiveHeight = (tileHeight < widget.minTileHeight ? widget.minTileHeight : tileHeight) + 50;
                   final isLoading = snapshot.connectionState == ConnectionState.waiting;
 
                   return SizedBox(

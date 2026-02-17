@@ -45,6 +45,7 @@ class EventsProvider with ChangeNotifier {
       if (doc.exists) {
         final serverData = doc.data() as Map<String, dynamic>;
         serverData['eventID'] = doc.id;
+        // Update master events list
         if (_events != null) {
           final index = _events!.indexWhere((event) => event['eventID'] == eventID);
           if (index != -1) {
@@ -52,8 +53,40 @@ class EventsProvider with ChangeNotifier {
           } else {
             _events!.add(serverData);
           }
-          notifyListeners();
         }
+
+        // Update cached eventsBetweenDates if present
+        if (_eventsBetweenDates != null) {
+          final index2 = _eventsBetweenDates!.indexWhere((event) => event['eventID'] == eventID);
+          if (index2 != -1) {
+            _eventsBetweenDates![index2] = serverData;
+          } else {
+            _eventsBetweenDates!.add(serverData);
+          }
+        }
+
+        // Update todaysEvents if present (ensure eventDate matches today's date before adding)
+        if (_todaysEvents != null) {
+          final index3 = _todaysEvents!.indexWhere((event) => event['eventID'] == eventID);
+          if (index3 != -1) {
+            _todaysEvents![index3] = serverData;
+          } else {
+            try {
+              final ts = serverData['eventDate'] as Timestamp?;
+              if (ts != null) {
+                final d = ts.toDate();
+                final now = DateTime.now();
+                if (d.year == now.year && d.month == now.month && d.day == now.day) {
+                  _todaysEvents!.add(serverData);
+                }
+              }
+            } catch (_) {
+              // ignore malformed date
+            }
+          }
+        }
+
+        notifyListeners();
       }
     } catch (e) {
       Exception('Error updating Event: $e');
@@ -65,9 +98,12 @@ class EventsProvider with ChangeNotifier {
   // Fetch events for betwee two dates
   Future<void> fetchEventsBetweenDates(DateTime startDate, DateTime endDate) async {
     try {
+      final startTs = Timestamp.fromDate(startDate);
+      final endTs = Timestamp.fromDate(endDate.add(const Duration(days: 1)));
+
       final QuerySnapshot snapshot = await _eventsCollection
-          .where('eventDate', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
-          .where('eventDate', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
+          .where('eventDate', isGreaterThanOrEqualTo: startTs)
+          .where('eventDate', isLessThan: endTs)
           .get();
 
       _eventsBetweenDates = snapshot.docs.map((doc) {

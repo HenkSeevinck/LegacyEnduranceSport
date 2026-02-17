@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
-import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
+//import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/Home/Page/homepage.dart';
 import 'package:provider/provider.dart';
 
@@ -35,9 +35,9 @@ class _UpdateMeState extends State<UpdateMe> {
   // Mobile Layout
   Widget _buildMobileUpdateMe() {
     final localAppTheme = ResponsiveTheme(context).theme;
-    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
-    final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
-    final appUser = appUserProvider.appUser;
+    //final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
+    //final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
+    //final appUser = appUserProvider.appUser;
 
     return Scaffold(
       appBar: AppBar(

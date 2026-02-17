@@ -147,6 +147,7 @@ class _DailyOverviewState extends State<DailyOverview> {
     final focusBlocks = internalStatusProvider.focusBlocks;
     final workoutTypes = internalStatusProvider.workoutTypes;
     final eventTypes = internalStatusProvider.eventTypes;
+    final appUser = appUserProvider.appUser;
 
     return Scaffold(
       appBar: AppBar(
@@ -593,6 +594,9 @@ class _DailyOverviewState extends State<DailyOverview> {
                     : Column(
                         children: List<Widget>.generate(todaysEvents.length, (index) {
                           final event = todaysEvents[index];
+                          final attendees = event['attendees'] as List?;
+                          final hasRSVPed = attendees != null && (attendees).contains(appUser['uid']);
+
                           return Container(
                             decoration: BoxDecoration(
                               border: Border(
@@ -605,56 +609,88 @@ class _DailyOverviewState extends State<DailyOverview> {
                               contentPadding: EdgeInsets.zero,
                               title: Padding(
                                 padding: const EdgeInsets.all(10.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    header2(header: event['name'] ?? 'Unnamed Event', context: context, color: localAppTheme['anchorColors']['primaryColor']),
-                                    SizedBox(height: 10.0),
-                                    Row(
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Icon(Icons.terrain, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
-                                        SizedBox(width: 20.0),
-                                        body(header: event['terrain'], color: localAppTheme['anchorColors']['primaryColor'], context: context),
-                                      ],
-                                    ),
-                                    SizedBox(height: 10.0),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.flag_outlined, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
-                                        SizedBox(width: 20.0),
-                                        body(
-                                          header: eventTypes.firstWhere((type) => type['id'] == event['type'])['eventType'] ?? 'Unknown',
-                                          color: localAppTheme['anchorColors']['primaryColor'],
-                                          context: context,
+                                        header2(header: event['name'] ?? 'Unnamed Event', context: context, color: localAppTheme['anchorColors']['primaryColor']),
+                                        SizedBox(height: 10.0),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.terrain, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
+                                            SizedBox(width: 20.0),
+                                            body(header: event['terrain'], color: localAppTheme['anchorColors']['primaryColor'], context: context),
+                                          ],
+                                        ),
+                                        SizedBox(height: 10.0),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.flag_outlined, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
+                                            SizedBox(width: 20.0),
+                                            body(
+                                              header: eventTypes.firstWhere((type) => type['id'] == event['type'])['eventType'] ?? 'Unknown',
+                                              color: localAppTheme['anchorColors']['primaryColor'],
+                                              context: context,
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 10.0),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.straighten, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
+                                            SizedBox(width: 20.0),
+                                            body(
+                                              header: '${event['distance'].toString()} km',
+                                              color: localAppTheme['anchorColors']['primaryColor'],
+                                              context: context,
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 10.0),
+                                        Row(
+                                          children: [
+                                            Icon(Icons.link, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
+                                            SizedBox(width: 20.0),
+                                            InkWell(
+                                              onTap: () => _openUrl(event['link']?.toString() ?? 'www.google.com'),
+                                              child: body(
+                                                header: event['link']?.toString() ?? 'www.google.com',
+                                                color: localAppTheme['anchorColors']['primaryColor'],
+                                                context: context,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
-                                    SizedBox(height: 10.0),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.straighten, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
-                                        SizedBox(width: 20.0),
-                                        body(
-                                          header: '${event['distance'].toString()} km',
-                                          color: localAppTheme['anchorColors']['primaryColor'],
-                                          context: context,
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 10.0),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.link, color: localAppTheme['anchorColors']['primaryColor'], size: 20),
-                                        SizedBox(width: 20.0),
-                                        InkWell(
-                                          onTap: () => _openUrl(event['link']?.toString() ?? 'www.google.com'),
-                                          child: body(
-                                            header: event['link']?.toString() ?? 'www.google.com',
-                                            color: localAppTheme['anchorColors']['primaryColor'],
-                                            context: context,
-                                          ),
-                                        ),
-                                      ],
+                                    imageButtonWithHeader(
+                                      width: 75, 
+                                      height: 130, 
+                                      onPressed: () async{
+                                        try{
+                                        // Update RSVP status
+                                        List<dynamic> updatedAttendees = List<dynamic>.from(event['attendees'] ?? <dynamic>[]);
+                                        if (!hasRSVPed) {
+                                          await eventsProvider.updateEvent(event['eventID'], {
+                                            'attendees': FieldValue.arrayUnion(appUser['uid'] != null ? [appUser['uid']] : []),
+                                          });
+                                          updatedAttendees.add(appUser['uid']);
+                                        } else {
+                                          await eventsProvider.updateEvent(event['eventID'], {
+                                            'attendees': FieldValue.arrayRemove(appUser['uid'] != null ? [appUser['uid']] : []),
+                                          });
+                                          updatedAttendees.remove(appUser['uid']);
+                                        }
+                                        } catch (e) {
+                                          showGeneralPopupDialog(context, 'Error', 'An error occurred while updating your RSVP. Please try again later.');
+                                        }
+                                      },
+                                      toolTip: 'RSVP', 
+                                      imagePath: hasRSVPed ? 'images/RSVPed.png' : 'images/RSVP.png', 
+                                      context: context, 
+                                      headerText: 'RSVP'
                                     ),
                                   ],
                                 ),
