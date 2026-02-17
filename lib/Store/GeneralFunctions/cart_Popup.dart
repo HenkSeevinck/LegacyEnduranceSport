@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/Store/GeneralFunctions/web_view_checkout.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -112,6 +113,7 @@ class _CartPopupState extends State<CartPopup> {
 // Remove an item from the cart by its ID, update SharedPreferences, and reload cart
   Future<void> _removeItem(String id) async {
     final prefs = await SharedPreferences.getInstance();
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
     final list = prefs.getStringList('cartItems') ?? [];
     list.removeWhere((s) {
       try {
@@ -122,14 +124,17 @@ class _CartPopupState extends State<CartPopup> {
       }
     });
     await prefs.setStringList('cartItems', list);
+    await internalStatusProvider.setItemsInCart(list.length); 
     await _loadCart();
   }
 
 //-----------------------------------------------
 // Clear the entire cart, update SharedPreferences, and reload cart
   Future<void> _clearCart() async {
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('cartItems');
+    await internalStatusProvider.setItemsInCart(0);
     await _loadCart();
   }
 

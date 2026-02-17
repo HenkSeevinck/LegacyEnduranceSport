@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/Landing/Page/landing_page.dart';
 import 'package:legacyendurancesport/SignInSignUp/Page/signin_signup.dart';
 import 'package:legacyendurancesport/Store/GeneralFunctions/cart_Popup.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 //import 'package:provider/provider.dart';
 
@@ -1230,8 +1232,10 @@ Widget pageHeaderImage({
 
 //------------------------------------------------------------------------
 // Shop Page Header Widget
-Widget shopPageHeaderImage({required String imagePath, required BuildContext context, required String? pageTitle, required int cartItemCount}) {
+Widget shopPageHeaderImage({required String imagePath, required BuildContext context, required String? pageTitle}) {
   final localAppTheme = ResponsiveTheme(context).theme;
+  final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
+  final itemsInCart = internalStatusProvider.itemsInCart;
 
   return Container(
     decoration: BoxDecoration(
@@ -1285,7 +1289,7 @@ Widget shopPageHeaderImage({required String imagePath, required BuildContext con
                 context: context,
               ),
             ),
-            if (cartItemCount > 0)
+            //if (itemsInCart > 0)
               Positioned(
                 right: 0,
                 top: 0,
@@ -1294,7 +1298,7 @@ Widget shopPageHeaderImage({required String imagePath, required BuildContext con
                   decoration: BoxDecoration(color: localAppTheme['anchorColors']['primaryColor'], shape: BoxShape.circle),
                   constraints: BoxConstraints(minWidth: 16, minHeight: 16),
                   child: Text(
-                    '$cartItemCount',
+                    '$itemsInCart',
                     style: TextStyle(color: localAppTheme['anchorColors']['secondaryColor'], fontSize: 10),
                     textAlign: TextAlign.center,
                   ),

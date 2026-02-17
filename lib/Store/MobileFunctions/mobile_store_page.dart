@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:legacyendurancesport/General/Providers/internal_app_providers.dart';
 import 'package:legacyendurancesport/General/Providers/woocommerce_store_provider.dart';
 import 'package:legacyendurancesport/General/Variables/globalvariables.dart';
 import 'package:legacyendurancesport/General/Widgets/widgets.dart';
@@ -26,19 +27,25 @@ class _MobileStorePageState extends State<MobileStorePage> {
   void initState() {
     super.initState();
     final woocommerceStore = Provider.of<WoocommerceStore>(context, listen: false);
-    _fetchDataFuture = _fetchData(woocommerceStore);
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
+    _fetchDataFuture = _fetchData(woocommerceStore, internalStatusProvider);
+    
   }
 
   //----------------------------------------------------
   // Fetch data function
-  Future<void> _fetchData(WoocommerceStore woocommerceStore) async {
+  Future<void> _fetchData(WoocommerceStore woocommerceStore, InternalStatusProvider internalStatusProvider) async {
     await woocommerceStore.fetchProducts();
+    final prefs = await SharedPreferences.getInstance();
+    final cartItems = prefs.getStringList('cartItems') ?? [];
+    internalStatusProvider.setItemsInCart(cartItems.length);
   }
 
   //----------------------------------------------------
   // Store item in Cart local storage
   Future<void> _addToCart(Map<String, dynamic> product, {int quantity = 1}) async {
     final prefs = await SharedPreferences.getInstance();
+    final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
     List<String> cartItems = prefs.getStringList('cartItems') ?? [];
 
     final itemId = product['id'].toString();
@@ -67,6 +74,7 @@ class _MobileStorePageState extends State<MobileStorePage> {
     }
 
     await prefs.setStringList('cartItems', cartItems);
+    internalStatusProvider.setItemsInCart(cartItems.length);
   }
 
   //----------------------------------------------------
@@ -249,6 +257,7 @@ class _MobileStorePageState extends State<MobileStorePage> {
                         label: 'ADD TO CART',
                         onPressed: () async {
                           await _addToCart(productToView, quantity: _selectedQuantity);
+                          //await _fetchData(woocommerceStore); // Refresh to update cart count
                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Added to cart')));
                         },
                         backgroundColor: localAppTheme['anchorColors']['primaryColor'],
@@ -459,7 +468,6 @@ class _MobileStorePageState extends State<MobileStorePage> {
                                     imagePath: 'images/Shop.png',
                                     context: context,
                                     pageTitle: 'ONLINE STORE',
-                                    cartItemCount: 10, //TODO: pass real cart count here
                                   ),
                                   SizedBox(height: 10),
                                   productToView.isEmpty

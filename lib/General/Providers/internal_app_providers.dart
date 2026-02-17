@@ -14,6 +14,7 @@ class InternalStatusProvider with ChangeNotifier {
   DateTime? weekStartDate;
   DateTime? selectedDate;
   String? homePageSelectedOption;
+  int itemsInCart = 0;
 
   List<Map<String, dynamic>> eventTypes = [
     {'id': 1, 'eventType': 'Run'},
@@ -96,6 +97,11 @@ class InternalStatusProvider with ChangeNotifier {
 
   Future<void> setWeekStartDate(DateTime startDate) async {
     weekStartDate = startDate;
+    notifyListeners();
+  }
+
+  Future<void> setItemsInCart(int count) async {
+    itemsInCart = count;
     notifyListeners();
   }
 
