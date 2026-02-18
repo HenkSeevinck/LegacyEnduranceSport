@@ -137,6 +137,14 @@ class WorkoutsProvider with ChangeNotifier {
   }
 
   //--------------------------------------------------------------
+  // Method to delete a loaded workout record in Firestore
+  Future<void> deleteLoadedWorkoutRecord(String loadedWorkoutUID) async {
+    await _firestore.collection('LoadedWorkouts').doc(loadedWorkoutUID).delete();
+    _todaysWorkouts.removeWhere((workout) => workout['loadedWorkoutUID'] == loadedWorkoutUID);
+    notifyListeners();
+  }
+
+  //--------------------------------------------------------------
   // Medhod to loop through a list of workouts and load or update them
   Future<void> loadOrUpdateWorkouts(List<Map<String, dynamic>> assignedAthletes) async {
     for (var workout in assignedAthletes) {

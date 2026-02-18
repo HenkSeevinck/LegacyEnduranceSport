@@ -20,8 +20,9 @@ class DailyOverview extends StatefulWidget {
   String navPath;
   DateTime selectedDate;
   String athleteUID;
+  bool isCoachView;
 
-  DailyOverview({super.key, required this.selectedDate, required this.navPath, required this.athleteUID});
+  DailyOverview({super.key, required this.selectedDate, required this.navPath, required this.athleteUID, required this.isCoachView});
 
   @override
   State<DailyOverview> createState() => _DailyOverviewState();
@@ -148,6 +149,7 @@ class _DailyOverviewState extends State<DailyOverview> {
     final workoutTypes = internalStatusProvider.workoutTypes;
     final eventTypes = internalStatusProvider.eventTypes;
     final appUser = appUserProvider.appUser;
+    final isCoachView = widget.isCoachView;
 
     return Scaffold(
       appBar: AppBar(
@@ -194,6 +196,16 @@ class _DailyOverviewState extends State<DailyOverview> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                pageHeaderImage(
+                  imagePath: 'images/DailyView.png',
+                  context: context,
+                  toolTip: '',
+                  userProfileToShow: {},
+                  pageTitle: 'DAY\'S OVERVIEW',
+                  isCoachView: false,
+                  buttonVisibility: false,
+                ),
+                SizedBox(height: 10.0),
                 header1(header: 'Day\'s Workouts:', context: context, color: localAppTheme['anchorColors']['primaryColor']),
                 const SizedBox(height: 10),
                 todaysWorkouts.isEmpty
@@ -231,10 +243,27 @@ class _DailyOverviewState extends State<DailyOverview> {
                                                   color: localAppTheme['anchorColors']['primaryColor'],
                                                   context: context,
                                                 ),
-                                                Visibility(
-                                                  visible: loadedWorkout['completedworkoutData'] != null,
-                                                  child: Icon(Icons.check_circle, color: Colors.green, size: 20),
-                                                ),
+                                                loadedWorkout['completedworkoutData'] != null
+                                                ? Icon(Icons.check_circle, color: Colors.green, size: 20)
+                                                : isCoachView
+                                                ? iconButton(
+                                                    label: null, 
+                                                    backgroundColor: null, 
+                                                    iconColor: localAppTheme['anchorColors']['primaryColor'], 
+                                                    icon: Icons.delete, 
+                                                    size: 20, 
+                                                    toolTip: 'REMOVE WORKOUT', 
+                                                    context: context, 
+                                                    onPressed: () async {    
+                                                      try{
+                                                        await workoutsProvider.deleteLoadedWorkoutRecord(loadedWorkout['loadedWorkoutUID']);
+                                                      } catch(e){
+                                                        snackbar(context: context, header: 'Error deleting workout. Please try again.');
+                                                      }
+                                                      
+                                                    },
+                                                  )
+                                                : SizedBox.shrink(),
                                               ],
                                             ),
                                           ),

@@ -155,6 +155,7 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
     final eventsProvider = Provider.of<EventsProvider>(context, listen: false);
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
+    final isCoach = appUserProvider.appUser['isCoach'] ?? false;
 
     // Filter goals and events from provider
     await appUserProvider.filterTodaysGoals(d);
@@ -170,7 +171,7 @@ class _WeekDaysTableState extends State<WeekDaysTable> {
     widget.onDaySelected?.call(d);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => DailyOverview(selectedDate: d, navPath: widget.navPath, athleteUID: widget.athleteUID),
+        builder: (context) => DailyOverview(selectedDate: d, navPath: widget.navPath, athleteUID: widget.athleteUID, isCoachView: isCoach),
       ),
     );
   }
