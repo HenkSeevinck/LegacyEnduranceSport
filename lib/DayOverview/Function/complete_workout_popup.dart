@@ -70,11 +70,13 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
   Future<void> _completeWorkout() async {
     final loadedWorkout = widget.loadedWorkout;
     final workoutsProvider = Provider.of<WorkoutsProvider>(context, listen: false);
+    final imageVerificationProvider = Provider.of<ImageVerificationProvider>(context, listen: false);
 
     loadedWorkout!['completedworkoutData'] = completedworkoutData;
     try {
-      setState(() {
-        workoutsProvider.addCompletedWorkoutData(loadedWorkout['loadedWorkoutUID'], completedworkoutData);
+      setState(() async {
+        await workoutsProvider.addCompletedWorkoutData(loadedWorkout['loadedWorkoutUID'], completedworkoutData);
+        imageVerificationProvider.clearWorkoutResult();
       });
       Navigator.of(context).pop();
     } catch (e) {

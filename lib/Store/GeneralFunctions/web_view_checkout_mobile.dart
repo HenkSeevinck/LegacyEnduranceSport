@@ -7,7 +7,7 @@ class WebViewCheckout extends StatefulWidget {
   final String initialUrl;
   final int? orderId;
 
-  const WebViewCheckout({required this.initialUrl, required this.orderId});
+  const WebViewCheckout({super.key, required this.initialUrl, required this.orderId});
 
   @override
   State<WebViewCheckout> createState() => WebViewCheckoutState();

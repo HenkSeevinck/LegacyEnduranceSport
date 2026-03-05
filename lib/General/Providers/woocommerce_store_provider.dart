@@ -80,8 +80,9 @@ class WoocommerceStore with ChangeNotifier {
       int? orderId;
       try {
         final idVal = data['id'];
-        if (idVal is int) orderId = idVal;
-        else if (idVal is String) orderId = int.tryParse(idVal);
+        if (idVal is int) {
+          orderId = idVal;
+        } else if (idVal is String) orderId = int.tryParse(idVal);
       } catch (_) {}
 
       // Extract payment URL from common locations

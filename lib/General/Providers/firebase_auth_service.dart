@@ -48,9 +48,11 @@ class FirebaseAuthService with ChangeNotifier {
       // Send email verification to the newly created user
       try {
         await _user?.sendEmailVerification();
-        snackbar(context: context, header: 'Verification email sent to ${_user?.email}');
+        //snackbar(context: context, header: 'Verification email sent to ${_user?.email}');
+        showGeneralPopupDialog(context, 'Verification Email Sent', 'Verification email sent to ${_user?.email}');
       } catch (e) {
-        snackbar(context: context, header: 'Failed to send verification email: ${e.toString()}');
+        //snackbar(context: context, header: 'Failed to send verification email: ${e.toString()}');
+        showGeneralPopupDialog(context, 'Verification Email Failed', 'Failed to send verification email: ${e.toString()}');
       }
       return credential;
     } on FirebaseAuthException catch (e) {
