@@ -74,13 +74,15 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
 
     loadedWorkout!['completedworkoutData'] = completedworkoutData;
     try {
-      setState(() async {
-        await workoutsProvider.addCompletedWorkoutData(loadedWorkout['loadedWorkoutUID'], completedworkoutData);
-        imageVerificationProvider.clearWorkoutResult();
-      });
-      Navigator.of(context).pop();
+      await workoutsProvider.addCompletedWorkoutData(loadedWorkout['loadedWorkoutUID'], completedworkoutData);
+      imageVerificationProvider.clearWorkoutResult();
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
     } catch (e) {
-      showGeneralPopupDialog(context, 'Error', 'Error submitting completed workout: $e');
+      if (mounted) {
+        showGeneralPopupDialog(context, 'Error', 'Error submitting completed workout: $e');
+      }
     }
   }
 
@@ -93,10 +95,13 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
     loadedWorkout!['completedworkoutData'] = completedworkoutData;
     try {
       await workoutsProvider.createLoadedWorkoutRecord(loadedWorkout, null);
-      setState(() {});
-      Navigator.of(context).pop();
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
     } catch (e) {
-      showGeneralPopupDialog(context, 'Error', 'Error submitting completed workout: $e');
+      if (mounted) {
+        showGeneralPopupDialog(context, 'Error', 'Error submitting completed workout: $e');
+      }
     }
   }
 
