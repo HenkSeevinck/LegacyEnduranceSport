@@ -169,7 +169,8 @@ class _GoalsPageState extends State<GoalsPage> {
                     pageTitle: 'GOALS',
                     isCoachView: widget.isCoachView,
                     showCreateGoalPopupDialog: () => _showCreateGoalPopupDialog(context, null, null),
-                    buttonVisibility: !widget.isCoachView,
+                    //buttonVisibility: widget.isCoachView,
+                    buttonVisibility: true,
                   ),
                   goals != null && goals.isNotEmpty
                       ? Column(

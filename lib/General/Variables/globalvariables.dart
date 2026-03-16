@@ -28,7 +28,7 @@ Map<String, dynamic> appInfo = {
   'description': '''
 TBA
 ''',
-  'version': 0.1014,
+  'version': 0.1024,
   'applicationID': 9,
 };
 
@@ -38,38 +38,28 @@ class ResponsiveTheme {
   final BuildContext context;
 
   InternalStatusProvider get internalStatusProvider => Provider.of<InternalStatusProvider>(context, listen: false);
-  String get platform => internalStatusProvider.platform;
+  String? get platform => internalStatusProvider.platform;
   ResponsiveTheme(this.context);
 
   double get header1Size => platform == 'DesktopWeb' || platform == 'Desktop'
     ? MediaQuery.of(context).size.width * 0.02 
-    : platform == 'MobileWeb' || platform == 'Mobile'
-      ? MediaQuery.of(context).size.width * 0.06 
-      : MediaQuery.of(context).size.width * 0.02;
+    : MediaQuery.of(context).size.width * 0.06;
 
   double get header2Size => platform == 'DesktopWeb' || platform == 'Desktop'
     ? MediaQuery.of(context).size.width * 0.01 
-    : platform == 'MobileWeb' || platform == 'Mobile'
-      ? MediaQuery.of(context).size.width * 0.04 
-      : MediaQuery.of(context).size.width * 0.01;
+    : MediaQuery.of(context).size.width * 0.04;
   
   double get header3Size => platform == 'DesktopWeb' || platform == 'Desktop'
     ? MediaQuery.of(context).size.width * 0.00875 
-    : platform == 'MobileWeb' || platform == 'Mobile'
-      ? MediaQuery.of(context).size.width * 0.03 
-      : MediaQuery.of(context).size.width * 0.00875;
+    : MediaQuery.of(context).size.width * 0.03;
   
   double get bodySize => platform == 'DesktopWeb' || platform == 'Desktop'
     ? MediaQuery.of(context).size.width * 0.00875 
-    : platform == 'MobileWeb' || platform == 'Mobile'
-      ? MediaQuery.of(context).size.width * 0.03 
-      : MediaQuery.of(context).size.width * 0.00875;
+    : MediaQuery.of(context).size.width * 0.03;
   
   double get formInputFieldHeight => platform == 'DesktopWeb' || platform == 'Desktop'
     ? MediaQuery.of(context).size.height * 0.0175 * 3 * 3 
-    : platform == 'MobileWeb' || platform == 'Mobile'
-      ? 50
-      : MediaQuery.of(context).size.height * 0.0175 * 3;
+    : 50;
 
   double get pageHeaderHeight => MediaQuery.of(context).size.height * 0.15;
   

@@ -56,11 +56,21 @@ Future<void> main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-  // Keep your existing _detectAndSetPlatform logic...
-  String _detectAndSetPlatform(BuildContext context) {
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    _detectAndSetPlatform();
+  }
+
+  void _detectAndSetPlatform() {
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: false);
     String platform;
     if (kIsWeb) {
@@ -84,10 +94,7 @@ class MyApp extends StatelessWidget {
           break;
       }
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      internalStatusProvider.setPlatform(platform);
-    });
-    return platform;
+    internalStatusProvider.setPlatform(platform);
   }
 
   /// Logic to check if the session is still valid
@@ -113,7 +120,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _detectAndSetPlatform(context);
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,

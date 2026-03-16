@@ -73,24 +73,58 @@ class AppUserProvider with ChangeNotifier {
 
   //--------------------------------------------------------------
   // Method to get the logged-in user's record from Firestore
-  Future<Map<String, dynamic>?> getUserRecord(String uid) async {
+  Future<void> getUserRecord(String uid) async {
+    if (uid.isEmpty) {
+      _appUser = {};
+      notifyListeners();
+      return;
+    }
+
     final doc = await _firestore.collection('AppUsers').doc(uid).get();
-    if (doc.exists) {
-      final data = doc.data();
-      if (data != null) {
-        _appUser = {'uid': uid, ...data};
-        await _isUserCoach(uid).then((isCoach) {
-          _appUser['isCoach'] = isCoach;
-        });
-        await _isUserAdmin(uid).then((isAdmin) {
-          _appUser['isAdmin'] = isAdmin;
-        });
-        await _isUserModerator(uid).then((isModerator) {
-          _appUser['isModerator'] = isModerator;
-        });
-        notifyListeners();
+
+    if (doc.exists && doc.data() != null) {
+      // Start with the base user data
+      final Map<String, dynamic> userMap = {'uid': uid, ...doc.data()!};
+
+      // Fetch all roles and related data in parallel
+      final results = await Future.wait([
+        _getCoachData(uid),
+        _isUserAdmin(uid),
+        _isUserModerator(uid),
+      ]);
+
+      // Consolidate results into the user map
+      final coachData = results[0] as Map<String, dynamic>;
+      final isAdmin = results[1] as bool;
+      final isModerator = results[2] as bool;
+
+      userMap.addAll(coachData);
+      userMap['isAdmin'] = isAdmin;
+      userMap['isModerator'] = isModerator;
+
+      // Atomic update to the state
+      _appUser = userMap;
+      notifyListeners();
+
+    } else {
+      // If user doesn't exist, clear the state
+      _appUser = {};
+      notifyListeners();
+    }
+  }
+
+  //--------------------------------------------------------------
+  // Method to fetch a user record without altering state
+  Future<Map<String, dynamic>?> fetchUserRecord(String uid) async {
+    if (uid.isEmpty) return null;
+    try {
+      final doc = await _firestore.collection('AppUsers').doc(uid).get();
+      if (doc.exists) {
+        return {'uid': uid, ...doc.data()!};
       }
-      return data;
+    } catch (e) {
+      // Log or handle error as needed
+      return null;
     }
     return null;
   }
@@ -98,6 +132,11 @@ class AppUserProvider with ChangeNotifier {
   //--------------------------------------------------------------
   // Method to get another user's profile which may be different from the logged-in user
   Future<Map<String, dynamic>?> getUserProfileToShow (String uid) async {
+    if (uid.isEmpty) {
+      _userProfileToShow = {};
+      notifyListeners();
+      return null;
+    }
     final doc = await _firestore.collection('AppUsers').doc(uid).get();
     if (doc.exists) {
       final data = doc.data();
@@ -109,6 +148,9 @@ class AppUserProvider with ChangeNotifier {
         notifyListeners();
       }
       return data;
+    } else {
+      _userProfileToShow = {};
+      notifyListeners();
     }
     return null;
   }
@@ -147,11 +189,12 @@ class AppUserProvider with ChangeNotifier {
 
   //--------------------------------------------------------------
   // Check if user is in the coach role and get athlete list
-  Future<bool> _isUserCoach(String userID) async {
+  Future<Map<String, dynamic>> _getCoachData(String userID) async {
     try {
       final query = await FirebaseFirestore.instance.collection('Coaches').where('userID', isEqualTo: userID).limit(1).get();
       if (query.docs.isNotEmpty) {
-        final Map<String, dynamic> data = query.docs.first.data();
+        final coachDoc = query.docs.first;
+        final data = coachDoc.data();
         if (data.isNotEmpty) {
           List<Map<String, dynamic>> rawAthletes = List<Map<String, dynamic>>.from(data['athletes'] ?? []);
           List<Map<String, dynamic>> athletes = [];
@@ -162,16 +205,18 @@ class AppUserProvider with ChangeNotifier {
               athletes.add({'uid': athlete['uid'], 'email': athlete['email'], ...?userDoc.data()});
             }
           }
-          _appUser['athletes'] = athletes;
-          _appUser['coachDocID'] = query.docs.first.id;
-          notifyListeners();
-          return true;
+          // Return the data instead of modifying state
+          return {
+            'isCoach': true,
+            'athletes': athletes,
+            'coachDocID': coachDoc.id
+          };
         }
       }
-      return false;
+      return {'isCoach': false}; // Return default value
     } catch (e) {
-      Exception('Error checking admin status: $e'); // Log the error
-      rethrow;
+      // In case of an error, return the default state
+      return {'isCoach': false};
     }
   }
 
@@ -180,18 +225,9 @@ class AppUserProvider with ChangeNotifier {
   Future<bool> _isUserAdmin(String userID) async {
     try {
       final query = await FirebaseFirestore.instance.collection('Administrators').where('uid', isEqualTo: userID).limit(1).get();
-      if (query.docs.isNotEmpty) {
-        final Map<String, dynamic> data = query.docs.first.data();
-        if (data.isNotEmpty) {
-          _appUser['isAdmin'] = true;
-          notifyListeners();
-          return true;
-        }
-      }
-      return false;
+      return query.docs.isNotEmpty;
     } catch (e) {
-      Exception('Error checking admin status: $e'); // Log the error
-      rethrow;
+      return false;
     }
   }
 
@@ -200,18 +236,9 @@ class AppUserProvider with ChangeNotifier {
   Future<bool> _isUserModerator(String userID) async {
     try {
       final query = await FirebaseFirestore.instance.collection('Moderators').where('uid', isEqualTo: userID).limit(1).get();
-      if (query.docs.isNotEmpty) {
-        final Map<String, dynamic> data = query.docs.first.data();
-        if (data.isNotEmpty) {
-          _appUser['isModerator'] = true;
-          notifyListeners();
-          return true;
-        }
-      }
-      return false;
+      return query.docs.isNotEmpty;
     } catch (e) {
-      Exception('Error checking moderator status: $e'); // Log the error
-      rethrow;
+      return false;
     }
   }
 

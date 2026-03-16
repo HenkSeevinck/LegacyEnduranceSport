@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:legacyendurancesport/General/Providers/appuser_provider.dart';
 import 'package:legacyendurancesport/General/Providers/events_provider.dart';
@@ -54,18 +54,50 @@ void initState() {
     InternalStatusProvider internalStatusProvider,
     WorkoutsProvider workoutsProvider
     ) async {
-    await clubsProvider.fetchAllClubs();
-    await eventsProvider.fetchAllEvents();
-    final appUser = appUserProvider.appUser;
-
-    if (appUser.isEmpty) {
-      await appUserProvider.getUserRecord(FirebaseAuthService().currentUser?.uid ?? ''); 
+    try {
+      await clubsProvider.fetchAllClubs();
+    } catch (e, s) {
+      throw Exception('Error in fetchAllClubs: $e\n$s');
     }
 
-    await _checkExpiryDateOfSession(sharedPreferences);
-    await _initializeNotifications(appUserProvider, messagingService, sharedPreferences, internalStatusProvider);
-    await appUserProvider.getAllUserRecords();
-    await workoutsProvider.fetchCompletedWorkoutsForAllAthletesLast7Days(appUserProvider.allUsers);
+    try {
+      await eventsProvider.fetchAllEvents();
+    } catch (e, s) {
+      throw Exception('Error in fetchAllEvents: $e\n$s');
+    }
+
+    try {
+      final appUser = appUserProvider.appUser;
+      if (appUser.isEmpty) {
+        await appUserProvider.getUserRecord(FirebaseAuthService().currentUser?.uid ?? '');
+      }
+    } catch (e, s) {
+      throw Exception('Error during appUser access or getUserRecord: $e\n$s');
+    }
+
+    try {
+      await _checkExpiryDateOfSession(sharedPreferences);
+    } catch (e, s) {
+      throw Exception('Error in _checkExpiryDateOfSession: $e\n$s');
+    }
+
+    try {
+      await _initializeNotifications(appUserProvider, messagingService, sharedPreferences, internalStatusProvider);
+    } catch (e, s) {
+      throw Exception('Error in _initializeNotifications: $e\n$s');
+    }
+
+    try {
+      await appUserProvider.getAllUserRecords();
+    } catch (e, s) {
+      throw Exception('Error in getAllUserRecords: $e\n$s');
+    }
+
+    try {
+      await workoutsProvider.fetchCompletedWorkoutsForAllAthletesLast7Days(appUserProvider.allUsers);
+    } catch (e, s) {
+      throw Exception('Error in fetchCompletedWorkoutsForAllAthletesLast7Days: $e\n$s');
+    }
   }
 
   //----------------------------------------------------
@@ -76,32 +108,41 @@ void initState() {
     Future<SharedPreferences> sharedPreferences,
     InternalStatusProvider internalStatusProvider
     ) async {
-    final appUser = appUserProvider.appUser;
-    final prefs = await sharedPreferences;
-    final platform = internalStatusProvider.platform;
+    try {
+      final appUser = appUserProvider.appUser;
+      final prefs = await sharedPreferences;
+      final platform = internalStatusProvider.platform;
 
-    if (kIsWeb || true) { // Request for all platforms
-      messagingService.initializeListeners();
-      
-      final userId = appUser['uid'] ?? FirebaseAuthService().currentUser?.uid;
-      if (userId != null) {
-        // Check current notification permission status
-        final settings = await FirebaseMessaging.instance.getNotificationSettings();
-        final hasAskedForNotifications = prefs.getBool('notifications_requested') ?? false;
+      if (platform == null) {
+        print("Skipping notification initialization: Platform is null.");
+        return;
+      }
+
+      if (kIsWeb || true) {
+        messagingService.initializeListeners();
         
-        // If permission is already granted, retrieve token even if we've asked before
-        if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-          //print('Notifications already authorized - retrieving FCM token');
-          await messagingService.requestPermission(userId, platform);
-        } else if (!hasAskedForNotifications) {
-          // If not granted yet and haven't asked, request permission
-          //print('Requesting notification permission');
-          await messagingService.requestPermission(userId, platform);
-          await prefs.setBool('notifications_requested', true);
-        } else {
-          //print('User declined or has not accepted notification permission');
+        final userId = appUser['uid'] ?? FirebaseAuthService().currentUser?.uid;
+        if (userId != null) {
+          // --- THE FINAL FIX ---
+          // On iOS Web, the getNotificationSettings() call fails. We will skip it on that platform.
+          if (kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+            print('Skipping notification settings check on iOS web to prevent crash.');
+            return;
+          }
+
+          final settings = await FirebaseMessaging.instance.getNotificationSettings();
+          final hasAskedForNotifications = prefs.getBool('notifications_requested') ?? false;
+          
+          if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+            await messagingService.requestPermission(userId, platform);
+          } else if (!hasAskedForNotifications) {
+            await messagingService.requestPermission(userId, platform);
+            await prefs.setBool('notifications_requested', true);
+          }
         }
       }
+    } catch (e, s) {
+      throw Exception('A crash occurred inside _initializeNotifications: $e\n$s');
     }
   }
 

@@ -139,7 +139,7 @@ class EventsProvider with ChangeNotifier {
   Future<void> fetchAttendeesForEvent(List athleteUIDs, AppUserProvider appUserProvider) async {
     for (var athleteUID in athleteUIDs) {
       try {
-        final appUserData = await appUserProvider.getUserRecord(athleteUID);
+        final appUserData = await appUserProvider.fetchUserRecord(athleteUID);
         if (appUserData != null) {
           _attendees ??= [];
           _attendees!.add(appUserData);

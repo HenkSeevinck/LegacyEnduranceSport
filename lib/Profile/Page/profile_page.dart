@@ -130,7 +130,8 @@ class _UserProfileState extends State<UserProfile> {
                   tickBox(
                     label: 'Monday',
                     value: userProfileToShow['workoutDays']['mondayBool'] ?? false,
-                    enabled: formEditable,
+                    //enabled: formEditable,
+                    enabled: true,
                     onChanged: (bool? newValue) {
                       setState(() {
                         userProfileToShow['workoutDays']['mondayBool'] = newValue ?? false;
@@ -177,7 +178,8 @@ class _UserProfileState extends State<UserProfile> {
                   tickBox(
                     label: 'Tuesday',
                     value: userProfileToShow['workoutDays']['tuesdayBool'] ?? false,
-                    enabled: formEditable,
+                    //enabled: formEditable,
+                    enabled: true,
                     onChanged: (bool? newValue) {
                       setState(() {
                         userProfileToShow['workoutDays']['tuesdayBool'] = newValue ?? false;
@@ -224,7 +226,8 @@ class _UserProfileState extends State<UserProfile> {
                   tickBox(
                     label: 'Wednesday',
                     value: userProfileToShow['workoutDays']['wednesdayBool'] ?? false,
-                    enabled: formEditable,
+                    //enabled: formEditable,
+                    enabled: true,
                     onChanged: (bool? newValue) {
                       setState(() {
                         userProfileToShow['workoutDays']['wednesdayBool'] = newValue ?? false;
@@ -271,7 +274,8 @@ class _UserProfileState extends State<UserProfile> {
                   tickBox(
                     label: 'Thursday',
                     value: userProfileToShow['workoutDays']['thursdayBool'] ?? false,
-                    enabled: formEditable,
+                    //enabled: formEditable,
+                    enabled: true,
                     onChanged: (bool? newValue) {
                       setState(() {
                         userProfileToShow['workoutDays']['thursdayBool'] = newValue ?? false;
@@ -318,7 +322,8 @@ class _UserProfileState extends State<UserProfile> {
                   tickBox(
                     label: 'Friday',
                     value: userProfileToShow['workoutDays']['fridayBool'] ?? false,
-                    enabled: formEditable,
+                    //enabled: formEditable,
+                    enabled: true,
                     onChanged: (bool? newValue) {
                       setState(() {
                         userProfileToShow['workoutDays']['fridayBool'] = newValue ?? false;
@@ -365,7 +370,8 @@ class _UserProfileState extends State<UserProfile> {
                   tickBox(
                     label: 'Saturday',
                     value: userProfileToShow['workoutDays']['saturdayBool'] ?? false,
-                    enabled: formEditable,
+                    //enabled: formEditable,
+                    enabled: true,
                     onChanged: (bool? newValue) {
                       setState(() {
                         userProfileToShow['workoutDays']['saturdayBool'] = newValue ?? false;
@@ -412,7 +418,8 @@ class _UserProfileState extends State<UserProfile> {
                   tickBox(
                     label: 'Sunday',
                     value: userProfileToShow['workoutDays']['sundayBool'] ?? false,
-                    enabled: formEditable,
+                    //enabled: formEditable,
+                    enabled: true,
                     onChanged: (bool? newValue) {
                       setState(() {
                         userProfileToShow['workoutDays']['sundayBool'] = newValue ?? false;
@@ -502,7 +509,8 @@ class _UserProfileState extends State<UserProfile> {
               tickBox(
                 label: 'Running',
                 value: userProfileToShow['athleteDisciplines']['runningBool'] ?? false,
-                enabled: formEditable,
+                //enabled: formEditable,
+                enabled: true,
                 onChanged: (bool? newValue) {
                   setState(() {
                     userProfileToShow['athleteDisciplines']['runningBool'] = newValue ?? false;
@@ -514,7 +522,8 @@ class _UserProfileState extends State<UserProfile> {
               tickBox(
                 label: 'Ultra Running',
                 value: userProfileToShow['athleteDisciplines']['ultraRunningBool'] ?? false,
-                enabled: formEditable,
+                //enabled: formEditable,
+                enabled: true,
                 onChanged: (bool? newValue) {
                   setState(() {
                     userProfileToShow['athleteDisciplines']['ultraRunningBool'] = newValue ?? false;
@@ -526,7 +535,8 @@ class _UserProfileState extends State<UserProfile> {
               tickBox(
                 label: 'Cycling',
                 value: userProfileToShow['athleteDisciplines']['cyclingBool'] ?? false,
-                enabled: formEditable,
+                //enabled: formEditable,
+                enabled: true,
                 onChanged: (bool? newValue) {
                   setState(() {
                     userProfileToShow['athleteDisciplines']['cyclingBool'] = newValue ?? false;
@@ -538,7 +548,8 @@ class _UserProfileState extends State<UserProfile> {
               tickBox(
                 label: 'Swimming',
                 value: userProfileToShow['athleteDisciplines']['swimmingBool'] ?? false,
-                enabled: formEditable,
+                //enabled: formEditable,
+                enabled: true,
                 onChanged: (bool? newValue) {
                   setState(() {
                     userProfileToShow['athleteDisciplines']['swimmingBool'] = newValue ?? false;
@@ -550,7 +561,8 @@ class _UserProfileState extends State<UserProfile> {
               tickBox(
                 label: 'Triathlon',
                 value: userProfileToShow['athleteDisciplines']['triathlonBool'] ?? false,
-                enabled: formEditable,
+                //enabled: formEditable,
+                enabled: true,
                 onChanged: (bool? newValue) {
                   setState(() {
                     userProfileToShow['athleteDisciplines']['triathlonBool'] = newValue ?? false;
@@ -564,7 +576,8 @@ class _UserProfileState extends State<UserProfile> {
                   tickBox(
                     label: 'Other',
                     value: userProfileToShow['athleteDisciplines']['otherBool'] ?? false,
-                    enabled: formEditable,
+                    //enabled: formEditable,
+                    enabled: true,
                     onChanged: (bool? newValue) {
                       setState(() {
                         userProfileToShow['athleteDisciplines']['otherBool'] = newValue ?? false;
@@ -1037,7 +1050,8 @@ class _UserProfileState extends State<UserProfile> {
                   _clubsWidget(userProfileToShow),
                   SizedBox(height: 20.0),
                   Visibility(
-                    visible: !widget.isCoachView,
+                    //visible: !widget.isCoachView,
+                    visible: true,
                     child: SizedBox(
                       width: double.infinity,
                       height: 50,

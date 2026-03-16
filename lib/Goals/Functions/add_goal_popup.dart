@@ -108,6 +108,8 @@ class _AddGoalPopupState extends State<AddGoalPopup> {
     final eventsProvider = Provider.of<EventsProvider>(context, listen: false);
     final eventTypes = internalStatusProvider.eventTypes;
     final events = eventsProvider.events ?? <Map<String, dynamic>>[];
+    final homePageSelectedOption = internalStatusProvider.homePageSelectedOption;
+    final userProfileToShow = appUserProvider.userProfileToShow;
     Map<String, dynamic>? goal = widget.goal;
     int? index = widget.index;
 
@@ -371,10 +373,19 @@ class _AddGoalPopupState extends State<AddGoalPopup> {
                           }
                         }
 
-                        await appUserProvider.updateUserRecord({
-                          'uid': appUserProvider.appUser['uid'],
-                          'goals': currentGoals,
-                        });
+                        //TODO: Need to add functionality that coach can add Goals.
+
+                        if(homePageSelectedOption == 'Athlete') {
+                          await appUserProvider.updateUserRecord({
+                            'uid': appUserProvider.appUser['uid'],
+                            'goals': currentGoals,
+                          });
+                        } else if (homePageSelectedOption == 'Coach') {
+                          await appUserProvider.updateUserRecord({
+                            'uid': userProfileToShow['uid'],
+                            'goals': currentGoals,
+                          });
+                        }
 
                         // Refresh the profile shown in the UI so it reflects the updated goals.
                         await appUserProvider.getUserProfileToShow(appUserProvider.appUser['uid']);

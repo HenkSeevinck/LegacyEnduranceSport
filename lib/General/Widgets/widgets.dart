@@ -1057,38 +1057,39 @@ Widget appheader({
           child: SizedBox(
             width: MediaQuery.of(context).size.width - 20,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Row(
-                  children: [
-                    Visibility(
-                      visible: isAdmin,
-                      child: iconButton(
-                        label: null,
-                        backgroundColor: null,
-                        iconColor: localAppTheme['anchorColors']['primaryColor'],
-                        icon: Icons.admin_panel_settings,
-                        size: 30,
-                        toolTip: 'ENABLE ADMIN',
-                        context: context,
-                        onPressed: () {},
-                      ),
-                    ),
-                    Visibility(
-                      visible: isModerator,
-                      child: iconButton(
-                        label: null,
-                        backgroundColor: null,
-                        iconColor: localAppTheme['anchorColors']['primaryColor'],
-                        icon: Icons.admin_panel_settings_outlined,
-                        size: 30,
-                        toolTip: 'ENABLE MODERATOR',
-                        context: context,
-                        onPressed: () {},
-                      ),
-                    ),
-                  ],
-                ),
+                // Row(
+                //   children: [
+                //     Visibility(
+                //       visible: isAdmin,
+                //       child: iconButton(
+                //         label: null,
+                //         backgroundColor: null,
+                //         iconColor: localAppTheme['anchorColors']['primaryColor'],
+                //         icon: Icons.admin_panel_settings,
+                //         size: 30,
+                //         toolTip: 'ENABLE ADMIN',
+                //         context: context,
+                //         onPressed: () {},
+                //       ),
+                //     ),
+                //     Visibility(
+                //       visible: isModerator,
+                //       child: iconButton(
+                //         label: null,
+                //         backgroundColor: null,
+                //         iconColor: localAppTheme['anchorColors']['primaryColor'],
+                //         icon: Icons.admin_panel_settings_outlined,
+                //         size: 30,
+                //         toolTip: 'ENABLE MODERATOR',
+                //         context: context,
+                //         onPressed: () {},
+                //       ),
+                //     ),
+                //   ],
+                // ),
                 iconButton(
                   label: null,
                   backgroundColor: null,
@@ -1364,8 +1365,16 @@ PreferredSizeWidget landingPageAppBar(BuildContext context) {
   return AppBar(
     backgroundColor: Color(0xFF081807),
     title: Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
+        customHeader(
+            header: appInfo['version'] != null ? 'v${appInfo['version']}' : '',
+            color: localAppTheme['anchorColors']['secondaryColor'],
+            context: context,
+            fontWeight: FontWeight.normal,
+            size: 12,
+        ),
         iconButton(
           label: null,
           backgroundColor: null,

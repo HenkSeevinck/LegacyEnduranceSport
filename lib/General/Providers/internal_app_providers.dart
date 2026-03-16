@@ -9,7 +9,7 @@ import 'package:legacyendurancesport/Workouts/Page/workouts_page.dart';
 //Form Status Provider
 class InternalStatusProvider with ChangeNotifier {
   String signInsignUpStatus = 'SignIn';
-  String platform = '';
+  String? platform;
   String userUIDToShow = '';
   DateTime? weekStartDate;
   DateTime? selectedDate;
@@ -85,7 +85,7 @@ class InternalStatusProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setPlatform(String value) async {
+  Future<void> setPlatform(String? value) async {
     platform = value;
     notifyListeners();
   }

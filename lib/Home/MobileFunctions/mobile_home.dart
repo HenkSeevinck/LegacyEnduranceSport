@@ -394,13 +394,13 @@ class _MobileHomeState extends State<MobileHome> {
     final localAppTheme = ResponsiveTheme(context).theme;
     final appUserProvider = Provider.of<AppUserProvider>(context, listen: true);
     final appUser = appUserProvider.appUser;
-    final isCoach = appUser['isCoach'] == true;
+    final isCoach = appUser['isCoach'] as bool? ?? false;
     final internalStatusProvider = Provider.of<InternalStatusProvider>(context, listen: true);
     final homePageOptions = internalStatusProvider.homePageOptions;
     final athleteOptions = homePageOptions.where((option) => option['coachOnly'] == false).toList();
     final coachOptions = homePageOptions.where((option) => option['coachOnly'] == true).toList();
-    final isAdmin = appUser['isAdmin'];
-    final isModerator = appUser['isModerator'];
+    final isAdmin = appUser['isAdmin'] as bool? ?? false;
+    final isModerator = appUser['isModerator'] as bool? ?? false;
     final homePageSelectedOption = internalStatusProvider.homePageSelectedOption;
 
     return Scaffold(
