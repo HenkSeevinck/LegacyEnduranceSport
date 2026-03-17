@@ -114,7 +114,6 @@ void initState() {
       final platform = internalStatusProvider.platform;
 
       if (platform == null) {
-        print("Skipping notification initialization: Platform is null.");
         return;
       }
 
@@ -126,7 +125,6 @@ void initState() {
           // --- THE FINAL FIX ---
           // On iOS Web, the getNotificationSettings() call fails. We will skip it on that platform.
           if (kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
-            print('Skipping notification settings check on iOS web to prevent crash.');
             return;
           }
 

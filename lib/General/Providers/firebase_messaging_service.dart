@@ -85,35 +85,24 @@ class FirebaseMessagingService with ChangeNotifier {
       } else {
         _fcmToken = await _firebaseMessaging.getToken();
       }
-      
+
       if (_fcmToken != null && _userId != null) {
-        // First, check if this token already exists for the user
-        final userDoc = await _firestore.collection('AppUsers').doc(_userId).get();
-        final existingTokens = List<Map<String, dynamic>>.from(
-          (userDoc.data()?['fcmTokens'] ?? []) as List
-        );
-        
-        // Check if token already exists
-        final tokenExists = existingTokens.any((t) => t['token'] == _fcmToken);
-        
-        if (!tokenExists) {
-          // Token doesn't exist, add it
-          await _firestore.collection('AppUsers').doc(_userId).update({
-            'fcmTokens': FieldValue.arrayUnion([
-              {
-                'token': _fcmToken,
-                'device': kIsWeb ? 'web' : 'mobile',
-                'platform': platform,
-                'addedAt': Timestamp.now(),
-              }
-            ]),
-          });
-          //print('FCM Token saved to user profile: $_fcmToken (Platform: ${_getPlatformName()})');
-          //print('FCM Token saved to user profile: $_fcmToken (Platform: $platform)');
-        } else {
-          // Token already exists, just log it
-          //print('FCM Token already exists for this device: $_fcmToken');
-        }
+        final userDocRef = _firestore.collection('AppUsers').doc(_userId);
+
+        // **THIS IS THE CHANGE**
+        // Clear existing tokens and set the new one
+        await userDocRef.update({
+          'fcmTokens': [ // Replace the entire array with a new array containing only the current token
+            {
+              'token': _fcmToken,
+              'device': kIsWeb ? 'web' : 'mobile',
+              'platform': platform,
+              'addedAt': Timestamp.now(),
+            }
+          ],
+        });
+
+        //print('FCM Token saved to user profile: $_fcmToken (Platform: $platform)');
       } else {
         //print('FCM Token: $_fcmToken (User ID: $_userId)');
       }
