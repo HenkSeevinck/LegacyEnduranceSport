@@ -276,6 +276,8 @@ Widget elevatedButton({
   required IconData? leadingIcon,
   required IconData? trailingIcon,
   required BuildContext context,
+  FontWeight? fontWeight,
+  double? size,
 }) {
   final localAppTheme = ResponsiveTheme(context).theme;
   return SizedBox(
@@ -303,13 +305,20 @@ Widget elevatedButton({
               ],
             ),
           ),
-          Text(
-            textAlign: TextAlign.center,
-            label,
-            style: localAppTheme['font'](
-              textStyle: TextStyle(fontSize: localAppTheme['header3Size'], color: labelColor, fontWeight: FontWeight.bold),
-            ),
+          customHeader(
+              header: label,
+              context: context,
+              color: labelColor,
+              fontWeight: fontWeight ?? FontWeight.bold,
+              size: size ?? localAppTheme['header3Size']
           ),
+          // Text(
+          //   textAlign: TextAlign.center,
+          //   label,
+          //   style: localAppTheme['font'](
+          //     textStyle: TextStyle(fontSize: localAppTheme['header3Size'], color: labelColor, fontWeight: FontWeight.bold),
+          //   ),
+          // ),
           Visibility(
             visible: trailingIcon == null ? false : true,
             child: Row(
@@ -1060,36 +1069,6 @@ Widget appheader({
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                // Row(
-                //   children: [
-                //     Visibility(
-                //       visible: isAdmin,
-                //       child: iconButton(
-                //         label: null,
-                //         backgroundColor: null,
-                //         iconColor: localAppTheme['anchorColors']['primaryColor'],
-                //         icon: Icons.admin_panel_settings,
-                //         size: 30,
-                //         toolTip: 'ENABLE ADMIN',
-                //         context: context,
-                //         onPressed: () {},
-                //       ),
-                //     ),
-                //     Visibility(
-                //       visible: isModerator,
-                //       child: iconButton(
-                //         label: null,
-                //         backgroundColor: null,
-                //         iconColor: localAppTheme['anchorColors']['primaryColor'],
-                //         icon: Icons.admin_panel_settings_outlined,
-                //         size: 30,
-                //         toolTip: 'ENABLE MODERATOR',
-                //         context: context,
-                //         onPressed: () {},
-                //       ),
-                //     ),
-                //   ],
-                // ),
                 iconButton(
                   label: null,
                   backgroundColor: null,

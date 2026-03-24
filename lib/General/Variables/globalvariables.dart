@@ -24,12 +24,14 @@ Map<String, dynamic> utilityPair4 = {'color1': const Color(0xFF9E0D8F), 'color2'
 //------------------------------------------------------------------------
 //Application Information
 Map<String, dynamic> appInfo = {
-  'name': 'APPLICATION BUILDER',
+  'name': 'LEGACY ENDURANCE SPORT',
   'description': '''
 TBA
 ''',
-  'version': 0.1025,
+  'version': 0.1027,
   'applicationID': 9,
+
+
 };
 
 //------------------------------------------------------------------------

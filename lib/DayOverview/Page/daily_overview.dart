@@ -684,10 +684,13 @@ class _DailyOverviewState extends State<DailyOverview> {
                                             SizedBox(width: 20.0),
                                             InkWell(
                                               onTap: () => _openUrl(event['link']?.toString() ?? 'www.google.com'),
-                                              child: body(
-                                                header: event['link']?.toString() ?? 'www.google.com',
-                                                color: localAppTheme['anchorColors']['primaryColor'],
-                                                context: context,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * 0.5,
+                                                child: body(
+                                                  header: event['link']?.toString() ?? 'www.google.com',
+                                                  color: localAppTheme['anchorColors']['primaryColor'],
+                                                  context: context,
+                                                ),
                                               ),
                                             ),
                                           ],
