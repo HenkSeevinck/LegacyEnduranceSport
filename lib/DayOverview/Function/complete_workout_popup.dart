@@ -23,6 +23,7 @@ class CompleteWorkoutPopup extends StatefulWidget {
 class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
   String? uploadType;
   bool inputData = true;
+  TextEditingController workoutTypeController = TextEditingController();
   TextEditingController durationController = TextEditingController();
   TextEditingController distanceController = TextEditingController();
   Uint8List? imageData;
@@ -33,9 +34,36 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   //--------------------------------------------------------------
+  // Find workout type by id or by label (e.g. 1 or RUN)
+  Map<String, dynamic>? _findWorkoutType(List<dynamic> workoutTypes, dynamic selectedType) {
+    if (selectedType == null) return null;
+
+    final selectedValue = selectedType.toString().trim().toUpperCase();
+
+    for (final type in workoutTypes) {
+      final typeId = type['workoutTypeID']?.toString().trim().toUpperCase();
+      final typeLabel = type['workoutType']?.toString().trim().toUpperCase();
+
+      if (selectedValue == typeId || selectedValue == typeLabel) {
+        return Map<String, dynamic>.from(type as Map);
+      }
+    }
+
+    return null;
+  }
+
+  //--------------------------------------------------------------
+  // Safely resolve workout type label from workout type id or workout name
+  String _resolveWorkoutTypeLabel(List<dynamic> workoutTypes, dynamic selectedType) {
+    final matchedType = _findWorkoutType(workoutTypes, selectedType);
+    return (matchedType?['workoutType'] ?? '').toString();
+  }
+
+  //--------------------------------------------------------------
   // Dispose
   @override
   void dispose() {
+    workoutTypeController.dispose();
     durationController.dispose();
     distanceController.dispose();
     super.dispose();
@@ -47,6 +75,10 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
   void initState() {
     super.initState();
     completedworkoutData = widget.workoutData?['completedworkoutData'] ?? {};
+
+    if (widget.workoutStatus == 'completed' && completedworkoutData['type'] == null) {
+      completedworkoutData['type'] = widget.loadedWorkout?['workout']?['type'];
+    }
 
     durationController.text = completedworkoutData['duration'] ?? '';
     distanceController.text = completedworkoutData['distance'] ?? '';
@@ -114,6 +146,19 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
     final workoutResult = imageVerificationProvider.workoutResult;
     final workoutTypes = internalStatusProvider.workoutTypes;
     final workoutStatus = widget.workoutStatus;
+    final resolvedWorkoutTypeLabel = _resolveWorkoutTypeLabel(workoutTypes, completedworkoutData['type']);
+    final matchedWorkoutType = _findWorkoutType(workoutTypes, completedworkoutData['type']);
+
+    if (workoutStatus == 'completed' && matchedWorkoutType != null) {
+      final normalizedTypeId = matchedWorkoutType['workoutTypeID'];
+      if (completedworkoutData['type'] != normalizedTypeId) {
+        completedworkoutData['type'] = normalizedTypeId;
+      }
+    }
+
+    if (workoutStatus == 'completed' && workoutTypeController.text != resolvedWorkoutTypeLabel) {
+      workoutTypeController.text = resolvedWorkoutTypeLabel;
+    }
 
     if (workoutResult.isNotEmpty && !_appliedWorkoutResult) {
       _resetTextControllers();
@@ -132,9 +177,8 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Visibility(
-                  visible: workoutStatus == 'completed',
-                  child: FormInputField(
+                if (workoutStatus == 'completed')
+                  FormInputField(
                     label: 'Workout Type:',
                     errorMessage: 'Please enter workout type',
                     isMultiline: false,
@@ -142,10 +186,8 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
                     prefixIcon: null,
                     suffixIcon: null,
                     showLabel: true,
+                    controller: workoutTypeController,
                     enabled: false,
-                    initialValue: completedworkoutData['type'] != null
-                        ? workoutTypes.where((type) => type['workoutTypeID'] == completedworkoutData['type']).first['workoutType']
-                        : '',
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter workout type';
@@ -153,10 +195,8 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
                       return null;
                     },
                   ),
-                ),
-                Visibility(
-                  visible: workoutStatus == 'new',
-                  child: SearchableDropdown(
+                if (workoutStatus == 'new')
+                  SearchableDropdown(
                     labelText: '',
                     hint: '',
                     dropdownTextColor: localAppTheme['anchorColors']['primaryColor'],
@@ -179,7 +219,6 @@ class _CompleteWorkoutPopupState extends State<CompleteWorkoutPopup> {
                       return null;
                     },
                   ),
-                ),
                 SizedBox(height: 10),
                 FormInputField(
                   label: 'Duration:',

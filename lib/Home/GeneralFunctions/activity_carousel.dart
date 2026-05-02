@@ -30,7 +30,11 @@ class _ActivityCarouselState extends State<ActivityCarousel> {
       const Duration(seconds: 3), // Change slide every 3 seconds
       (timer) {
         if (_pageController.hasClients) {
-          int nextPage = (_pageController.page?.toInt() ?? _initialPage) + 1;
+          final currentPage = _pageController.page;
+          final safeCurrentPage = (currentPage != null && currentPage.isFinite)
+              ? currentPage.toInt()
+              : _initialPage;
+          final nextPage = safeCurrentPage + 1;
           
           _pageController.animateToPage(
             nextPage,
@@ -58,6 +62,25 @@ class _ActivityCarouselState extends State<ActivityCarousel> {
     final workoutTypes = internalStatusProvider.workoutTypes;
     
     //print(completedWorkouts);
+
+    if (completedWorkouts.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.only(bottom: 10.0, top: 10.0),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: localAppTheme['anchorColors']['primaryColor'], width: 1.0),
+          ),
+        ),
+        height: 57,
+        child: Center(
+          child: body(
+            header: 'No completed workouts',
+            color: localAppTheme['anchorColors']['primaryColor'],
+            context: context,
+          ),
+        ),
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.only(bottom: 10.0, top: 10.0),
